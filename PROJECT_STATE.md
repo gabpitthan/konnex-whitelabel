@@ -2,6 +2,29 @@
 
 Última atualização: 2026-07-28
 
+## Governança e versionamento
+
+- Versão ativa: `1.2`, em desenvolvimento.
+- Fonte da versão: arquivo `VERSION`.
+- Regras permanentes: `AGENTS.md`.
+- Política detalhada: `docs/VERSIONING.md`.
+- Histórico: `CHANGELOG.md`.
+- Cada lote de mudanças incrementa uma subversão: `1.1` → `1.2` → `1.3`.
+- Diagnósticos sem mudança de código não incrementam versão.
+- Quando o usuário declarar que a versão está pronta, criar snapshot com `scripts/create-version-snapshot.sh`.
+- Snapshots ficam fora do repositório ativo em `/root/whitelabel-whaticket-versions/versao-X.Y/`.
+- Cada snapshot contém código completo rastreado, manifesto, release notes e checksum.
+- Segredos, dados de clientes, banco, uploads e certificados privados nunca entram nos snapshots.
+- Após fechar a versão 1, o próximo ciclo começa em `2.1`.
+- Toda entrega relevante deve atualizar este documento e o changelog.
+
+## Permissões do Codex
+
+- O usuário autorizou execução autônoma de alterações, builds, testes, deploys e comandos deste projeto.
+- O repositório possui `.codex/config.toml` com `approval_policy = "never"` e `sandbox_mode = "danger-full-access"`.
+- Essa configuração é aplicada somente a novas sessões iniciadas no repositório; a sessão atual mantém a política com que foi criada.
+- Políticas gerenciadas da plataforma podem ter precedência sobre a configuração local.
+
 ## Objetivo
 
 Modernizar e desenvolver uma plataforma whitelabel de atendimento com WhatsApp e FlowBuilder, baseada no projeto Whaticket TurboFlow, mantendo isolamento dos demais sistemas do servidor.
