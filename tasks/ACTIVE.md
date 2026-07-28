@@ -1,6 +1,6 @@
 # Tarefa ativa
 
-Estado: pesquisa de confiabilidade concluída; preparação do lote P0 `REL-001`.
+Estado: lote P0 `REL-001` concluído e publicado na 1.8; próximo lote `REL-002`/`REL-003`.
 
 ## Pedido
 
@@ -76,9 +76,19 @@ Atendimento e Contatos, seguidos por Kanban, Campanhas, FlowBuilder, Conexões e
 - Configurações públicas, favicon e avatar corrigidos.
 - Build, deploy, smoke e navegador autenticado aprovados.
 
+## Resultado 1.8
+
+- JWT, namespace e IDs Socket.IO padronizados.
+- Namespace vinculado ao `companyId` assinado.
+- Sala de ticket autorizada por ticket e empresa.
+- Frontend envia token por `auth` e limpa/recria conexão por identidade.
+- 8/8 testes aprovados.
+- Prova runtime publicada rejeitou namespace estrangeiro.
+- QA desktop/mobile e smoke aprovados.
+
 ## Próximo passo
 
-Receber a avaliação visual do usuário e migrar, em subversões controladas, os ambientes especializados: Dashboard, Atendimento, Kanban, FlowBuilder, campanhas e configurações.
+Executar `REL-002` e `REL-003` para estabilizar ciclo de vida e persistência de autenticação das sessões WhatsApp.
 
 Ao iniciar uma tarefa, registrar:
 

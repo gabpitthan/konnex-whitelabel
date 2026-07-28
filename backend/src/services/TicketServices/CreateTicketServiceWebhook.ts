@@ -2,7 +2,7 @@ import AppError from "../../errors/AppError";
 import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import Ticket from "../../models/Ticket";
-import { getIO } from "../../libs/socket";
+import { getIO, ticketRoom } from "../../libs/socket";
 
 interface Request {
   contactId: number;
@@ -74,7 +74,7 @@ const CreateTicketServiceWebhook = async ({
 
   const io = getIO();
 
-  io.to(ticket.id.toString()).emit("ticket", {
+  io.of(String(companyId)).to(ticketRoom(companyId, ticket.id)).emit("ticket", {
     action: "update",
     ticket
   });

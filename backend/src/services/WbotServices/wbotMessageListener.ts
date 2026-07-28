@@ -30,7 +30,7 @@ import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
 import { Mutex } from "async-mutex";
-import { getIO } from "../../libs/socket";
+import { getIO, statusRoom } from "../../libs/socket";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import logger from "../../utils/logger";
 import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateContactService";
@@ -3527,7 +3527,9 @@ const flowbuilderIntegration = async (
       ticketId: ticket.id
     });
 
-    io.to(ticket.status).emit(`company-${companyId}-ticket`, {
+    io.of(String(companyId))
+      .to(statusRoom(companyId, ticket.status))
+      .emit(`company-${companyId}-ticket`, {
       action: "update",
       ticket,
       ticketId: ticket.id

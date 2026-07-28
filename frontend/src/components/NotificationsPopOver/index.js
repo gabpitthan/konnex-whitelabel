@@ -146,7 +146,7 @@ const NotificationsPopOver = (volume) => {
 			const queueIds = queues.map((q) => q.id);
 
 			const onConnectNotificationsPopover = () => {
-				socket.emit("joinNotification");
+				socket.emit("joinNotification", {});
 			}
 
 			const onCompanyTicketNotificationsPopover = (data) => {

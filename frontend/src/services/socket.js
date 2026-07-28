@@ -1,14 +1,11 @@
-import openSocket from "socket.io-client";
 import { isObject } from "lodash";
 import SocketWorker from "./SocketWorker"
 
 export function socketConnection(params) {
-  let userId = "";
-  let companyId = "";
-  if (isObject(params)){
-    companyId = params?.user?.companyId
-    userId = params?.user?.id
-  }
- 
-  return SocketWorker(companyId,userId)
+  if (!isObject(params)) return null;
+  const companyId = Number(params?.user?.companyId);
+  const userId = Number(params?.user?.id);
+  if (!Number.isInteger(companyId) || companyId <= 0) return null;
+  if (!Number.isInteger(userId) || userId <= 0) return null;
+  return SocketWorker(companyId, userId);
 }

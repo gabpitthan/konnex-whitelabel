@@ -3,7 +3,7 @@ import AppError from "../errors/AppError";
 import fs from "fs";
 import GetTicketWbot from "../helpers/GetTicketWbot";
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
-import { getIO } from "../libs/socket";
+import { getIO, ticketRoom } from "../libs/socket";
 import Message from "../models/Message";
 import Ticket from "../models/Ticket";
 import Queue from "../models/Queue";
@@ -115,7 +115,9 @@ export const addReaction = async (req: Request, res: Response): Promise<Response
     });
 
     const io = getIO();
-    io.to(message.ticketId.toString()).emit(`company-${companyId}-appMessage`, {
+    io.of(String(companyId))
+      .to(ticketRoom(companyId, message.ticketId))
+      .emit(`company-${companyId}-appMessage`, {
       action: "update",
       message,
     });

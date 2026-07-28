@@ -1,11 +1,11 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-28  
-Versão ativa: 1.7
+Versão ativa: 1.8
 
 ## Em foco
 
-Programa P0 de confiabilidade. A versão 1.7 estabilizou shell e tela branca; a pesquisa posterior confirmou riscos críticos em Socket.IO, multi-tenancy e ciclo de sessão WhatsApp.
+Programa P0 de confiabilidade. O contrato Socket.IO e o isolamento de namespace foram corrigidos na 1.8; o próximo foco é o ciclo de sessão WhatsApp e o auth state Redis.
 
 ## Estado operacional
 
@@ -16,11 +16,13 @@ Programa P0 de confiabilidade. A versão 1.7 estabilizou shell e tela branca; a 
 - Não existe suíte automatizada relevante; isso é P0.
 - Versão `1.7` publicada no commit `933e247`.
 - Build, deploy, smoke, Error Boundary e navegador autenticado desktop/mobile foram validados na 1.7.
-- Socket.IO possui incompatibilidades de JWT, IDs e namespace confirmadas por análise estática; teste tenant A/B é o próximo gate.
+- Socket.IO usa namespace autenticado, IDs numéricos e sala de ticket segregada por empresa.
+- Testes: 8/8 aprovados; navegador autenticado desktop/mobile limpo.
+- Prova runtime: namespace próprio aceito e estrangeiro rejeitado.
 
 ## Próximo passo
 
-Executar `REL-001`: corrigir autenticação e isolamento multi-tenant do Socket.IO com teste real de dois tenants. Depois executar `REL-002` e `REL-003` para ciclo de vida e auth state das sessões WhatsApp. A pesquisa e o protocolo permanente estão em `docs/JARVIS_ENGINEERING_SYSTEM.md`, `docs/research/WHATICKET_RELIABILITY_2026.md` e `docs/project/RELIABILITY_BACKLOG.md`.
+Executar `REL-002` e `REL-003`: ciclo de vida single-flight e auth state Redis das sessões WhatsApp. Em paralelo futuro, transformar o QA temporário de Socket.IO em E2E permanente e retirar gradualmente a ponte de namespaces legados.
 
 ## Fontes
 

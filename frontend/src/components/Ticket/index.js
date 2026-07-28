@@ -121,7 +121,7 @@ const Ticket = () => {
       //    const socket = socketManager.GetSocket();
 
       const onConnectTicket = () => {
-        socket.emit("joinChatBox", `${ticket.id}`);
+        socket.emit("joinChatBox", { ticketId: ticket.id });
       }
 
       const onCompanyTicket = (data) => {
@@ -153,7 +153,7 @@ const Ticket = () => {
 
       return () => {
 
-        socket.emit("joinChatBoxLeave", `${ticket.id}`);
+        socket.emit("leaveChatBox", { ticketId: ticket.id });
         socket.off("connect", onConnectTicket);
         socket.off(`company-${companyId}-ticket`, onCompanyTicket);
         socket.off(`company-${companyId}-contact`, onCompanyContactTicket);

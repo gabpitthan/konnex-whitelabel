@@ -541,10 +541,6 @@ const MessagesList = ({
     const companyId = user.companyId;
 
     //    const socket = socketManager.GetSocket();
-    const connectEventMessagesList = () => {
-      socket.emit("joinChatBox", `${ticketId}`);
-    }
-
     const onAppMessageMessagesList = (data) => {
       if (data.action === "create" && data.ticket.uuid === ticketId) {
         dispatch({ type: "ADD_MESSAGE", payload: data.message });
@@ -559,14 +555,10 @@ const MessagesList = ({
         dispatch({ type: "DELETE_MESSAGE", payload: data.messageId });
       }
     }
-    socket.on("connect", connectEventMessagesList);
     socket.on(`company-${companyId}-appMessage`, onAppMessageMessagesList);
 
     return () => {
 
-      socket.emit("joinChatBoxLeave", `${ticketId}`)
-
-      socket.off("connect", connectEventMessagesList);
       socket.off(`company-${companyId}-appMessage`, onAppMessageMessagesList);
     };
 

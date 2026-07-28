@@ -1,194 +1,270 @@
-import { Server as SocketIO } from "socket.io";
-import { Server } from "http";
+import { Server as HttpServer } from "http";
+import { Namespace, Server as SocketIOServer, Socket } from "socket.io";
+import { instrument } from "@socket.io/admin-ui";
+
+import User from "../models/User";
 import AppError from "../errors/AppError";
 import logger from "../utils/logger";
-import { instrument } from "@socket.io/admin-ui";
-import { z } from "zod";
-import jwt from "jsonwebtoken";
+import AuthorizeTicketRoomService from "../services/SocketServices/AuthorizeTicketRoomService";
+import {
+  WORKSPACE_NAMESPACE,
+  SocketUser,
+  normalizeNamespace,
+  notificationRoom,
+  statusPayloadSchema,
+  statusRoom,
+  ticketPayloadSchema,
+  ticketRoom,
+  verifySocketIdentity,
+  workspaceNamespace
+} from "./socketContract";
 
-// Define namespaces permitidos
-const ALLOWED_NAMESPACES = /^\/workspace-\d+$/;
+export {
+  notificationRoom,
+  statusRoom,
+  ticketRoom,
+  workspaceNamespace
+} from "./socketContract";
 
-// Esquemas de validação
-const userIdSchema = z.string().uuid().optional();
-const ticketIdSchema = z.string().uuid();
-const statusSchema = z.enum(["open", "closed", "pending"]);
-const jwtPayloadSchema = z.object({
-  userId: z.string().uuid(),
-  iat: z.number().optional(),
-  exp: z.number().optional(),
-});
+const CONFIGURED_NAMESPACE = Symbol("configuredWorkspaceNamespace");
 
-// Origens CORS permitidas
 const ALLOWED_ORIGINS = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
+  ? process.env.FRONTEND_URL.split(",").map(url => url.trim())
   : ["http://localhost:3000"];
 
-// Ajuste da classe AppError para compatibilidade com Error
+type SocketAck = (result: {
+  ok: boolean;
+  code?: "INVALID_PAYLOAD" | "TICKET_NOT_FOUND" | "FORBIDDEN" | "INTERNAL_ERROR";
+}) => void;
+
 class SocketCompatibleAppError extends Error {
-  constructor(public message: string, public statusCode: number) {
+  public data: { code: string; statusCode: number };
+
+  constructor(message: string, statusCode: number, code: string) {
     super(message);
-    this.name = "AppError";
-    // Garante que a stack trace seja capturada
+    this.name = "SocketAuthError";
+    this.data = { code, statusCode };
     Error.captureStackTrace?.(this, SocketCompatibleAppError);
   }
 }
 
-let io: SocketIO;
+let io: SocketIOServer;
 
-export const initIO = (httpServer: Server): SocketIO => {
-  io = new SocketIO(httpServer, {
+const safeAck = (ack: unknown, result: Parameters<SocketAck>[0]): void => {
+  if (typeof ack === "function") {
+    (ack as SocketAck)(result);
+  }
+};
+
+const authenticateSocket = async (
+  socket: Socket,
+  next: (error?: Error) => void
+): Promise<void> => {
+  const token = socket.handshake.auth?.token;
+  if (typeof token !== "string" || !token) {
+    return next(new SocketCompatibleAppError("Token ausente", 401, "AUTH_TOKEN_MISSING"));
+  }
+
+  try {
+    const payload = verifySocketIdentity(token, socket.nsp.name);
+
+    const user = await User.findOne({
+      where: { id: payload.id, companyId: payload.companyId },
+      attributes: ["id", "companyId", "profile"]
+    });
+
+    if (!user) {
+      return next(new SocketCompatibleAppError("Usuário inválido", 401, "AUTH_USER_INVALID"));
+    }
+
+    socket.data.user = payload;
+    socket.data.companyId = payload.companyId;
+    return next();
+  } catch (error) {
+    if (error instanceof Error && error.message === "TENANT_NAMESPACE_MISMATCH") {
+      logger.warn({ event: "socket_tenant_mismatch", namespace: socket.nsp.name });
+      return next(
+        new SocketCompatibleAppError(
+          "Namespace não autorizado",
+          403,
+          "TENANT_NAMESPACE_MISMATCH"
+        )
+      );
+    }
+    logger.warn({ event: "socket_auth_failed", namespace: socket.nsp.name });
+    return next(new SocketCompatibleAppError("Token inválido", 401, "AUTH_TOKEN_INVALID"));
+  }
+};
+
+const configureWorkspaceNamespace = (namespace: Namespace): void => {
+  const configured = namespace as Namespace & { [CONFIGURED_NAMESPACE]?: boolean };
+  if (configured[CONFIGURED_NAMESPACE]) return;
+  configured[CONFIGURED_NAMESPACE] = true;
+
+  namespace.use((socket, next) => {
+    authenticateSocket(socket, next).catch(() =>
+      next(new SocketCompatibleAppError("Falha de autenticação", 500, "AUTH_INTERNAL_ERROR"))
+    );
+  });
+
+  namespace.on("connection", socket => {
+    const user = socket.data.user as SocketUser;
+    const companyId = user.companyId;
+
+    logger.info({
+      event: "socket_connected",
+      socketId: socket.id,
+      userId: user.id,
+      companyId,
+      namespace: socket.nsp.name
+    });
+
+    socket.on("joinChatBox", async (payload: unknown, ack?: SocketAck) => {
+      const parsed = ticketPayloadSchema.safeParse(payload);
+      if (!parsed.success) {
+        safeAck(ack, { ok: false, code: "INVALID_PAYLOAD" });
+        return;
+      }
+
+      try {
+        const ticket = await AuthorizeTicketRoomService({
+          ticketId: parsed.data.ticketId,
+          companyId
+        });
+
+        if (!ticket) {
+          safeAck(ack, { ok: false, code: "TICKET_NOT_FOUND" });
+          return;
+        }
+
+        await socket.join(ticketRoom(companyId, ticket.id));
+        safeAck(ack, { ok: true });
+      } catch (error) {
+        logger.error({
+          event: "socket_join_ticket_failed",
+          userId: user.id,
+          companyId,
+          ticketId: parsed.data.ticketId
+        });
+        safeAck(ack, { ok: false, code: "INTERNAL_ERROR" });
+      }
+    });
+
+    const leaveTicket = async (payload: unknown, ack?: SocketAck): Promise<void> => {
+      const parsed = ticketPayloadSchema.safeParse(payload);
+      if (!parsed.success) {
+        safeAck(ack, { ok: false, code: "INVALID_PAYLOAD" });
+        return;
+      }
+      await socket.leave(ticketRoom(companyId, parsed.data.ticketId));
+      safeAck(ack, { ok: true });
+    };
+
+    socket.on("leaveChatBox", leaveTicket);
+    // Compatibility alias for already-open 1.7 browser tabs.
+    socket.on("joinChatBoxLeave", leaveTicket);
+
+    const joinStatus = async (payload: unknown, ack?: SocketAck): Promise<void> => {
+      const parsed = statusPayloadSchema.safeParse(payload);
+      if (!parsed.success) {
+        safeAck(ack, { ok: false, code: "INVALID_PAYLOAD" });
+        return;
+      }
+      await socket.join(statusRoom(companyId, parsed.data.status));
+      safeAck(ack, { ok: true });
+    };
+
+    const leaveStatus = async (payload: unknown, ack?: SocketAck): Promise<void> => {
+      const parsed = statusPayloadSchema.safeParse(payload);
+      if (!parsed.success) {
+        safeAck(ack, { ok: false, code: "INVALID_PAYLOAD" });
+        return;
+      }
+      await socket.leave(statusRoom(companyId, parsed.data.status));
+      safeAck(ack, { ok: true });
+    };
+
+    socket.on("joinTickets", joinStatus);
+    socket.on("leaveTickets", leaveStatus);
+    socket.on("joinTicketsLeave", leaveStatus);
+
+    socket.on("joinNotification", async (_payload?: unknown, ack?: SocketAck) => {
+      await socket.join(notificationRoom(companyId));
+      safeAck(ack, { ok: true });
+    });
+
+    socket.on("leaveNotification", async (_payload?: unknown, ack?: SocketAck) => {
+      await socket.leave(notificationRoom(companyId));
+      safeAck(ack, { ok: true });
+    });
+
+    socket.on("disconnect", reason => {
+      logger.info({
+        event: "socket_disconnected",
+        socketId: socket.id,
+        userId: user.id,
+        companyId,
+        reason
+      });
+    });
+  });
+};
+
+export const initIO = (httpServer: HttpServer): SocketIOServer => {
+  io = new SocketIOServer(httpServer, {
     cors: {
       origin: (origin, callback) => {
         if (!origin || ALLOWED_ORIGINS.includes(origin)) {
           callback(null, true);
         } else {
-          logger.warn(`Origem não autorizada: ${origin}`);
-          callback(new SocketCompatibleAppError("Violação da política CORS", 403));
+          callback(new SocketCompatibleAppError("Origem não autorizada", 403, "CORS_DENIED"));
         }
       },
       methods: ["GET", "POST"],
-      credentials: true,
+      credentials: true
     },
-    maxHttpBufferSize: 1e6, // Limita payload a 1MB
+    maxHttpBufferSize: 1e6,
     pingTimeout: 20000,
-    pingInterval: 25000,
+    pingInterval: 25000
   });
 
-  // Middleware de autenticação JWT
-  io.use((socket, next) => {
-    const token = socket.handshake.query.token as string;
-    if (!token) {
-      logger.warn("Tentativa de conexão sem token");
-      return next(new SocketCompatibleAppError("Token ausente", 401));
-    }
+  // Preserve existing emitters while moving every numeric company namespace
+  // into the authenticated canonical workspace namespace.
+  const originalOf = io.of.bind(io);
+  (io as SocketIOServer & { of: SocketIOServer["of"] }).of = ((
+    name: Parameters<SocketIOServer["of"]>[0],
+    ...args: any[]
+  ) => originalOf(normalizeNamespace(name) as any, ...args)) as SocketIOServer["of"];
 
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || "default_secret");
-      const validatedPayload = jwtPayloadSchema.parse(decoded);
-      socket.data.user = validatedPayload;
-      next();
-    } catch (err) {
-      logger.warn("Token inválido");
-      return next(new SocketCompatibleAppError("Token inválido", 401));
+  io.on("new_namespace", namespace => {
+    if (WORKSPACE_NAMESPACE.test(namespace.name)) {
+      configureWorkspaceNamespace(namespace);
     }
   });
 
-  // Admin UI apenas em desenvolvimento
-  const isAdminEnabled = process.env.SOCKET_ADMIN === "true" && process.env.NODE_ENV !== "production";
+  // Allows clients to create their canonical workspace namespace on demand.
+  io.of(WORKSPACE_NAMESPACE);
+
+  const isAdminEnabled =
+    process.env.SOCKET_ADMIN === "true" && process.env.NODE_ENV !== "production";
   if (isAdminEnabled && process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD) {
-    try {
-      instrument(io, {
-        auth: {
-          type: "basic",
-          username: process.env.ADMIN_USERNAME,
-          password: process.env.ADMIN_PASSWORD,
-        },
-        mode: "development",
-        readonly: true,
-      });
-      logger.info("Socket.IO Admin UI inicializado em modo de desenvolvimento");
-    } catch (error) {
-      logger.error("Falha ao inicializar Socket.IO Admin UI", error);
-    }
-  } else if (isAdminEnabled) {
-    logger.warn("Credenciais de administrador ausentes, Admin UI não inicializado");
+    instrument(io, {
+      auth: {
+        type: "basic",
+        username: process.env.ADMIN_USERNAME,
+        password: process.env.ADMIN_PASSWORD
+      },
+      mode: "development",
+      readonly: true
+    });
   }
-
-  // Namespaces dinâmicos com validação
-  const workspaces = io.of((name, auth, next) => {
-    if (ALLOWED_NAMESPACES.test(name)) {
-      next(null, true);
-    } else {
-      logger.warn(`Tentativa de conexão a namespace inválido: ${name}`);
-      next(new SocketCompatibleAppError("Namespace inválido", 403), false);
-    }
-  });
-
-  workspaces.on("connection", (socket) => {
-    const clientIp = socket.handshake.address;
-
-    // Valida userId
-    let userId: string | undefined;
-    try {
-      userId = userIdSchema.parse(socket.handshake.query.userId);
-    } catch (error) {
-      socket.disconnect(true);
-      logger.warn(`userId inválido de ${clientIp}`);
-      return;
-    }
-
-    logger.info(`Cliente conectado ao namespace ${socket.nsp.name} (IP: ${clientIp})`);
-
-    socket.on("joinChatBox", (ticketId: string, callback: (error?: string) => void) => {
-      try {
-        const validatedTicketId = ticketIdSchema.parse(ticketId);
-        socket.join(validatedTicketId);
-        logger.info(`Cliente entrou no canal de ticket ${validatedTicketId} no namespace ${socket.nsp.name}`);
-        callback();
-      } catch (error) {
-        logger.warn(`ticketId inválido: ${ticketId}`);
-        callback("ID de ticket inválido");
-      }
-    });
-
-    socket.on("joinNotification", (callback: (error?: string) => void) => {
-      socket.join("notification");
-      logger.info(`Cliente entrou no canal de notificações no namespace ${socket.nsp.name}`);
-      callback();
-    });
-
-    socket.on("joinTickets", (status: string, callback: (error?: string) => void) => {
-      try {
-        const validatedStatus = statusSchema.parse(status);
-        socket.join(validatedStatus);
-        logger.info(`Cliente entrou no canal ${validatedStatus} no namespace ${socket.nsp.name}`);
-        callback();
-      } catch (error) {
-        logger.warn(`Status inválido: ${status}`);
-        callback("Status inválido");
-      }
-    });
-
-    socket.on("joinTicketsLeave", (status: string, callback: (error?: string) => void) => {
-      try {
-        const validatedStatus = statusSchema.parse(status);
-        socket.leave(validatedStatus);
-        logger.info(`Cliente saiu do canal ${validatedStatus} no namespace ${socket.nsp.name}`);
-        callback();
-      } catch (error) {
-        logger.warn(`Status inválido: ${status}`);
-        callback("Status inválido");
-      }
-    });
-
-    socket.on("joinChatBoxLeave", (ticketId: string, callback: (error?: string) => void) => {
-      try {
-        const validatedTicketId = ticketIdSchema.parse(ticketId);
-        socket.leave(validatedTicketId);
-        logger.info(`Cliente saiu do canal de ticket ${validatedTicketId} no namespace ${socket.nsp.name}`);
-        callback();
-      } catch (error) {
-        logger.warn(`ticketId inválido: ${ticketId}`);
-        callback("ID de ticket inválido");
-      }
-    });
-
-    socket.on("disconnect", () => {
-      logger.info(`Cliente desconectado do namespace ${socket.nsp.name} (IP: ${clientIp})`);
-    });
-
-    socket.on("error", (error) => {
-      logger.error(`Erro no socket do namespace ${socket.nsp.name}: ${error.message}`);
-    });
-  });
 
   return io;
 };
 
-export const getIO = (): SocketIO => {
+export const getIO = (): SocketIOServer => {
   if (!io) {
-    throw new SocketCompatibleAppError("Socket IO não inicializado", 500);
+    throw new AppError("Socket IO não inicializado", 500);
   }
   return io;
 };

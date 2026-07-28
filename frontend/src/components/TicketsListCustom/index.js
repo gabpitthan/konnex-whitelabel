@@ -353,9 +353,9 @@ const TicketsListCustom = (props) => {
 
         const onConnectTicketsList = () => {
             if (status) {
-                socket.emit("joinTickets", status);
+                socket.emit("joinTickets", { status });
             } else {
-                socket.emit("joinNotification");
+                socket.emit("joinNotification", {});
             }
         }
 
@@ -366,9 +366,9 @@ const TicketsListCustom = (props) => {
 
         return () => {
             if (status) {
-                socket.emit("leaveTickets", status);
+                socket.emit("leaveTickets", { status });
             } else {
-                socket.emit("leaveNotification");
+                socket.emit("leaveNotification", {});
             }
             socket.off("connect", onConnectTicketsList);
             socket.off(`company-${companyId}-ticket`, onCompanyTicketTicketsList);

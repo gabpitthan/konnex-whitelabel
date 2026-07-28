@@ -3,7 +3,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends git python3 make g++ ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
-COPY tsconfig.json .sequelizerc ./
+COPY tsconfig.json jest.config.js .sequelizerc ./
 COPY src ./src
 RUN npm run build
 

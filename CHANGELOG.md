@@ -2,6 +2,30 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.8] — 2026-07-28 — em desenvolvimento
+
+### Objetivo
+
+Autenticar o Socket.IO e garantir isolamento multiempresa de namespace e salas.
+
+### Entregue
+
+- Contrato canônico `/workspace-{companyId}`.
+- JWT real e usuário verificados no handshake.
+- Token enviado por `auth`, nunca pela URL.
+- Entrada em ticket validada por `ticketId + companyId`.
+- Salas e payloads numéricos padronizados.
+- Ciclo de socket do frontend corrigido para refresh, logout e troca de identidade.
+- Testes automatizados de contrato e autorização.
+
+### Testes
+
+- 8 de 8 testes automatizados aprovados.
+- Builds de produção aprovados.
+- Deploy conjunto e smoke aprovados.
+- QA autenticado desktop/mobile sem falhas.
+- Token real aceito apenas no próprio namespace e rejeitado no namespace estrangeiro.
+
 ## [1.7] — 2026-07-28 — em desenvolvimento
 
 ### Objetivo

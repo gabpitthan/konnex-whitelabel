@@ -8,8 +8,8 @@
 | WhatsApp mensagens | sim | não | não | não | pendente |
 | Frontend geral | sim | HTTP | não | n/a | parcial |
 | Endpoint de versão | sim | automático | n/a | n/a | aprovado |
-| Socket.IO autenticado | sim | falha de contrato confirmada | não | não | crítico |
-| Sala de ticket Socket.IO | sim | não | não | não | crítico |
+| Socket.IO autenticado | sim | runtime publicado | sessão | namespace A/B | aprovado |
+| Sala de ticket Socket.IO | sim | serviço automatizado | n/a | ticket+empresa | aprovado com limite |
 | Auth state Redis | sim | QR apenas | parcial | não | crítico |
 | Reconexão WhatsApp | sim | não | não | não | pendente |
 | Jobs Bull/idempotência | sim | não | não | não | pendente |

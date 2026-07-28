@@ -46,6 +46,7 @@ const useAuth = () => {
         if (data) {
           localStorage.setItem("token", JSON.stringify(data.token));
           api.defaults.headers.Authorization = `Bearer ${data.token}`;
+          if (typeof socket?.refreshAuth === "function") socket.refreshAuth();
         }
         return api(originalRequest);
       }
@@ -81,7 +82,7 @@ const useAuth = () => {
       let io;
       if (!Object.keys(socket).length) {
         io = socketConnection({ user });
-        setSocket(io)
+        if (io) setSocket(io)
       } else {
         io = socket
       }
@@ -189,8 +190,10 @@ Entre em contato com o Suporte para mais informações! `);
     try {
       // socket.disconnect();
       await api.delete("/auth/logout");
+      if (typeof socket?.destroy === "function") socket.destroy();
       setIsAuth(false);
       setUser({});
+      setSocket({});
       localStorage.removeItem("token");
       localStorage.removeItem("cshow");
       // localStorage.removeItem("public-token");
