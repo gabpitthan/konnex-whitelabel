@@ -1,11 +1,11 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-28  
-Versão ativa: 1.8
+Versão ativa: 1.9
 
 ## Em foco
 
-Programa P0 de confiabilidade. O contrato Socket.IO e o isolamento de namespace foram corrigidos na 1.8; o próximo foco é o ciclo de sessão WhatsApp e o auth state Redis.
+Programa P0 de confiabilidade. A 1.9 entrega a primeira fase do lifecycle WhatsApp e auth state Redis fail-closed, sem afirmar que o programa inteiro está concluído.
 
 ## Estado operacional
 
@@ -19,10 +19,13 @@ Programa P0 de confiabilidade. O contrato Socket.IO e o isolamento de namespace 
 - Socket.IO usa namespace autenticado, IDs numéricos e sala de ticket segregada por empresa.
 - Testes: 8/8 aprovados; navegador autenticado desktop/mobile limpo.
 - Prova runtime: namespace próprio aceito e estrangeiro rejeitado.
+- Auth state v2 é tenant-aware, versionado, validado por checksum e mantém rollback legado.
+- Starts concorrentes no mesmo processo são coalescidos e sockets antigos recebem geração inválida.
+- Logout, reset e exclusão agora limpam o estado realmente usado pelo runtime.
 
 ## Próximo passo
 
-Executar `REL-002` e `REL-003`: ciclo de vida single-flight e auth state Redis das sessões WhatsApp. Em paralelo futuro, transformar o QA temporário de Socket.IO em E2E permanente e retirar gradualmente a ponte de namespaces legados.
+Concluir `REL-002/003` com lease Redis/fencing, registry completo, cleanup de listeners/timers, shutdown e manifesto atômico. Depois validar em uma conta canário: QR, conexão, texto, mídia, queda de rede, restart e logout.
 
 ## Fontes
 

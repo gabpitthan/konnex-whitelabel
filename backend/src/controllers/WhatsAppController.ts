@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
-import cacheLayer from "../libs/cache";
+import { purgeBaileysAuthState } from "../helpers/useMultiFileAuthState";
 import { removeWbot, restartWbot } from "../libs/wbot";
 import Whatsapp from "../models/Whatsapp";
 import AppError from "../errors/AppError";
@@ -175,7 +175,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     flowIdWelcome
   });
 
-  StartWhatsAppSession(whatsapp, companyId);
+  await StartWhatsAppSession(whatsapp, companyId);
 
   const io = getIO();
   io.of(String(companyId))
@@ -400,10 +400,10 @@ export const remove = async (
 
 
   if (whatsapp.channel === "whatsapp") {
+    await removeWbot(+whatsappId);
+    await purgeBaileysAuthState(whatsapp);
     await DeleteBaileysService(whatsappId);
     await DeleteWhatsAppService(whatsappId);
-    await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
-    removeWbot(+whatsappId);
 
     io.of(String(companyId))
       .emit(`company-${companyId}-whatsapp`, {
@@ -510,10 +510,10 @@ export const removeAdmin = async (
 
 
   if (whatsapp.channel === "whatsapp") {
+    await removeWbot(+whatsappId);
+    await purgeBaileysAuthState(whatsapp);
     await DeleteBaileysService(whatsappId);
     await DeleteWhatsAppService(whatsappId);
-    await cacheLayer.delFromPattern(`sessions:${whatsappId}:*`);
-    removeWbot(+whatsappId);
 
     io.of(String(companyId))
       .emit(`admin-whatsapp`, {
@@ -561,4 +561,3 @@ export const showAdmin = async (req: Request, res: Response): Promise<Response> 
 
   return res.status(200).json(whatsapp);
 };
-

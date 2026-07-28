@@ -2,6 +2,35 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.9] — 2026-07-29 — em desenvolvimento
+
+### Objetivo
+
+Primeira fase de confiabilidade do lifecycle WhatsApp e auth state Redis.
+
+### Entregue
+
+- auth state v2 tenant-aware, versionado e com checksum;
+- migração lazy sem apagar rollback legado;
+- falha explícita para Redis indisponível, corrupção e escrita;
+- single-flight e geração de sessão em processo;
+- timeout de inicialização;
+- logout/reset/delete com cleanup coerente;
+- boot parcial resiliente;
+- testes de concorrência, isolamento, persistência e corrupção.
+
+### Banco e migrations
+
+- nenhuma migration;
+- PostgreSQL inalterado;
+- Redis migra sob demanda e preserva chaves legadas.
+
+### Testes
+
+- 18 testes automatizados do lote e regressão aprovados;
+- backend e frontend compilados em imagens de produção;
+- runtime canário WhatsApp ainda pendente.
+
 ## [1.8] — 2026-07-28 — em desenvolvimento
 
 ### Objetivo

@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-07-28
-Versão ativa: `1.8`, em desenvolvimento.
+Versão ativa: `1.9`, em desenvolvimento.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -64,10 +64,10 @@ Toda nova sessão deve ler `AGENTS.md`, este índice e `docs/project/CURRENT.md`
 
 Antes de continuar o redesign, executar o P0 de confiabilidade:
 
-1. fortalecer auth state e ciclo de vida Baileys;
-2. criar regressão automatizada para jornadas completas de socket e WhatsApp;
-3. migrar emissores Socket.IO legados para o namespace canônico;
-4. ampliar a auditoria multi-tenant para APIs e jobs.
+1. concluir lifecycle Baileys com lease distribuído, cleanup central e shutdown;
+2. validar auth state v2 com conta canário, restart e mensagens;
+3. criar regressão automatizada para jornadas completas de WhatsApp;
+4. migrar emissores Socket.IO legados para o namespace canônico.
 
 ## Direção visual aprovada
 

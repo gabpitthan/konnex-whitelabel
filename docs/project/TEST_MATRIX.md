@@ -10,8 +10,9 @@
 | Endpoint de versão | sim | automático | n/a | n/a | aprovado |
 | Socket.IO autenticado | sim | runtime publicado | sessão | namespace A/B | aprovado |
 | Sala de ticket Socket.IO | sim | serviço automatizado | n/a | ticket+empresa | aprovado com limite |
-| Auth state Redis | sim | QR apenas | parcial | não | crítico |
-| Reconexão WhatsApp | sim | não | não | não | pendente |
+| Auth state Redis | sim | unitário fail-closed | v2/legacy | chave tenant-aware | parcial |
+| Lifecycle WhatsApp | sim | unitário concorrência | local | owner tenant-aware | parcial |
+| Reconexão WhatsApp | sim | política limitada | não | não | pendente canário |
 | Jobs Bull/idempotência | sim | não | não | não | pendente |
 | Mídia WhatsApp | sim | não | não | não | pendente |
 

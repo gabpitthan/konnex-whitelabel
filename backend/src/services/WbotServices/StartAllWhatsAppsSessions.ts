@@ -13,8 +13,16 @@ export const StartAllWhatsAppsSessions = async (
           return StartWhatsAppSession(whatsapp, companyId);
         }
       });
-      // Aguardar a resolução de todas as promessas
-      await Promise.all(promises);
+      const results = await Promise.allSettled(promises);
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          Sentry.captureException(result.reason);
+          console.error(
+            "WhatsApp startup failed",
+            { whatsappId: whatsapps[index]?.id, companyId }
+          );
+        }
+      });
     }
 
     // fechar os tickets automaticamente

@@ -13,6 +13,8 @@
 
 ### REL-002 — máquina de estados da sessão WhatsApp
 
+Estado: parcial na 1.9 — single-flight local, generation, timeout e falha propagada.
+
 - `idle`, `pairing`, `connecting`, `connected`, `degraded`, `reconnecting`, `logged_out`, `failed`;
 - lock single-flight por sessão;
 - epoch/generation para ignorar eventos de socket antigo;
@@ -20,6 +22,8 @@
 - diferenciar erro recuperável, autenticação revogada e incidente externo.
 
 ### REL-003 — integridade do auth state
+
+Estado: parcial na 1.9 — fail-closed, envelope v2, checksum, ownership e migração lazy.
 
 - erro Redis deve falhar de forma segura, nunca virar credencial vazia;
 - persistência atômica/versionada;
@@ -94,4 +98,3 @@
 ## Regra de priorização
 
 Se houver falha P0, congelar redesign e novas funcionalidades afetadas até existir correção, regressão automatizada e evidência pós-deploy.
-
