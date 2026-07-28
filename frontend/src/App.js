@@ -326,11 +326,11 @@ const App = () => {
       });
     getPublicSetting("appName")
       .then((name) => {
-        setAppName(name || "ChatBot Saas");
+        setAppName(name || "Konnex");
       })
       .catch((error) => {
         console.log("!==== Erro ao carregar temas: ====!", error);
-        setAppName("ChatBot Saas");
+        setAppName("Konnex");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -355,7 +355,7 @@ const App = () => {
 
   return (
     <>
-      <Favicon url={appLogoFavicon ? getBackendUrl() + "/public/" + appLogoFavicon : defaultLogoFavicon} />
+      <Favicon url={appLogoFavicon || defaultLogoFavicon} />
       <ColorModeContext.Provider value={{ colorMode }}>
         <ThemeProvider theme={theme}>
           <QueryClientProvider client={queryClient}>

@@ -9,4 +9,5 @@ cd "$PROJECT_DIR"
 echo "Compilando backend e frontend em imagens reproduzíveis..."
 docker compose build backend frontend
 
-echo "Quality gate aprovado. Testes automatizados ainda são uma lacuna registrada em docs/project/ISSUES.md."
+echo "Gate de compilação aprovado."
+echo "A entrega ainda exige o gate de runtime descrito em docs/DEFINITION_OF_DONE.md: navegador autenticado, console/rede, responsividade, observabilidade e smoke."

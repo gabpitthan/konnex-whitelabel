@@ -16,6 +16,12 @@ Uma tarefa só está pronta quando as respostas aplicáveis forem “sim”:
 - O deploy executa a versão documentada?
 - Memória e documentação descrevem o estado real?
 - Limitações restantes estão explícitas?
+- A validação foi além de build e HTTP 200?
+- O fluxo autenticado foi exercitado em navegador real?
+- Console, erros de página e requisições foram inspecionados?
+- Há evidência visual desktop e mobile das áreas alteradas?
+- Foram realizadas revisões funcional, UX e regressiva separadamente?
+- A entrega transforma realmente a funcionalidade ou apenas aplica tema?
 
 ## Revisão do diff
 
@@ -27,3 +33,26 @@ Antes do commit:
 4. conferir tratamento de erro e estados de carregamento;
 5. conferir compatibilidade de API e banco;
 6. registrar os comandos realmente executados.
+
+## Autoavaliação em três passagens
+
+### 1. Funcional
+
+- Exercitar dados reais ou demonstração isolada.
+- Confirmar rotas, APIs, permissões, erros e persistência.
+- Atualizar e reabrir a página.
+
+### 2. UX
+
+- Executar a tarefa como usuário, não apenas inspecionar componentes.
+- Contar cliques, conferir próxima ação, scroll, teclado, fechamento e salvamento.
+- Avaliar identidade e coerência com o restante do CRM.
+
+### 3. Regressão
+
+- Login autenticado.
+- Console e `pageerror` sem falhas novas.
+- Rede sem erros inesperados.
+- Desktop, tablet e mobile.
+- Tema claro/escuro e perfis aplicáveis.
+- Fallback de erro induzido quando houver mudanças de observabilidade.

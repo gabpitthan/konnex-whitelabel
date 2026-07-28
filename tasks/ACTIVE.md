@@ -1,10 +1,18 @@
 # Tarefa ativa
 
-Estado: versão 1.6 implantada; reconstrução do CRM continua nas próximas subversões.
+Estado: versão 1.7 publicada; aguardando validação visual e funcional do usuário.
 
 ## Pedido
 
 Transformar a aplicação em um novo CRM, eliminando a arquitetura visual e de uso herdada do Whaticket. Corrigir imediatamente rolagem e botões que desaparecem, reconstruir navegação, disposição e UX e preservar funcionamento.
+
+## Feedback 1.7
+
+- Remover rail com letras e submenu semelhante ao Whaticket.
+- Criar menu único com ícones e subgrupos.
+- Remover barra inferior mobile.
+- Corrigir tela branca recorrente.
+- Criar observabilidade para erros reais do navegador.
 
 ## Resultado esperado
 
@@ -54,6 +62,15 @@ Atendimento e Contatos, seguidos por Kanban, Campanhas, FlowBuilder, Conexões e
 - Componentes transversais e diálogos responsivos atualizados.
 - Capturas reais validadas em 1440×900 e 390×844.
 - Build e smoke aprovados na versão 1.5.
+
+## Resultado 1.7
+
+- Menu único implantado em desktop e mobile.
+- Barra inferior e rail de letras removidos.
+- Tela branca causada por corrida do socket corrigida.
+- Error Boundary e telemetria sanitizada implantados.
+- Configurações públicas, favicon e avatar corrigidos.
+- Build, deploy, smoke e navegador autenticado aprovados.
 
 ## Próximo passo
 

@@ -1,6 +1,5 @@
 import { Router } from "express";
 import isAuth from "../middleware/isAuth";
-import envTokenAuth from "../middleware/envTokenAuth";
 import multer from "multer";
 
 import * as SettingController from "../controllers/SettingController";
@@ -24,7 +23,10 @@ settingRoutes.get("/setting/:settingKey", isAuth, SettingController.getSetting);
 
 settingRoutes.put("/setting/:settingKey", isAuth, SettingController.updateOne);
 
-settingRoutes.get("/public-settings/:settingKey", envTokenAuth, SettingController.publicShow);
+// The service exposes a strict allowlist of non-sensitive branding keys.
+// Keeping this route truly public avoids coupling the login shell to a
+// hard-coded client token that can drift from ENV_TOKEN.
+settingRoutes.get("/public-settings/:settingKey", SettingController.publicShow);
 
 settingRoutes.post("/settings-whitelabel/logo", isAuth, upload.single("file"), SettingController.storeLogo);
 

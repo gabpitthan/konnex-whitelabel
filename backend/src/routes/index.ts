@@ -37,6 +37,7 @@ import apiCompanyRoutes from "./api/apiCompanyRoutes";
 import apiContactRoutes from "./api/apiContactRoutes";
 import apiMessageRoutes from "./api/apiMessageRoutes";
 import companySettingsRoutes from "./companySettingsRoutes";
+import clientErrorRoutes from "./clientErrorRoutes";
 
 import promptRoutes from "./promptRouter";
 import statisticsRoutes from "./statisticsRoutes";
@@ -79,6 +80,7 @@ routes.use("/webhook", webHookRoutes);
 routes.use(subScriptionRoutes);
 routes.use(invoiceRoutes);
 routes.use(versionRouter);
+routes.use(clientErrorRoutes);
 routes.use(filesRoutes);
 routes.use(queueOptionRoutes);
 routes.use(queueIntegrationRoutes);

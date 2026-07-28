@@ -27,6 +27,20 @@ Antes de qualquer alteração:
 6. Confirmar persistência, refresh/restart, backend, mobile e isolamento por tenant quando aplicável.
 7. Registrar limitações; nunca chamar uma interface não funcional de concluída.
 
+## Profundidade mínima obrigatória
+
+- Não resolver pedidos amplos com mudanças cosméticas ou uma única camada transversal.
+- Para redesign, auditar e migrar também a composição interna, hierarquia, estados e fluxo das funcionalidades.
+- Antes do deploy executar três revisões independentes:
+  1. **funcional:** dados, APIs, permissões, persistência e erros;
+  2. **UX:** clareza, sequência, ações, scroll, mobile e identidade;
+  3. **regressão:** login autenticado, console, rede, refresh, rotas e estados críticos.
+- Build e HTTP 200 não provam que o frontend funciona.
+- Toda mudança de shell ou rota autenticada exige navegador autenticado real, captura de console e screenshot desktop/mobile.
+- Toda proteção de erro exige teste induzido do fallback e confirmação de que o erro chegou à observabilidade.
+- Comparar a entrega com o pedido original e listar internamente o que ainda ficou superficial.
+- Se uma funcionalidade apenas herdou tokens/tema, descrevê-la como pendente, não reformulada.
+
 ## Versionamento obrigatório
 
 - A versão ativa está no arquivo `VERSION`.

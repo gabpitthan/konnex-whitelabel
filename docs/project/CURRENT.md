@@ -1,11 +1,11 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-28  
-Versão ativa: 1.6
+Versão ativa: 1.7
 
 ## Em foco
 
-Reconstrução do frontend como novo CRM em andamento. A versão 1.6 substituiu o shell, corrigiu regressões estruturais e reconstruiu o Dashboard.
+Estabilização do shell e observabilidade em andamento. A navegação de duas camadas da 1.6 foi rejeitada e a tela branca reapareceu de forma intermitente.
 
 ## Estado operacional
 
@@ -21,7 +21,7 @@ Reconstrução do frontend como novo CRM em andamento. A versão 1.6 substituiu 
 
 ## Próximo passo
 
-Migrar internamente Atendimento e Contatos; depois Kanban, Campanhas, FlowBuilder, Conexões e Configurações. Nenhum módulo será considerado pronto apenas por herdar o novo shell.
+Concluir 1.7 com menu único, drawer mobile sem barra inferior, Error Boundary e captura segura de erros frontend. Só depois retomar Atendimento e Contatos.
 
 ## Fontes
 

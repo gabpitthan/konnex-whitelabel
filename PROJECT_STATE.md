@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-07-28
-Versão ativa: `1.6`, em desenvolvimento.
+Versão ativa: `1.7`, em desenvolvimento.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -68,3 +68,6 @@ Toda nova sessão deve ler `AGENTS.md`, este índice e `docs/project/CURRENT.md`
 - A versão 1.5 foi considerada insuficiente: limpa, porém ainda estruturalmente semelhante ao Whaticket.
 - A meta é um novo CRM com arquitetura de informação, navegação e experiência próprias.
 - Rolagem e ações inacessíveis são regressões críticas e devem ser corrigidas antes da expansão visual.
+- A navegação 1.6 em duas camadas foi rejeitada. O padrão novo é um menu único com ícones e subgrupos.
+- A barra inferior mobile foi rejeitada e deve ser removida.
+- Tela branca deve sempre apresentar fallback recuperável e gerar erro observável no backend.

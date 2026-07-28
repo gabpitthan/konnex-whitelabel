@@ -2,6 +2,23 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.7] — 2026-07-28 — em desenvolvimento
+
+### Objetivo
+
+Estabilizar o frontend e implantar navegação única e observabilidade de erros do navegador.
+
+### Prioridades
+
+- Tela branca nunca silenciosa.
+- Menu único com ícones e subgrupos.
+- Remoção da barra inferior mobile.
+- Logs frontend seguros e correlacionáveis.
+
+### Testes
+
+- Em execução.
+
 ## [1.6] — 2026-07-28 — em desenvolvimento
 
 ### Objetivo

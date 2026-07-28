@@ -29,14 +29,9 @@ const useSettings = () => {
   };
 
   const getPublicSetting = async (key) => {
-    const params = {
-      token: "wtV"
-    }
-
     const { data } = await openApi.request({
         url: `/public-settings/${key}`,
-        method: 'GET',
-        params
+        method: 'GET'
     });
     return data;
   };
