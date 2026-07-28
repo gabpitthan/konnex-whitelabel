@@ -1,11 +1,11 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-28  
-Versão ativa: 1.5
+Versão ativa: 1.6
 
 ## Em foco
 
-Primeira fundação do redesign integral implantada com a identidade aprovada **Konnex Signal**; aguardando validação visual do usuário.
+Reconstrução do frontend como novo CRM em andamento. A versão 1.6 substituiu o shell, corrigiu regressões estruturais e reconstruiu o Dashboard.
 
 ## Estado operacional
 
@@ -21,9 +21,7 @@ Primeira fundação do redesign integral implantada com a identidade aprovada **
 
 ## Próximo passo
 
-Coletar a avaliação do usuário na URL publicada e continuar a migração das áreas especializadas em subversões controladas.
-
-Áreas seguintes: Dashboard, Atendimento, Kanban, FlowBuilder, campanhas e configurações. Cada uma deve preservar comportamento e ser validada em 360/390, 768/1024, 1366 e 1920px.
+Migrar internamente Atendimento e Contatos; depois Kanban, Campanhas, FlowBuilder, Conexões e Configurações. Nenhum módulo será considerado pronto apenas por herdar o novo shell.
 
 ## Fontes
 

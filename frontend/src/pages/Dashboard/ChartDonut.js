@@ -1,51 +1,72 @@
-import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Customized } from 'recharts';
+import React from "react";
+import { Box, Typography, useTheme } from "@mui/material";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
+const parseData = data => {
+  try {
+    return JSON.parse(`[${String(data).replace(/'/g, '"')}]`);
+  } catch (_) {
+    return [];
+  }
+};
 
-const DonutChart = (props) => {
-  const {title, value, data , color} = props;
-  
-  const data1 = JSON.parse(`[${String(data).replace(/'/g, '"')}]`);
-  
-  const COLORS = [color].length === 1 ? color : [JSON.stringify(color)];
-  
-  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
-    const RADIAN = Math.PI / 120;
-    const radius = -100 + innerRadius + (outerRadius - innerRadius);
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  
-    return (
-      <text x={x} y={y} fill="#000" textAnchor='middle'  dominantBaseline="middle" fontWeight="bold">
-        <tspan fontWeight="bold">{`${title}`}</tspan> 
-        <tspan x={x +1} y={y} dy="1.2em" fontWeight="bold">{`${value}%`}</tspan>
-      </text>
-    );
-  };
+const DonutChart = ({ title, value, data, color, featured = false }) => {
+  const theme = useTheme();
+  const chartData = parseData(data);
+  const colors = Array.isArray(color) ? color : [color];
 
   return (
-    <div>
-       <ResponsiveContainer width={300} height={300}>
-        <PieChart>
-          <Pie
-            data={data1}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}
-            innerRadius={50}
-            labelLine={false}
-            strokeWidth={0}
-            label={renderCustomLabel}
-          >
-            {data1.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}            
-          </Pie>          
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+    <Box
+      sx={{
+        minWidth: 0,
+        p: { xs: 2, md: featured ? 3 : 2.5 },
+        borderRight: { md: "1px solid" },
+        borderBottom: { xs: "1px solid", md: 0 },
+        borderColor: "divider",
+        bgcolor: featured ? "action.hover" : "transparent",
+      }}
+    >
+      <Typography sx={{ color: "text.secondary", fontSize: 12, mb: 1 }}>{title}</Typography>
+      <Box sx={{ height: featured ? 190 : 160, position: "relative" }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={featured ? 78 : 65}
+              innerRadius={featured ? 65 : 55}
+              startAngle={90}
+              endAngle={-270}
+              paddingAngle={chartData.length > 1 ? 2 : 0}
+              strokeWidth={0}
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`${entry.name}-${index}`} fill={colors[index % colors.length] || theme.palette.primary.main} />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                background: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: 7,
+                boxShadow: "none",
+                fontSize: 12,
+              }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+        <Box sx={{ position: "absolute", inset: 0, display: "grid", placeContent: "center", textAlign: "center", pointerEvents: "none" }}>
+          <Typography sx={{ fontSize: featured ? 32 : 25, fontWeight: 750, lineHeight: 1, fontVariantNumeric: "tabular-nums", letterSpacing: "-.05em" }}>
+            {value}{title === "NPS" ? "" : "%"}
+          </Typography>
+          <Typography sx={{ color: "text.secondary", fontSize: 10, mt: .5 }}>{featured ? "score" : "do total"}</Typography>
+        </Box>
+      </Box>
+    </Box>
   );
 };
+
 export default DonutChart;

@@ -1,8 +1,8 @@
 {
   "name": "frontend",
-  "version": "1.5",
+  "version": "1.6",
   "nomeEmpresa": "Sua empresa",
-  "versionSystem": "1.5",
+  "versionSystem": "1.6",
   "private": true,
   "dependencies": {
     "@date-io/date-fns": "^2.16.0",

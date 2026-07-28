@@ -1,10 +1,10 @@
 # Tarefa ativa
 
-Estado: primeira entrega implantada; aguardando validação visual do usuário.
+Estado: versão 1.6 implantada; reconstrução do CRM continua nas próximas subversões.
 
 ## Pedido
 
-Reformular integralmente o frontend com a identidade original **Konnex Signal**, moderna, clean, intuitiva e consistente, preservando toda funcionalidade e publicando para teste.
+Transformar a aplicação em um novo CRM, eliminando a arquitetura visual e de uso herdada do Whaticket. Corrigir imediatamente rolagem e botões que desaparecem, reconstruir navegação, disposição e UX e preservar funcionamento.
 
 ## Resultado esperado
 
@@ -29,6 +29,22 @@ Reformular integralmente o frontend com a identidade original **Konnex Signal**,
 - Layout utilizável em 360, 390, 768, 1024, 1366 e 1920px.
 - Modais globais possuem ações acessíveis no mobile.
 - Deploy e smoke aprovados.
+- Uma única região de rolagem previsível por contexto.
+- Nenhuma ação some ao abrir função, modal ou teclado.
+- Shell e menu não mantêm a disposição visual do Whaticket.
+- Navegação organizada por espaços de trabalho e contexto.
+
+## Resultado 1.6
+
+- Regressões de rolagem e ações corrigidas na base.
+- Shell Whaticket substituído por navegação em espaços de trabalho.
+- Navegação mobile inferior e painel adaptado.
+- Dashboard interno completamente reconstruído.
+- Build, deploy e smoke aprovados.
+
+## Próxima migração
+
+Atendimento e Contatos, seguidos por Kanban, Campanhas, FlowBuilder, Conexões e Configurações. Cada módulo deve mudar composição e usabilidade, não apenas tema.
 
 ## Resultado do lote
 

@@ -13,10 +13,15 @@ const useStyles = makeStyles(theme => ({
 	paper: {
 		width: "100%",
 		maxWidth: 440,
+		maxHeight: "min(560px, calc(100dvh - 32px))",
+		display: "flex",
+		flexDirection: "column",
+		overflow: "hidden",
 		borderRadius: 12,
 		boxShadow: "0 20px 55px rgba(15, 23, 42, 0.18)",
 		[theme.breakpoints.down("xs")]: {
 			width: `calc(100% - ${theme.spacing(3)}px)`,
+			maxHeight: "calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom))",
 			margin: theme.spacing(1.5),
 			borderRadius: 10,
 		},
@@ -38,6 +43,10 @@ const useStyles = makeStyles(theme => ({
 		padding: theme.spacing(1.5, 3, 2.5),
 		border: 0,
 		color: theme.palette.text.secondary,
+		minHeight: 0,
+		overflowY: "auto",
+		overscrollBehavior: "contain",
+		WebkitOverflowScrolling: "touch",
 		[theme.breakpoints.down("xs")]: {
 			padding: theme.spacing(1.25, 2, 2),
 		},
@@ -47,13 +56,15 @@ const useStyles = makeStyles(theme => ({
 		lineHeight: 1.6,
 	},
 	actions: {
+		flexShrink: 0,
 		gap: theme.spacing(1),
 		padding: theme.spacing(1.5, 3, 2.5),
+		backgroundColor: theme.palette.background.paper,
 		"& > :not(:first-child)": {
 			marginLeft: 0,
 		},
 		[theme.breakpoints.down("xs")]: {
-			padding: theme.spacing(1, 2, 2),
+			padding: `8px 16px calc(12px + env(safe-area-inset-bottom))`,
 			"& button": {
 				flex: 1,
 				minHeight: 42,

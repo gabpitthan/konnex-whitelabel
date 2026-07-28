@@ -2,6 +2,33 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.6] — 2026-07-28 — em desenvolvimento
+
+### Objetivo
+
+Reconstruir a experiência como um novo CRM e corrigir as regressões observadas na primeira fundação visual.
+
+### Prioridades
+
+- Scroll e viewport.
+- Ações acessíveis.
+- Novo shell e arquitetura de navegação.
+- Identidade e usabilidade que não reproduzam o Whaticket.
+
+### Testes
+
+- Preflight aprovado.
+- Builds de backend e frontend aprovados.
+- Deploy Docker concluído.
+- Smoke aprovado com API em `1.6`.
+
+### Entregue
+
+- Novo shell CRM com espaços de trabalho e ferramentas contextuais.
+- Navegação mobile inferior.
+- Dashboard completamente reconstruído.
+- Correções estruturais de scroll, viewport, modais e ações.
+
 ## [1.5] — 2026-07-28 — em desenvolvimento
 
 ### Objetivo

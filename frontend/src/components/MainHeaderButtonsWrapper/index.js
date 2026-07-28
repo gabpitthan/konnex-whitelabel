@@ -15,10 +15,21 @@ const useStyles = makeStyles(theme => ({
 			margin: 0,
 		},
 		[theme.breakpoints.down("xs")]: {
-			width: "100%",
-			justifyContent: "flex-start",
-			marginLeft: 0,
-			"& > button": {
+			minWidth: 0,
+			maxWidth: "62%",
+			flexWrap: "nowrap",
+			justifyContent: "flex-end",
+			overflowX: "auto",
+			overscrollBehaviorX: "contain",
+			WebkitOverflowScrolling: "touch",
+			scrollbarWidth: "none",
+			"&::-webkit-scrollbar": {
+				display: "none",
+			},
+			"& > *": {
+				flex: "0 0 auto",
+			},
+			"& > button, & > * > button": {
 				minHeight: 40,
 			},
 		},

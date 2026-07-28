@@ -26,7 +26,7 @@ body,
 body {
 	background: var(--knx-bone);
 	color: var(--knx-ink);
-	overscroll-behavior: none;
+	overscroll-behavior: contain;
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
@@ -99,6 +99,9 @@ select {
 	border: 1px solid rgba(65, 80, 76, .16);
 	border-radius: 14px !important;
 	box-shadow: var(--knx-shadow-float) !important;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 }
 
 .MuiDialogTitle-root {
@@ -108,15 +111,19 @@ select {
 
 .MuiDialogContent-root {
 	padding: 22px !important;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
 }
 
 .MuiDialogActions-root {
-	position: sticky;
-	bottom: 0;
+	flex: 0 0 auto;
 	z-index: 2;
 	gap: 8px;
 	border-top: 1px solid rgba(65, 80, 76, .12);
 	padding: 14px 22px !important;
+	background: var(--knx-surface);
 }
 
 .MuiChip-root {
@@ -132,7 +139,7 @@ select {
 	.MuiDialog-paper:not(.MuiDialog-paperWidthXs) {
 		width: 100% !important;
 		max-width: none !important;
-		height: 100% !important;
+		height: 100dvh !important;
 		max-height: none !important;
 		margin: 0 !important;
 		border: 0;
@@ -140,19 +147,20 @@ select {
 	}
 
 	.MuiDialogTitle-root {
-		position: sticky;
-		top: 0;
+		flex: 0 0 auto;
 		z-index: 3;
-		background: inherit;
+		padding-top: calc(18px + env(safe-area-inset-top)) !important;
+		background: var(--knx-surface);
 	}
 
 	.MuiDialogContent-root {
-		padding: 18px 16px 96px !important;
+		flex: 1 1 auto;
+		padding: 18px 16px 24px !important;
 	}
 
 	.MuiDialogActions-root {
 		padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
-		background: inherit;
+		background: var(--knx-surface);
 	}
 
 	.MuiTableContainer-root {

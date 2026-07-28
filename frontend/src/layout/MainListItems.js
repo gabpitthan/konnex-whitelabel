@@ -1,19 +1,7 @@
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import useHelps from "../hooks/useHelps";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListSubheader from "@material-ui/core/ListSubheader";
-import Divider from "@material-ui/core/Divider";
-import Avatar from "@material-ui/core/Avatar";
-import Badge from "@material-ui/core/Badge";
-import Collapse from "@material-ui/core/Collapse";
-import List from "@material-ui/core/List";
-import Tooltip from "@material-ui/core/Tooltip";
-import Typography from "@material-ui/core/Typography";
-
+import { makeStyles } from "@material-ui/core/styles";
+import { Badge, Typography } from "@material-ui/core";
 import DashboardOutlinedIcon from "@material-ui/icons/DashboardOutlined";
 import WhatsAppIcon from "@material-ui/icons/WhatsApp";
 import SyncAltIcon from "@material-ui/icons/SyncAlt";
@@ -24,850 +12,326 @@ import AccountTreeOutlinedIcon from "@material-ui/icons/AccountTreeOutlined";
 import FlashOnIcon from "@material-ui/icons/FlashOn";
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import CodeRoundedIcon from "@material-ui/icons/CodeRounded";
-import ViewKanban from "@mui/icons-material/ViewKanban";
-import Schedule from "@material-ui/icons/Schedule";
+import ScheduleIcon from "@material-ui/icons/Schedule";
 import LocalOfferIcon from "@material-ui/icons/LocalOffer";
-import EventAvailableIcon from "@material-ui/icons/EventAvailable";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import PeopleIcon from "@material-ui/icons/People";
-import ListIcon from "@material-ui/icons/ListAlt";
 import AnnouncementIcon from "@material-ui/icons/Announcement";
 import ForumIcon from "@material-ui/icons/Forum";
 import LocalAtmIcon from "@material-ui/icons/LocalAtm";
 import BusinessIcon from "@material-ui/icons/Business";
+import ViewKanban from "@mui/icons-material/ViewKanban";
 import {
   AllInclusive,
   AttachFile,
-  Dashboard,
   Description,
   DeviceHubOutlined,
   GridOn,
   ListAlt,
   PhonelinkSetup,
 } from "@material-ui/icons";
-
+import { Campaign, ShapeLine } from "@mui/icons-material";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
-import { useActiveMenu } from "../context/ActiveMenuContext";
-
 import { Can } from "../components/Can";
-
-import { isArray } from "lodash";
 import api from "../services/api";
-import toastError from "../errors/toastError";
 import usePlans from "../hooks/usePlans";
-import { i18n } from "../translate/i18n";
-import { Campaign, ShapeLine, Webhook } from "@mui/icons-material";
+import toastError from "../errors/toastError";
 
 const packageVersion = require("../../package.json").version;
 
-const useStyles = makeStyles((theme) => ({
-  listItem: {
-    minHeight: 42,
-    width: "100%",
-    margin: "2px 0",
-    padding: "5px 10px",
-    borderRadius: 8,
-    transition: "background-color 160ms ease, color 160ms ease",
-    "& .MuiListItemIcon-root": {
-      minWidth: 40,
-    },
-    "&:hover": {
-      backgroundColor: theme.mode === "light" ? "rgba(22,133,111,.07)" : "rgba(82,199,174,.09)",
-    },
-    "&:hover $iconHoverActive": {
-      color: theme.mode === "light" ? "#0f6d5b" : "#62d0b7",
-    },
-  },
+export const WORKSPACES = [
+  { id: "central", label: "Central", glyph: "C" },
+  { id: "atendimento", label: "Atendimento", glyph: "A" },
+  { id: "campanhas", label: "Campanhas", glyph: "M" },
+  { id: "automacao", label: "Automação", glyph: "F" },
+  { id: "gestao", label: "Gestão", glyph: "G" },
+  { id: "sistema", label: "Sistema", glyph: "S" },
+];
 
-  listItemText: {
-    fontSize: 13,
-    fontWeight: 620,
-    color: theme.palette.text.secondary,
-  },
-  avatarActive: {
-    backgroundColor: "transparent",
-  },
-  avatarHover: {
-    backgroundColor: "transparent",
-  },
-  iconHoverActive: {
+export const workspaceForPath = (pathname) => {
+  if (/^\/(tickets|contacts|quick-messages|kanban|schedules|tags|chats)/.test(pathname)) return "atendimento";
+  if (/^\/(campaigns|contact-lists|campaigns-config)/.test(pathname)) return "campanhas";
+  if (/^\/(phrase-lists|flowbuilders|flowbuilder|prompts|queue-integration|messages-api)/.test(pathname)) return "automacao";
+  if (/^\/(users|queues|financeiro|reports|moments)/.test(pathname)) return "gestao";
+  if (/^\/(connections|allConnections|files|settings|companies|announcements|helps)/.test(pathname)) return "sistema";
+  return "central";
+};
+
+const useStyles = makeStyles((theme) => ({
+  panel: {
+    height: "100%",
+    minHeight: 0,
     display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 7,
-    height: 30,
-    width: 30,
-    backgroundColor: "transparent",
+    flexDirection: "column",
+    color: theme.palette.text.primary,
+  },
+  panelHeader: {
+    padding: "22px 18px 14px",
+    flexShrink: 0,
+  },
+  eyebrow: {
+    display: "block",
     color: theme.palette.text.secondary,
-    "&:hover, &.active": {
-      backgroundColor: theme.mode === "light" ? "rgba(22,133,111,.11)" : "rgba(82,199,174,.13)",
-      color: theme.mode === "light" ? "#0f6d5b" : "#62d0b7",
+    fontSize: 10,
+    fontWeight: 800,
+    letterSpacing: ".13em",
+    textTransform: "uppercase",
+  },
+  panelTitle: {
+    marginTop: 5,
+    fontSize: 19,
+    fontWeight: 760,
+    letterSpacing: "-.025em",
+  },
+  tools: {
+    flex: 1,
+    minHeight: 0,
+    overflowY: "auto",
+    overscrollBehavior: "contain",
+    padding: "4px 10px 18px",
+    ...theme.scrollbarStyles,
+  },
+  sectionLabel: {
+    display: "block",
+    padding: "14px 10px 6px",
+    color: theme.palette.text.secondary,
+    fontSize: 10,
+    fontWeight: 800,
+    letterSpacing: ".1em",
+    textTransform: "uppercase",
+  },
+  link: {
+    position: "relative",
+    display: "grid",
+    gridTemplateColumns: "30px minmax(0, 1fr) auto",
+    alignItems: "center",
+    minHeight: 43,
+    gap: 9,
+    padding: "5px 10px",
+    margin: "2px 0",
+    borderRadius: 7,
+    color: theme.palette.text.secondary,
+    textDecoration: "none",
+    transition: "background 140ms ease, color 140ms ease, transform 140ms ease",
+    "&:hover": {
+      color: theme.palette.text.primary,
+      background: theme.mode === "light" ? "rgba(17, 45, 41, .055)" : "rgba(255,255,255,.055)",
+      transform: "translateX(2px)",
     },
-    "& .MuiSvgIcon-root": {
-      fontSize: "1.2rem",
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      left: 0,
+      top: 11,
+      bottom: 11,
+      width: 2,
+      borderRadius: 2,
+      background: "transparent",
     },
+  },
+  active: {
+    color: theme.mode === "light" ? "#0b6758" : "#79d8c3",
+    background: theme.mode === "light" ? "rgba(20, 132, 111, .09)" : "rgba(68, 196, 166, .1)",
+    "&::before": {
+      background: theme.mode === "light" ? "#11836d" : "#60d0b7",
+    },
+  },
+  linkIcon: {
+    width: 30,
+    height: 30,
+    display: "grid",
+    placeItems: "center",
+    "& .MuiSvgIcon-root": { fontSize: 19 },
+  },
+  linkLabel: {
+    overflow: "hidden",
+    fontSize: 13,
+    fontWeight: 640,
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  footer: {
+    flexShrink: 0,
+    padding: "12px 18px 16px",
+    borderTop: `1px solid ${theme.palette.divider}`,
+    color: theme.palette.text.secondary,
+    fontSize: 10,
+    letterSpacing: ".06em",
   },
 }));
 
-function ListItemLink(props) {
-  const { icon, primary, to, tooltip, showBadge } = props;
-  const classes = useStyles();
-  const { activeMenu } = useActiveMenu();
-  const location = useLocation();
-  const isActive = activeMenu === to || location.pathname === to;
-
-  const renderLink = React.useMemo(
-    () => React.forwardRef((itemProps, ref) => <RouterLink to={to} ref={ref} {...itemProps} />),
-    [to]
-  );
-
-  const ConditionalTooltip = ({ children, tooltipEnabled }) =>
-    tooltipEnabled ? (
-      <Tooltip title={primary} placement="right">
-        {children}
-      </Tooltip>
-    ) : (
-      children
-    );
-
-  return (
-    <ConditionalTooltip tooltipEnabled={!!tooltip}>
-      <li>
-        <ListItem button component={renderLink} className={classes.listItem}>
-          {icon ? (
-            <ListItemIcon>
-              {showBadge ? (
-                <Badge badgeContent="!" color="error" overlap="circular" className={classes.badge}>
-                  <Avatar className={`${classes.iconHoverActive} ${isActive ? "active" : ""}`}>{icon}</Avatar>
-                </Badge>
-              ) : (
-                <Avatar className={`${classes.iconHoverActive} ${isActive ? "active" : ""}`}>{icon}</Avatar>
-              )}
-            </ListItemIcon>
-          ) : null}
-          <ListItemText primary={<Typography className={classes.listItemText}>{primary}</Typography>} />
-        </ListItem>
-      </li>
-    </ConditionalTooltip>
-  );
-}
-
 const reducer = (state, action) => {
-  if (action.type === "LOAD_CHATS") {
-    const chats = action.payload;
-    const newChats = [];
-
-    if (isArray(chats)) {
-      chats.forEach((chat) => {
-        const chatIndex = state.findIndex((u) => u.id === chat.id);
-        if (chatIndex !== -1) {
-          state[chatIndex] = chat;
-        } else {
-          newChats.push(chat);
-        }
-      });
-    }
-
-    return [...state, ...newChats];
+  if (action.type === "LOAD") return action.payload || [];
+  if (action.type === "CHANGE") {
+    return state.map((chat) => chat.id === action.payload.chat.id ? action.payload.chat : chat);
   }
-
-  if (action.type === "UPDATE_CHATS") {
-    const chat = action.payload;
-    const chatIndex = state.findIndex((u) => u.id === chat.id);
-
-    if (chatIndex !== -1) {
-      state[chatIndex] = chat;
-      return [...state];
-    } else {
-      return [chat, ...state];
-    }
-  }
-
-  if (action.type === "DELETE_CHAT") {
-    const chatId = action.payload;
-
-    const chatIndex = state.findIndex((u) => u.id === chatId);
-    if (chatIndex !== -1) {
-      state.splice(chatIndex, 1);
-    }
-    return [...state];
-  }
-
-  if (action.type === "RESET") {
-    return [];
-  }
-
-  if (action.type === "CHANGE_CHAT") {
-    const changedChats = state.map((chat) => {
-      if (chat.id === action.payload.chat.id) {
-        return action.payload.chat;
-      }
-      return chat;
-    });
-    return changedChats;
-  }
+  return state;
 };
 
-const MainListItems = ({ collapsed, drawerClose }) => {
-  const theme = useTheme();
+const NavItem = ({ to, label, icon, warning, onNavigate }) => {
+  const classes = useStyles();
+  const location = useLocation();
+  const active = to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
+  return (
+    <RouterLink
+      to={to}
+      className={`${classes.link} ${active ? classes.active : ""}`}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+    >
+      <span className={classes.linkIcon}>
+        {warning ? <Badge color="error" variant="dot">{icon}</Badge> : icon}
+      </span>
+      <span className={classes.linkLabel}>{label}</span>
+    </RouterLink>
+  );
+};
+
+const Admin = ({ user, children, connections = false }) => (
+  <Can
+    role={connections && user.profile === "user" && user.allowConnections === "enabled" ? "admin" : user.profile}
+    perform={connections ? "drawer-admin-items:view" : "dashboard:view"}
+    yes={() => children}
+  />
+);
+
+const Section = ({ label, children }) => {
+  const classes = useStyles();
+  return (
+    <section>
+      {label && <Typography className={classes.sectionLabel}>{label}</Typography>}
+      {children}
+    </section>
+  );
+};
+
+const MainListItems = ({ workspace, onNavigate }) => {
   const classes = useStyles();
   const { whatsApps } = useContext(WhatsAppsContext);
   const { user, socket } = useContext(AuthContext);
-  const { setActiveMenu } = useActiveMenu();
-  const location = useLocation();
-
-  const [connectionWarning, setConnectionWarning] = useState(false);
-  const [openCampaignSubmenu, setOpenCampaignSubmenu] = useState(false);
-  const [openFlowSubmenu, setOpenFlowSubmenu] = useState(false);
-  const [openDashboardSubmenu, setOpenDashboardSubmenu] = useState(false);
-  const [showCampaigns, setShowCampaigns] = useState(false);
-  const [showKanban, setShowKanban] = useState(false);
-  const [showOpenAi, setShowOpenAi] = useState(false);
-  const [showIntegrations, setShowIntegrations] = useState(false);
-
-  // novas features
-  const [showSchedules, setShowSchedules] = useState(false);
-  const [showInternalChat, setShowInternalChat] = useState(false);
-  const [showExternalApi, setShowExternalApi] = useState(false);
-
-  const [invisible, setInvisible] = useState(true);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [searchParam] = useState("");
-  const [chats, dispatch] = useReducer(reducer, []);
-  const [managementHover, setManagementHover] = useState(false);
-  const [campaignHover, setCampaignHover] = useState(false);
-  const [flowHover, setFlowHover] = useState(false)
-  const { list } = useHelps();  // INSERIR
-  const [hasHelps, setHasHelps] = useState(false);
-
-
-  useEffect(() => {   // INSERIR ESSE EFFECT INTEIRO
-    async function checkHelps() {
-      const helps = await list();
-      setHasHelps(helps.length > 0);
-    }
-    checkHelps();
-  }, []);
-
-  const isManagementActive =
-    location.pathname === "/" || location.pathname.startsWith("/reports") || location.pathname.startsWith("/moments");
-
-  const isCampaignRouteActive =
-    location.pathname === "/campaigns" ||
-    location.pathname.startsWith("/contact-lists") ||
-    location.pathname.startsWith("/campaigns-config");
-
-  const isFlowbuilderRouteActive =
-    location.pathname.startsWith("/phrase-lists") ||
-    location.pathname.startsWith("/flowbuilders") ||
-    location.pathname.startsWith("/flowbuilder/");
-
-  useEffect(() => {
-    if (location.pathname.startsWith("/tickets")) {
-      setActiveMenu("/tickets");
-    } else {
-      setActiveMenu("");
-    }
-  }, [location, setActiveMenu]);
-
   const { getPlanCompany } = usePlans();
+  const [flags, setFlags] = useState({});
+  const [chats, dispatch] = useReducer(reducer, []);
 
   useEffect(() => {
-    dispatch({ type: "RESET" });
-    setPageNumber(1);
-  }, [searchParam]);
-
-  useEffect(() => {
-    async function fetchData() {
-      const companyId = user.companyId;
-      const planConfigs = await getPlanCompany(undefined, companyId);
-
-      setShowCampaigns(planConfigs.plan.useCampaigns);
-      setShowKanban(planConfigs.plan.useKanban);
-      setShowOpenAi(planConfigs.plan.useOpenAi);
-      setShowIntegrations(planConfigs.plan.useIntegrations);
-      setShowSchedules(planConfigs.plan.useSchedules);
-      setShowInternalChat(planConfigs.plan.useInternalChat);
-      setShowExternalApi(planConfigs.plan.useExternalApi);
-    }
-    fetchData();
+    let mounted = true;
+    getPlanCompany(undefined, user.companyId)
+      .then(({ plan }) => mounted && setFlags(plan || {}))
+      .catch(toastError);
+    return () => { mounted = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.companyId]);
+
+  useEffect(() => {
+    api.get("/chats/")
+      .then(({ data }) => dispatch({ type: "LOAD", payload: data.records }))
+      .catch(toastError);
   }, []);
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      fetchChats();
-    }, 500);
-    return () => clearTimeout(delayDebounceFn);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParam, pageNumber]);
+    if (!socket || !user.companyId) return undefined;
+    const event = `company-${user.companyId}-chat`;
+    const handler = (data) => dispatch({ type: "CHANGE", payload: data });
+    socket.on(event, handler);
+    return () => socket.off(event, handler);
+  }, [socket, user.companyId]);
 
-  useEffect(() => {
-    if (user.id) {
-      const companyId = user.companyId;
-      //    const socket = socketManager.GetSocket();
-      // console.log('socket nListItems')
-      const onCompanyChatMainListItems = (data) => {
-        if (data.action === "new-message") {
-          dispatch({ type: "CHANGE_CHAT", payload: data });
-        }
-        if (data.action === "update") {
-          dispatch({ type: "CHANGE_CHAT", payload: data });
-        }
-      };
+  const unreadChat = useMemo(() => chats.some((chat) =>
+    (chat.users || []).some((chatUser) => chatUser.userId === user.id && chatUser.unreads > 0)
+  ), [chats, user.id]);
 
-      socket.on(`company-${companyId}-chat`, onCompanyChatMainListItems);
-      return () => {
-        socket.off(`company-${companyId}-chat`, onCompanyChatMainListItems);
-      };
-    }
-  }, [socket]);
+  const connectionWarning = useMemo(() => whatsApps.some(({ status }) =>
+    ["qrcode", "PAIRING", "DISCONNECTED", "TIMEOUT", "OPENING"].includes(status)
+  ), [whatsApps]);
 
-  useEffect(() => {
-    let unreadsCount = 0;
-    if (chats.length > 0) {
-      for (let chat of chats) {
-        for (let chatUser of chat.users) {
-          if (chatUser.userId === user.id) {
-            unreadsCount += chatUser.unreads;
-          }
-        }
-      }
-    }
-    if (unreadsCount > 0) {
-      setInvisible(false);
-    } else {
-      setInvisible(true);
-    }
-  }, [chats, user.id]);
-
-  // useEffect(() => {
-  //   if (localStorage.getItem("cshow")) {
-  //     setShowCampaigns(true);
-  //   }
-  // }, []);
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (whatsApps.length > 0) {
-        const offlineWhats = whatsApps.filter((whats) => {
-          return (
-            whats.status === "qrcode" ||
-            whats.status === "PAIRING" ||
-            whats.status === "DISCONNECTED" ||
-            whats.status === "TIMEOUT" ||
-            whats.status === "OPENING"
-          );
-        });
-        if (offlineWhats.length > 0) {
-          setConnectionWarning(true);
-        } else {
-          setConnectionWarning(false);
-        }
-      }
-    }, 2000);
-    return () => clearTimeout(delayDebounceFn);
-  }, [whatsApps]);
-
-  const fetchChats = async () => {
-    try {
-      const { data } = await api.get("/chats/", {
-        params: { searchParam, pageNumber },
-      });
-      dispatch({ type: "LOAD_CHATS", payload: data.records });
-    } catch (err) {
-      toastError(err);
-    }
-  };
+  const title = WORKSPACES.find((item) => item.id === workspace)?.label || "Central";
 
   return (
-    <div onClick={drawerClose}>
-      <Can
-        role={
-          (user.profile === "user" && user.showDashboard === "enabled") || user.allowRealTime === "enabled"
-            ? "admin"
-            : user.profile
-        }
-        perform={"drawer-admin-items:view"}
-        yes={() => (
+    <div className={classes.panel}>
+      <header className={classes.panelHeader}>
+        <span className={classes.eyebrow}>Espaço de trabalho</span>
+        <Typography component="h2" className={classes.panelTitle}>{title}</Typography>
+      </header>
+      <nav className={classes.tools} aria-label={`Ferramentas de ${title}`}>
+        {workspace === "central" && (
           <>
-            <Tooltip title={collapsed ? i18n.t("mainDrawer.listItems.management") : ""} placement="right">
-              <ListItem
-                dense
-                button
-                onClick={() => setOpenDashboardSubmenu((prev) => !prev)}
-                onMouseEnter={() => setManagementHover(true)}
-                onMouseLeave={() => setManagementHover(false)}
-              >
-                <ListItemIcon>
-                  <Avatar
-                    className={`${classes.iconHoverActive} ${isManagementActive || managementHover ? "active" : ""}`}
-                  >
-                    <Dashboard />
-                  </Avatar>
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography className={classes.listItemText}>
-                      {i18n.t("mainDrawer.listItems.management")}
-                    </Typography>
-                  }
-                />
-                {openDashboardSubmenu ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-              </ListItem>
-            </Tooltip>
-            <Collapse
-              in={openDashboardSubmenu}
-              timeout="auto"
-              unmountOnExit
-              style={{
-                margin: "3px 0 8px 14px",
-                borderLeft: `1px solid ${theme.palette.divider}`,
-              }}
-            >
-              <Can
-                role={user.profile === "user" && user.showDashboard === "enabled" ? "admin" : user.profile}
-                perform={"drawer-admin-items:view"}
-                yes={() => (
-                  <>
-                    <ListItemLink
-                      small
-                      to="/"
-                      primary="Dashboard"
-                      icon={<DashboardOutlinedIcon />}
-                      tooltip={collapsed}
-                    />
-                    <ListItemLink
-                      small
-                      to="/reports"
-                      primary={i18n.t("mainDrawer.listItems.reports")}
-                      icon={<Description />}
-                      tooltip={collapsed}
-                    />
-                  </>
-                )}
-              />
-              <Can
-                role={user.profile === "user" && user.allowRealTime === "enabled" ? "admin" : user.profile}
-                perform={"drawer-admin-items:view"}
-                yes={() => (
-                  <ListItemLink
-                    to="/moments"
-                    primary={i18n.t("mainDrawer.listItems.chatsTempoReal")}
-                    icon={<GridOn />}
-                    tooltip={collapsed}
-                  />
-                )}
-              />
-            </Collapse>
+            <Section label="Visão da operação">
+              <Admin user={user}><NavItem to="/" label="Visão geral" icon={<DashboardOutlinedIcon />} onNavigate={onNavigate} /></Admin>
+              <Admin user={user}><NavItem to="/reports" label="Relatórios" icon={<Description />} onNavigate={onNavigate} /></Admin>
+              <Admin user={user}><NavItem to="/moments" label="Tempo real" icon={<GridOn />} onNavigate={onNavigate} /></Admin>
+            </Section>
+            <Section label="Acesso rápido">
+              <NavItem to="/tickets" label="Abrir atendimentos" icon={<WhatsAppIcon />} onNavigate={onNavigate} />
+              <NavItem to="/contacts" label="Consultar contatos" icon={<ContactPhoneOutlinedIcon />} onNavigate={onNavigate} />
+            </Section>
           </>
         )}
-      />
-      <ListItemLink
-        to="/tickets"
-        primary={i18n.t("mainDrawer.listItems.tickets")}
-        icon={<WhatsAppIcon />}
-        tooltip={collapsed}
-      />
-
-      <ListItemLink
-        to="/quick-messages"
-        primary={i18n.t("mainDrawer.listItems.quickMessages")}
-        icon={<FlashOnIcon />}
-        tooltip={collapsed}
-      />
-
-      {showKanban && (
-        <>
-          <ListItemLink
-            to="/kanban"
-            primary={i18n.t("mainDrawer.listItems.kanban")}
-            icon={<ViewKanban />}
-            tooltip={collapsed}
-          />
-        </>
-      )}
-
-      <ListItemLink
-        to="/contacts"
-        primary={i18n.t("mainDrawer.listItems.contacts")}
-        icon={<ContactPhoneOutlinedIcon />}
-        tooltip={collapsed}
-      />
-
-      {showSchedules && (
-        <>
-          <ListItemLink
-            to="/schedules"
-            primary={i18n.t("mainDrawer.listItems.schedules")}
-            icon={<Schedule />}
-            tooltip={collapsed}
-          />
-        </>
-      )}
-
-      <ListItemLink
-        to="/tags"
-        primary={i18n.t("mainDrawer.listItems.tags")}
-        icon={<LocalOfferIcon />}
-        tooltip={collapsed}
-      />
-
-      {showInternalChat && (
-        <>
-          <ListItemLink
-            to="/chats"
-            primary={i18n.t("mainDrawer.listItems.chats")}
-            icon={
-              <Badge color="secondary" variant="dot" invisible={invisible}>
-                <ForumIcon />
-              </Badge>
-            }
-            tooltip={collapsed}
-          />
-        </>
-      )}
-
-      {/* <ListItemLink
-        to="/todolist"
-        primary={i18n.t("ToDoList")}
-        icon={<EventAvailableIcon />}
-      /> */}
-      
-        <ListItemLink
-          to="/helps"
-          primary={i18n.t("mainDrawer.listItems.helps")}
-          icon={<HelpOutlineIcon />}
-          tooltip={collapsed}
-        />
-      
-      <Can
-        role={user.profile === "user" && user.allowConnections === "enabled" ? "admin" : user.profile}
-        perform="dashboard:view"
-        yes={() => (
+        {workspace === "atendimento" && (
           <>
-            <Divider style={{ margin: "14px 8px 8px" }} />
-            <ListSubheader
-              disableSticky
-              style={{
-                padding: collapsed ? "8px 0" : "8px 12px 5px",
-                color: theme.palette.text.secondary,
-                fontSize: 10,
-                fontWeight: 800,
-                letterSpacing: ".1em",
-                lineHeight: 1.4,
-                textTransform: "uppercase",
-              }}
-            >
-              {collapsed ? "•••" : i18n.t("mainDrawer.listItems.administration")}
-            </ListSubheader>
-            {showCampaigns && (
-              <Can
-                role={user.profile}
-                perform="dashboard:view"
-                yes={() => (
-                  <>
-                    <Tooltip title={collapsed ? i18n.t("mainDrawer.listItems.campaigns") : ""} placement="right">
-                      <ListItem
-                        dense
-                        button
-                        onClick={() => setOpenCampaignSubmenu((prev) => !prev)}
-                        onMouseEnter={() => setCampaignHover(true)}
-                        onMouseLeave={() => setCampaignHover(false)}
-                      >
-                        <ListItemIcon>
-                          <Avatar
-                            className={`${classes.iconHoverActive} ${isCampaignRouteActive || campaignHover ? "active" : ""
-                              }`}
-                          >
-                            <EventAvailableIcon />
-                          </Avatar>
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Typography className={classes.listItemText}>
-                              {i18n.t("mainDrawer.listItems.campaigns")}
-                            </Typography>
-                          }
-                        />
-                        {openCampaignSubmenu ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                      </ListItem>
-                    </Tooltip>
-                    <Collapse
-                      in={openCampaignSubmenu}
-                      timeout="auto"
-                      unmountOnExit
-                      style={{
-                        margin: "3px 0 8px 14px",
-                        borderLeft: `1px solid ${theme.palette.divider}`,
-                      }}
-                    >
-                      <List dense component="div" disablePadding>
-                        <ListItemLink
-                          to="/campaigns"
-                          primary={i18n.t("campaigns.subMenus.list")}
-                          icon={<ListIcon />}
-                          tooltip={collapsed}
-                        />
-                        <ListItemLink
-                          to="/contact-lists"
-                          primary={i18n.t("campaigns.subMenus.listContacts")}
-                          icon={<PeopleIcon />}
-                          tooltip={collapsed}
-                        />
-                        <ListItemLink
-                          to="/campaigns-config"
-                          primary={i18n.t("campaigns.subMenus.settings")}
-                          icon={<SettingsOutlinedIcon />}
-                          tooltip={collapsed}
-                        />
-                      </List>
-                    </Collapse>
-                  </>
-                )}
-              />
-            )}
-
-            {/* FLOWBUILDER */}
-            <Can
-              role={user.profile}
-              perform="dashboard:view"
-              yes={() => (
-                <>
-                  <Tooltip title={collapsed ? i18n.t("mainDrawer.listItems.campaigns") : ""} placement="right">
-                    <ListItem
-                      dense
-                      button
-                      onClick={() => setOpenFlowSubmenu((prev) => !prev)}
-                      onMouseEnter={() => setFlowHover(true)}
-                      onMouseLeave={() => setFlowHover(false)}
-                    >
-                      <ListItemIcon>
-                        <Avatar
-                          className={`${classes.iconHoverActive} ${isFlowbuilderRouteActive || flowHover ? "active" : ""
-                            }`}
-                        >
-                          <Webhook />
-                        </Avatar>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Typography className={classes.listItemText}>
-                            {i18n.t("Flowbuilder")}
-                          </Typography>
-                        }
-                      />
-                      {openFlowSubmenu ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </ListItem>
-                  </Tooltip>
-
-                  <Collapse
-                    in={openFlowSubmenu}
-                    timeout="auto"
-                    unmountOnExit
-                    style={{
-                      margin: "3px 0 8px 14px",
-                      borderLeft: `1px solid ${theme.palette.divider}`,
-                    }}
-                  >
-                    <List dense component="div" disablePadding>
-                      <ListItemLink
-                        to="/phrase-lists"
-                        primary={"Fluxo de Campanha"}
-                        icon={<EventAvailableIcon />}
-                        tooltip={collapsed}
-                      />
-
-                      <ListItemLink
-                        to="/flowbuilders"
-                        primary={'Fluxo de conversa'}
-                        icon={<ShapeLine />}
-                      />
-                    </List>
-                  </Collapse>
-                </>
-              )}
-            />
-
-
-            {user.super && (
-              <ListItemLink
-                to="/announcements"
-                primary={i18n.t("mainDrawer.listItems.annoucements")}
-                icon={<AnnouncementIcon />}
-                tooltip={collapsed}
-              />
-            )}
-
-            {showExternalApi && (
-              <>
-                <Can
-                  role={user.profile}
-                  perform="dashboard:view"
-                  yes={() => (
-                    <ListItemLink
-                      to="/messages-api"
-                      primary={i18n.t("mainDrawer.listItems.messagesAPI")}
-                      icon={<CodeRoundedIcon />}
-                      tooltip={collapsed}
-                    />
-                  )}
-                />
-              </>
-            )}
-            <Can
-              role={user.profile}
-              perform="dashboard:view"
-              yes={() => (
-                <ListItemLink
-                  to="/users"
-                  primary={i18n.t("mainDrawer.listItems.users")}
-                  icon={<PeopleAltOutlinedIcon />}
-                  tooltip={collapsed}
-                />
-              )}
-            />
-            <Can
-              role={user.profile}
-              perform="dashboard:view"
-              yes={() => (
-                <ListItemLink
-                  to="/queues"
-                  primary={i18n.t("mainDrawer.listItems.queues")}
-                  icon={<AccountTreeOutlinedIcon />}
-                  tooltip={collapsed}
-                />
-              )}
-            />
-
-            {showOpenAi && (
-              <Can
-                role={user.profile}
-                perform="dashboard:view"
-                yes={() => (
-                  <ListItemLink
-                    to="/prompts"
-                    primary={i18n.t("mainDrawer.listItems.prompts")}
-                    icon={<AllInclusive />}
-                    tooltip={collapsed}
-                  />
-                )}
-              />
-            )}
-
-            {showIntegrations && (
-              <Can
-                role={user.profile}
-                perform="dashboard:view"
-                yes={() => (
-                  <ListItemLink
-                    to="/queue-integration"
-                    primary={i18n.t("mainDrawer.listItems.queueIntegration")}
-                    icon={<DeviceHubOutlined />}
-                    tooltip={collapsed}
-                  />
-                )}
-              />
-            )}
-            <Can
-              role={user.profile === "user" && user.allowConnections === "enabled" ? "admin" : user.profile}
-              perform={"drawer-admin-items:view"}
-              yes={() => (
-                <ListItemLink
-                  to="/connections"
-                  primary={i18n.t("mainDrawer.listItems.connections")}
-                  icon={<SyncAltIcon />}
-                  showBadge={connectionWarning}
-                  tooltip={collapsed}
-                />
-              )}
-            />
-            {user.super && (
-              <ListItemLink
-                to="/allConnections"
-                primary={i18n.t("mainDrawer.listItems.allConnections")}
-                icon={<PhonelinkSetup />}
-                tooltip={collapsed}
-              />
-            )}
-            <Can
-              role={user.profile}
-              perform="dashboard:view"
-              yes={() => (
-                <ListItemLink
-                  to="/files"
-                  primary={i18n.t("mainDrawer.listItems.files")}
-                  icon={<AttachFile />}
-                  tooltip={collapsed}
-                />
-              )}
-            />
-            <Can
-              role={user.profile}
-              perform="dashboard:view"
-              yes={() => (
-                <ListItemLink
-                  to="/financeiro"
-                  primary={i18n.t("mainDrawer.listItems.financeiro")}
-                  icon={<LocalAtmIcon />}
-                  tooltip={collapsed}
-                />
-              )}
-            />
-            <Can
-              role={user.profile}
-              perform="dashboard:view"
-              yes={() => (
-                <ListItemLink
-                  to="/settings"
-                  primary={i18n.t("mainDrawer.listItems.settings")}
-                  icon={<SettingsOutlinedIcon />}
-                  tooltip={collapsed}
-                />
-              )}
-            />
-            {/* {user.super && (
-              <ListSubheader inset>
-                {i18n.t("mainDrawer.listItems.administration")}
-              </ListSubheader>
-            )} */}
-
-            {user.super && (
-              <ListItemLink
-                to="/companies"
-                primary={i18n.t("mainDrawer.listItems.companies")}
-                icon={<BusinessIcon />}
-                tooltip={collapsed}
-              />
-            )}
-
+            <Section label="Operação">
+              <NavItem to="/tickets" label="Conversas" icon={<WhatsAppIcon />} onNavigate={onNavigate} />
+              {flags.useKanban && <NavItem to="/kanban" label="Kanban" icon={<ViewKanban />} onNavigate={onNavigate} />}
+              <NavItem to="/contacts" label="Contatos" icon={<ContactPhoneOutlinedIcon />} onNavigate={onNavigate} />
+              {flags.useSchedules && <NavItem to="/schedules" label="Agenda" icon={<ScheduleIcon />} onNavigate={onNavigate} />}
+            </Section>
+            <Section label="Recursos">
+              <NavItem to="/quick-messages" label="Respostas rápidas" icon={<FlashOnIcon />} onNavigate={onNavigate} />
+              <NavItem to="/tags" label="Tags" icon={<LocalOfferIcon />} onNavigate={onNavigate} />
+              {flags.useInternalChat && <NavItem to="/chats" label="Chat interno" icon={<ForumIcon />} warning={unreadChat} onNavigate={onNavigate} />}
+            </Section>
           </>
-
         )}
-      />
-      {!collapsed && (
-        <React.Fragment>
-          <Divider />
-          {/* 
-              // IMAGEM NO MENU
-              <Hidden only={['sm', 'xs']}>
-                <img style={{ width: "100%", padding: "10px" }} src={logo} alt="image" />            
-              </Hidden> 
-              */}
-          <Typography
-            style={{
-              fontSize: "12px",
-              padding: "10px",
-              textAlign: "center",
-              fontWeight: "bold",
-            }}
-          >
-            {`Versão ${packageVersion}`}
-          </Typography>
-        </React.Fragment>
-      )}
+        {workspace === "campanhas" && flags.useCampaigns && (
+          <Admin user={user}>
+            <Section label="Campanhas">
+              <NavItem to="/campaigns" label="Campanhas" icon={<Campaign />} onNavigate={onNavigate} />
+              <NavItem to="/contact-lists" label="Listas de contatos" icon={<ListAlt />} onNavigate={onNavigate} />
+              <NavItem to="/campaigns-config" label="Configuração" icon={<SettingsOutlinedIcon />} onNavigate={onNavigate} />
+            </Section>
+          </Admin>
+        )}
+        {workspace === "automacao" && (
+          <Admin user={user}>
+            <Section label="Construtores">
+              <NavItem to="/flowbuilders" label="Fluxos de conversa" icon={<ShapeLine />} onNavigate={onNavigate} />
+              <NavItem to="/phrase-lists" label="Fluxos de campanha" icon={<Campaign />} onNavigate={onNavigate} />
+            </Section>
+            <Section label="Inteligência e integração">
+              {flags.useOpenAi && <NavItem to="/prompts" label="Prompts e IA" icon={<AllInclusive />} onNavigate={onNavigate} />}
+              {flags.useIntegrations && <NavItem to="/queue-integration" label="Integrações" icon={<DeviceHubOutlined />} onNavigate={onNavigate} />}
+              {flags.useExternalApi && <NavItem to="/messages-api" label="API e webhooks" icon={<CodeRoundedIcon />} onNavigate={onNavigate} />}
+            </Section>
+          </Admin>
+        )}
+        {workspace === "gestao" && (
+          <Admin user={user}>
+            <Section label="Equipe">
+              <NavItem to="/users" label="Usuários" icon={<PeopleAltOutlinedIcon />} onNavigate={onNavigate} />
+              <NavItem to="/queues" label="Filas" icon={<AccountTreeOutlinedIcon />} onNavigate={onNavigate} />
+            </Section>
+            <Section label="Desempenho">
+              <NavItem to="/reports" label="Relatórios" icon={<Description />} onNavigate={onNavigate} />
+              <NavItem to="/moments" label="Tempo real" icon={<GridOn />} onNavigate={onNavigate} />
+              <NavItem to="/financeiro" label="Financeiro" icon={<LocalAtmIcon />} onNavigate={onNavigate} />
+            </Section>
+          </Admin>
+        )}
+        {workspace === "sistema" && (
+          <>
+            <Section label="Canais e dados">
+              <Admin user={user} connections><NavItem to="/connections" label="Conexões" icon={<SyncAltIcon />} warning={connectionWarning} onNavigate={onNavigate} /></Admin>
+              {user.super && <NavItem to="/allConnections" label="Todas as conexões" icon={<PhonelinkSetup />} onNavigate={onNavigate} />}
+              <Admin user={user}><NavItem to="/files" label="Arquivos" icon={<AttachFile />} onNavigate={onNavigate} /></Admin>
+            </Section>
+            <Section label="Administração">
+              <Admin user={user}><NavItem to="/settings" label="Configurações" icon={<SettingsOutlinedIcon />} onNavigate={onNavigate} /></Admin>
+              {user.super && <NavItem to="/companies" label="Empresas" icon={<BusinessIcon />} onNavigate={onNavigate} />}
+              {user.super && <NavItem to="/announcements" label="Comunicados" icon={<AnnouncementIcon />} onNavigate={onNavigate} />}
+              <NavItem to="/helps" label="Ajuda" icon={<HelpOutlineIcon />} onNavigate={onNavigate} />
+            </Section>
+          </>
+        )}
+      </nav>
+      <footer className={classes.footer}>KONNEX SIGNAL · {packageVersion}</footer>
     </div>
   );
 };

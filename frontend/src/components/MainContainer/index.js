@@ -11,6 +11,7 @@ const useStyles = makeStyles(theme => ({
 		padding: theme.spacing(2.5, 3),
 		height: `calc(100% - 48px)`,
 		minHeight: 0,
+		overflow: "hidden",
 		backgroundColor: theme.palette.background.default,
 		[theme.breakpoints.down("sm")]: {
 			padding: theme.spacing(2),
@@ -25,9 +26,13 @@ const useStyles = makeStyles(theme => ({
 		height: "100%",
 		minHeight: 0,
 		width: "100%",
-		overflowY: "hidden",
+		overflowX: "hidden",
+		overflowY: "auto",
+		overscrollBehavior: "contain",
+		WebkitOverflowScrolling: "touch",
 		display: "flex",
 		flexDirection: "column",
+		paddingBottom: "max(0px, env(safe-area-inset-bottom))",
 	},
 }));
 
