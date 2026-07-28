@@ -2,6 +2,34 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.4] — 2026-07-28 — em desenvolvimento
+
+### Objetivo
+
+Instituir o sistema permanente de engenharia autônoma com Codex.
+
+### Adicionado
+
+- Workflow para desenvolvimento por prompts simples.
+- Definição de pronto e protocolo de autoavaliação.
+- Memória estruturada em `docs/project/`.
+- Registro de tarefa ativa e decisões arquiteturais.
+- Scripts de preflight, quality gate e smoke.
+- README próprio da versão 1.4.
+
+### Alterado
+
+- `PROJECT_STATE.md` transformado em índice curto sem falhas antigas contraditórias.
+- Regras de subagentes, loops finitos, encerramento e segurança incluídas em `AGENTS.md`.
+- Versão técnica sincronizada em `1.4`.
+
+### Testes
+
+- Preflight e validação de shell aprovados.
+- Build Docker de backend e frontend aprovado.
+- Deploy isolado concluído.
+- Smoke aprovado com frontend ativo e API `/version` em `1.4`.
+
 ## [1.3] — 2026-07-28 — em desenvolvimento
 
 ### Objetivo

@@ -2,10 +2,30 @@
 
 Antes de qualquer alteração:
 
-1. Ler `PROJECT_STATE.md`, `VERSION`, `CHANGELOG.md` e `docs/VERSIONING.md`.
+1. Ler `PROJECT_STATE.md`, `docs/project/CURRENT.md`, `docs/project/ROADMAP.md`, `VERSION`, `CHANGELOG.md` e `docs/VERSIONING.md`.
 2. Verificar `git status` e preservar alterações existentes.
 3. Tratar este projeto como uma plataforma multiempresa: toda leitura e mutação de dados de tenant deve incluir `companyId`.
 4. Não modificar nem reiniciar outros projetos do servidor.
+5. Registrar a tarefa atual em `tasks/ACTIVE.md` quando houver implementação.
+
+## Operação autônoma
+
+- Interpretar prompts simples e descobrir sozinho os componentes, rotas, banco, riscos e testes envolvidos.
+- Para tarefas grandes, usar subagentes com escopos independentes: engenharia, QA, segurança/multitenancy, operações ou UX. O agente principal sempre integra e valida.
+- Trabalhar em ciclos finitos: reproduzir → diagnosticar → corrigir → testar → revisar. Após três tentativas sem progresso, documentar evidências e o bloqueio real.
+- Não pedir ao usuário decisões técnicas rotineiras que possam ser determinadas pelo código e pela arquitetura.
+- Não ampliar o escopo para ações externas irreversíveis, dados reais de clientes ou outros projetos.
+- Antes de editar, concluir a auditoria solicitada; depois implementar o menor lote coerente.
+
+## Encerramento obrigatório
+
+1. Executar `scripts/preflight.sh`.
+2. Executar testes proporcionais ao risco e `scripts/quality-gate.sh` quando houver código.
+3. Em deploy, executar `scripts/smoke-test.sh`.
+4. Fazer autoavaliação usando `docs/DEFINITION_OF_DONE.md`.
+5. Atualizar `tasks/ACTIVE.md`, `docs/project/CURRENT.md`, `docs/project/ISSUES.md`, README da subversão e changelog.
+6. Confirmar persistência, refresh/restart, backend, mobile e isolamento por tenant quando aplicável.
+7. Registrar limitações; nunca chamar uma interface não funcional de concluída.
 
 ## Versionamento obrigatório
 
@@ -39,3 +59,5 @@ Quando o usuário disser que a versão está pronta:
 - Evitar SQL bruto; quando inevitável, usar replacements/bind parameters.
 - Não inserir segredos, chaves, senhas ou dados pessoais no Git, documentação ou logs.
 - Realizar deploy somente com build aprovado e teste de regressão de login, API e serviços críticos.
+- Não ler, imprimir ou copiar `credentials.txt` ou `.env`; scripts podem consumir variáveis sem exibi-las.
+- Migrations destrutivas exigem backup verificável e plano de rollback.
