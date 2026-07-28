@@ -38,6 +38,10 @@ Cada subversão deve registrar:
 - instruções de deploy e rollback;
 - commit Git.
 
+Essas informações devem existir também em:
+
+`docs/versions/X.Y/README.md`
+
 ## Snapshot completo
 
 Destino:
@@ -49,6 +53,7 @@ Arquivos:
 - `whitelabel-whaticket-X.Y.tar.gz`: código-fonte rastreado no Git;
 - `MANIFEST.md`: versão, commit, data, branch e contexto operacional;
 - `RELEASE_NOTES.md`: cópia das notas da versão;
+- `README.md`: documentação específica da versão;
 - `SHA256SUMS`: checksum do arquivo.
 
 O snapshot é criado a partir de um commit Git, garantindo conteúdo reproduzível.

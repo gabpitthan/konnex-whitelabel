@@ -4,7 +4,8 @@
 
 ## Governança e versionamento
 
-- Versão ativa: `1.2`, em desenvolvimento.
+- Versão ativa: `1.3`, implantada em desenvolvimento.
+- Deploy 1.3 validado em 2026-07-28: frontend HTTP 200 e `/version` respondendo `1.3`.
 - Fonte da versão: arquivo `VERSION`.
 - Regras permanentes: `AGENTS.md`.
 - Política detalhada: `docs/VERSIONING.md`.
@@ -17,6 +18,8 @@
 - Segredos, dados de clientes, banco, uploads e certificados privados nunca entram nos snapshots.
 - Após fechar a versão 1, o próximo ciclo começa em `2.1`.
 - Toda entrega relevante deve atualizar este documento e o changelog.
+- Toda subversão possui README próprio em `docs/versions/X.Y/README.md`.
+- A versão exibida no frontend e no endpoint `/version` deve corresponder ao arquivo `VERSION`.
 
 ## Permissões do Codex
 

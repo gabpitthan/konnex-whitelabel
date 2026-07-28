@@ -48,6 +48,7 @@ CREATED_AT="$(date --iso-8601=seconds)"
 } > "${DESTINATION}/MANIFEST.md"
 
 cp "${PROJECT_DIR}/CHANGELOG.md" "${DESTINATION}/RELEASE_NOTES.md"
+cp "${PROJECT_DIR}/docs/versions/${VERSION}/README.md" "${DESTINATION}/README.md"
 
 (
   cd "${DESTINATION}"

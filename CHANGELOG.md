@@ -2,7 +2,35 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
-## [1.2] — 2026-07-28 — em desenvolvimento
+## [1.3] — 2026-07-28 — em desenvolvimento
+
+### Objetivo
+
+Sincronizar a versão exibida no produto e criar documentação própria para cada subversão.
+
+### Alterado
+
+- Versão do frontend, backend, lockfiles e arquivo canônico atualizada para `1.3`.
+- Menu lateral passa a mostrar a versão real do pacote.
+- Endpoint `/version` deixa de depender de valor antigo no banco.
+- Processo de snapshot passa a incluir o README da versão.
+
+### Adicionado
+
+- `docs/versions/1.1/README.md`.
+- `docs/versions/1.2/README.md`.
+- `docs/versions/1.3/README.md`.
+- Regra permanente exigindo README para cada nova subversão.
+
+### Testes
+
+- Build TypeScript do backend aprovado.
+- Build de produção do frontend aprovado, com avisos legados.
+- Imagens e containers Docker recriados.
+- Frontend local e público respondendo HTTP 200.
+- Endpoint `/version` local e público respondendo `1.3`.
+
+## [1.2] — 2026-07-28 — concluída
 
 ### Objetivo
 

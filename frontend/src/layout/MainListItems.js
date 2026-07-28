@@ -57,9 +57,10 @@ import { isArray } from "lodash";
 import api from "../services/api";
 import toastError from "../errors/toastError";
 import usePlans from "../hooks/usePlans";
-import useVersion from "../hooks/useVersion";
 import { i18n } from "../translate/i18n";
 import { Campaign, ShapeLine, Webhook } from "@mui/icons-material";
+
+const packageVersion = require("../../package.json").version;
 
 const useStyles = makeStyles((theme) => ({
   listItem: {
@@ -226,7 +227,6 @@ const MainListItems = ({ collapsed, drawerClose }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam] = useState("");
   const [chats, dispatch] = useReducer(reducer, []);
-  const [version, setVersion] = useState(false);
   const [managementHover, setManagementHover] = useState(false);
   const [campaignHover, setCampaignHover] = useState(false);
   const [flowHover, setFlowHover] = useState(false)
@@ -263,17 +263,6 @@ const MainListItems = ({ collapsed, drawerClose }) => {
   }, [location, setActiveMenu]);
 
   const { getPlanCompany } = usePlans();
-
-  const { getVersion } = useVersion();
-
-  useEffect(() => {
-    async function fetchVersion() {
-      const _version = await getVersion();
-      setVersion(_version.version);
-    }
-    fetchVersion();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -849,7 +838,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
               fontWeight: "bold",
             }}
           >
-            {`Versão 13.8.2`}
+            {`Versão ${packageVersion}`}
           </Typography>
         </React.Fragment>
       )}
