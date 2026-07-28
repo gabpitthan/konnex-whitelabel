@@ -1,0 +1,70 @@
+[
+  {
+    "id": "556198317415@s.whatsapp.net",
+    "name": "Paulo Roberto"
+  },
+  {
+    "id": "556194512736@s.whatsapp.net",
+    "name": "Lukas Parnassa"
+  },
+  {
+    "id": "556182826591@s.whatsapp.net",
+    "name": "Carol Dias"
+  },
+  {
+    "id": "556185252643@s.whatsapp.net",
+    "name": "Marketing"
+  },
+  {
+    "id": "556191917555@s.whatsapp.net",
+    "name": "Gráfica Feira"
+  },
+  {
+    "id": "556192823027@s.whatsapp.net",
+    "name": "Equipe Megafone"
+  },
+  {
+    "id": "5528999682412@s.whatsapp.net",
+    "name": "Bruna Hellen"
+  },
+  {
+    "id": "556192942602@s.whatsapp.net",
+    "name": "Henrique"
+  },
+  {
+    "id": "556193167949@s.whatsapp.net",
+    "name": "Notebook Valparaíso"
+  },
+  {
+    "id": "5522999212325@s.whatsapp.net",
+    "name": "Geny Cliente Sharknet"
+  },
+  {
+    "id": "559581136398@s.whatsapp.net",
+    "name": "murilogaab"
+  },
+  {
+    "id": "556299585501@s.whatsapp.net",
+    "name": "Engenheiro Caixa (Jg3)"
+  },
+  {
+    "id": "558999827781@s.whatsapp.net",
+    "name": "Isa Benvindo Cunhada"
+  },
+  {
+    "id": "558894387926@s.whatsapp.net",
+    "name": "Pai"
+  },
+  {
+    "id": "556192929549@s.whatsapp.net",
+    "name": "Gilmauro"
+  },
+  {
+    "id": "556191923081@s.whatsapp.net",
+    "name": "Andreia Luiza Cliente Imovel"
+  },
+  {
+    "id": "556184144582@s.whatsapp.net",
+    "name": "Velpro Telecom"
+  }
+]

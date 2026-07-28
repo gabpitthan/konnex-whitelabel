@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+	<!-- <title></title> -->
+	<!-- <title>%REACT_APP_NAME_SYSTEM%</title> -->
+	<link rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" />
+	<link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
+	<link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+	<link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+	<meta name="theme-color" content="#000000" />
+	<meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style>
+		#splash-screen {
+			position: fixed;
+			inset: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			background: #f3f4f6;
+			z-index: 9999;
+			flex-direction: column;
+		}
+
+		.loading-spinner {
+			width: 50px;
+			height: 50px;
+			border: 5px solid #999093;
+			border-top: 5px solid transparent;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+			margin-bottom: 1rem;
+		}
+
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+
+		.progress-bar {
+			width: 200px;
+			height: 8px;
+			background-color: #d1d5db;
+			border-radius: 9999px;
+			overflow: hidden;
+		}
+
+		.progress {
+			height: 100%;
+			background-color: #999093;
+			width: 0;
+			transition: width 0.3s ease-in-out;
+		}
+
+		.loading-text {
+			color: #374151;
+			font-family: 'Inter', sans-serif;
+			margin-top: 1rem;
+			font-weight: 500;
+		}
+	</style>
+	<script>
+		if (!crossOriginIsolated) SharedArrayBuffer = ArrayBuffer;
+	</script>
+</head>
+
+<body class="bg-white text-gray-900 font-inter">
+	<div id="splash-screen">
+		<div class="loading-spinner"></div>
+		<div class="progress-bar">
+			<div class="progress" id="progress-bar"></div>
+		</div>
+		<div class="loading-text">Carregando o sistema</div>
+	</div>
+	<div id="root"></div>
+	<noscript>Você precisa habilitar o JavaScript para executar este app.</noscript>
+
+	<script>
+		let progress = 0;
+		const progressBar = document.getElementById('progress-bar');
+		const interval = setInterval(() => {
+			if (progress < 50) {
+				progress += 10;
+			} else if (progress < 80) {
+				progress += 3;
+			} else if (progress < 99) {
+				progress += ((99 - progress) / 20);
+			}
+			progressBar.style.width = progress + '%';
+
+			if (progress >= 100) {
+				clearInterval(interval);
+				setTimeout(() => {
+					const splashScreen = document.getElementById('splash-screen');
+					splashScreen.remove();
+				}, 500);
+			}
+		}, 1000);
+
+		window.finishProgress = () => {
+			progress = 100;
+		};
+	</script>
+</body>
+
+</html>
