@@ -15,3 +15,12 @@ Permitir desenvolvimento por prompts simples com autonomia, subagentes, autoaval
 ## Handoff
 
 O sistema aguarda o primeiro projeto funcional. Ao recebê-lo, registrar critérios em `tasks/ACTIVE.md`, executar o workflow e atualizar a próxima subversão.
+
+## Continuação — Konnex Signal 1.5
+
+- Identidade visual Konnex Signal aprovada e documentada.
+- Primeira fundação visual implantada no commit `2076dab`.
+- URL de validação: `https://whitelabel.usekonnex.com`.
+- Backend/frontend compilaram; deploy e smoke passaram.
+- Login validado em desktop e iPhone.
+- Próxima etapa é migrar as áreas especializadas sem alterar regras de negócio.
