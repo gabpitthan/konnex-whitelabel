@@ -2,6 +2,8 @@
 
 Este documento permite ao usuário trabalhar por pedidos simples, como “corrija o login” ou “adicione filtros”.
 
+O protocolo completo e vinculante está em `docs/JARVIS_ENGINEERING_SYSTEM.md`. Este arquivo resume o fluxo; em divergência, prevalece o protocolo Jarvis.
+
 ## Ciclo automático
 
 1. **Contexto:** ler regras, estado atual, roadmap, problemas e Git.
@@ -14,6 +16,16 @@ Este documento permite ao usuário trabalhar por pedidos simples, como “corrij
 8. **Deploy:** construir, implantar apenas no projeto correto e rodar smoke.
 9. **Memória:** atualizar estado, problemas, testes, changelog e README da versão.
 10. **Entrega:** informar resultado, evidências, limitações e próximo risco.
+
+## Regra P0
+
+Falhas em autenticação, isolamento multi-tenant, integridade de dados, WhatsApp, tickets/mensagens ou tela branca congelam novas funcionalidades na superfície afetada até:
+
+1. causa comprovada;
+2. correção;
+3. teste de regressão;
+4. validação runtime;
+5. observação pós-deploy.
 
 ## Subagentes
 

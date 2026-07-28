@@ -1,10 +1,14 @@
 # Tarefa ativa
 
-Estado: versão 1.7 publicada; aguardando validação visual e funcional do usuário.
+Estado: pesquisa de confiabilidade concluída; preparação do lote P0 `REL-001`.
 
 ## Pedido
 
 Transformar a aplicação em um novo CRM, eliminando a arquitetura visual e de uso herdada do Whaticket. Corrigir imediatamente rolagem e botões que desaparecem, reconstruir navegação, disposição e UX e preservar funcionamento.
+
+## Nova diretriz permanente
+
+Operar como um time completo por meio de `docs/JARVIS_ENGINEERING_SYSTEM.md`. Antes de novas evoluções, tratar falhas P0 confirmadas de Socket.IO, multi-tenancy e sessões WhatsApp.
 
 ## Feedback 1.7
 

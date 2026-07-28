@@ -7,6 +7,7 @@ Antes de qualquer alteração:
 3. Tratar este projeto como uma plataforma multiempresa: toda leitura e mutação de dados de tenant deve incluir `companyId`.
 4. Não modificar nem reiniciar outros projetos do servidor.
 5. Registrar a tarefa atual em `tasks/ACTIVE.md` quando houver implementação.
+6. Aplicar o sistema operacional em `docs/JARVIS_ENGINEERING_SYSTEM.md`.
 
 ## Operação autônoma
 
@@ -26,6 +27,8 @@ Antes de qualquer alteração:
 5. Atualizar `tasks/ACTIVE.md`, `docs/project/CURRENT.md`, `docs/project/ISSUES.md`, README da subversão e changelog.
 6. Confirmar persistência, refresh/restart, backend, mobile e isolamento por tenant quando aplicável.
 7. Registrar limitações; nunca chamar uma interface não funcional de concluída.
+8. Pontuar a autoavaliação 0–2 e bloquear conclusão se corretude, dados, auth/tenant, runtime ou rollback tiverem nota 0.
+9. Registrar “Como esta entrega ainda pode falhar?” e separar fatos, inferências e itens não testados.
 
 ## Profundidade mínima obrigatória
 

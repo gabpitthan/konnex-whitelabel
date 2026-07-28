@@ -2,6 +2,9 @@
 
 ## P0 — confiabilidade
 
+- Corrigir autenticação, contrato de IDs e isolamento do Socket.IO.
+- Implementar máquina de estados e single-flight das sessões WhatsApp.
+- Tornar falhas do auth state Redis explícitas e seguras.
 - Testes de autenticação e isolamento entre tenants.
 - Endpoints de liveness/readiness para backend.
 - Smoke autenticado sem exposição de credenciais.
@@ -10,6 +13,9 @@
 
 ## P1 — engenharia
 
+- Idempotência e telemetria dos jobs Bull.
+- Transações para ticket/mensagem e emissão afterCommit.
+- Remover SQL interpolado.
 - CI com preflight, análise estática, testes e builds.
 - Testes de FlowBuilder e rotas críticas.
 - Logs estruturados com request ID e sanitização.
@@ -18,6 +24,7 @@
 
 ## P2 — evolução
 
+- Laboratório/canário Baileys 7 com LID, novo auth state e rollback.
 - Modernização progressiva do frontend legado.
 - Redução do bundle e renderizações.
 - Métricas operacionais e monitoramento externo.

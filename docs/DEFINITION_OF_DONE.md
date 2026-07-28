@@ -22,6 +22,9 @@ Uma tarefa só está pronta quando as respostas aplicáveis forem “sim”:
 - Há evidência visual desktop e mobile das áreas alteradas?
 - Foram realizadas revisões funcional, UX e regressiva separadamente?
 - A entrega transforma realmente a funcionalidade ou apenas aplica tema?
+- Existe um Evidence Pack proporcional ao risco?
+- A entrega documenta como ainda pode falhar?
+- Fatos, inferências e itens não testados estão separados?
 
 ## Revisão do diff
 
@@ -56,3 +59,7 @@ Antes do commit:
 - Desktop, tablet e mobile.
 - Tema claro/escuro e perfis aplicáveis.
 - Fallback de erro induzido quando houver mudanças de observabilidade.
+
+## Gate numérico
+
+Aplicar a matriz 0–2 de `docs/JARVIS_ENGINEERING_SYSTEM.md`. Nota `0` em corretude, persistência/integridade, auth/tenant, runtime real ou deploy/rollback impede declarar a tarefa concluída.

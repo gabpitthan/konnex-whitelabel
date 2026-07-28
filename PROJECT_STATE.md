@@ -38,6 +38,9 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 - Arquitetura: `docs/project/ARCHITECTURE.md`
 - Operação: `docs/project/RUNBOOK.md`
 - Workflow Codex: `docs/DEVELOPMENT_WORKFLOW.md`
+- Sistema Jarvis: `docs/JARVIS_ENGINEERING_SYSTEM.md`
+- Pesquisa Whaticket/Baileys: `docs/research/WHATICKET_RELIABILITY_2026.md`
+- Backlog de confiabilidade: `docs/project/RELIABILITY_BACKLOG.md`
 - Definição de pronto: `docs/DEFINITION_OF_DONE.md`
 - Tarefa ativa: `tasks/ACTIVE.md`
 - Decisões: `docs/decisions/`
@@ -56,6 +59,15 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 ## Continuidade
 
 Toda nova sessão deve ler `AGENTS.md`, este índice e `docs/project/CURRENT.md`. Toda entrega relevante deve atualizar apenas as fontes afetadas, removendo estados obsoletos em vez de acumular contradições.
+
+## Prioridade de engenharia atual
+
+Antes de continuar o redesign, executar o P0 de confiabilidade:
+
+1. corrigir contrato JWT/IDs/namespace do Socket.IO;
+2. comprovar isolamento tenant A/B nas salas;
+3. fortalecer auth state e ciclo de vida Baileys;
+4. criar regressão automatizada para jornadas de socket e WhatsApp.
 
 ## Direção visual aprovada
 
