@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect, useMemo } from "react";
 import clsx from "clsx";
+import { useLocation } from "react-router-dom";
 // import moment from "moment";
 
 // import { isNill } from "lodash";
@@ -47,7 +48,6 @@ import logo from "../assets/logo.png";
 import logoDark from "../assets/logo-black.png";
 import ChatPopover from "../pages/Chat/ChatPopover";
 
-import { useDate } from "../hooks/useDate";
 import UserLanguageSelector from "../components/UserLanguageSelector";
 
 import ColorModeContext from "./themeContext";
@@ -61,14 +61,14 @@ import VersionControl from "../components/VersionControl";
 
 const backendUrl = getBackendUrl();
 
-const drawerWidth = 240;
+const drawerWidth = 264;
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
-    height: "100vh",
+    height: "100dvh",
     [theme.breakpoints.down("sm")]: {
-      height: "calc(100vh - 56px)",
+      height: "100dvh",
     },
     backgroundColor: theme.palette.fancyBackground,
     "& .MuiButton-outlinedPrimary": {
@@ -90,24 +90,35 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
   },
   toolbar: {
-    paddingRight: 24, // keep right padding when drawer closed
-    color: theme.palette.dark.main,
+    minHeight: 64,
+    padding: "0 18px",
+    color: theme.palette.text.primary,
     background: theme.palette.barraSuperior,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    gap: 4,
+    [theme.breakpoints.down("sm")]: {
+      minHeight: 56,
+      padding: "0 10px",
+    },
   },
   toolbarIcon: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
     // backgroundColor: "#FFF",
     backgroundSize: "cover",
-    padding: "0 8px",
-    minHeight: "48px",
+    padding: "0 12px 0 18px",
+    minHeight: "64px",
+    borderBottom: `1px solid ${theme.palette.divider}`,
     [theme.breakpoints.down("sm")]: {
-      height: "48px",
+      height: "56px",
+      minHeight: "56px",
     },
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
+    boxShadow: "none",
+    background: theme.palette.background.paper,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -132,8 +143,11 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     flexGrow: 1,
-    fontSize: 14,
-    color: "white",
+    minWidth: 0,
+    fontSize: 15,
+    fontWeight: 720,
+    letterSpacing: "-0.01em",
+    color: theme.palette.text.primary,
   },
   drawerPaper: {
     position: "relative",
@@ -146,6 +160,8 @@ const useStyles = makeStyles((theme) => ({
     }),
     overflowX: "hidden",
     overflowY: "hidden",
+    background: theme.palette.background.paper,
+    borderRight: `1px solid ${theme.palette.divider}`,
   },
 
   drawerPaperClose: {
@@ -162,11 +178,17 @@ const useStyles = makeStyles((theme) => ({
   },
 
   appBarSpacer: {
-    minHeight: "48px",
+    minHeight: "64px",
+    [theme.breakpoints.down("sm")]: {
+      minHeight: "56px",
+    },
   },
   content: {
     flex: 1,
-    overflow: "visible", position: "relative",
+    minWidth: 0,
+    overflow: "hidden",
+    position: "relative",
+    background: theme.palette.background.default,
   },
   container: {
     paddingTop: theme.spacing(4),
@@ -181,24 +203,19 @@ const useStyles = makeStyles((theme) => ({
   containerWithScroll: {
     flex: 1,
     // padding: theme.spacing(1),
-    overflowY: "scroll", // Use "auto" para mostrar a barra de rolagem apenas quando necessário
+    overflowY: "auto",
     overflowX: "hidden", // Oculta a barra de rolagem horizontal
     ...theme.scrollbarStyles,
-    borderRadius: "8px",
-    border: "2px solid transparent",
-    "&::-webkit-scrollbar": {
-      display: "none",
-    },
-    "-ms-overflow-style": "none",
-    "scrollbar-width": "none",
+    padding: "10px 8px 14px",
   },
   NotificationsPopOver: {
     // color: theme.barraSuperior.secondary.main,
   },
   logo: {
-    width: "100%",
-    height: "45px",
-    maxWidth: 180,
+    width: "auto",
+    height: "34px",
+    maxWidth: 164,
+    objectFit: "contain",
     [theme.breakpoints.down("sm")]: {
       width: "auto",
       height: "100%",
@@ -215,7 +232,45 @@ const useStyles = makeStyles((theme) => ({
     height: theme.spacing(4),
     cursor: "pointer",
     borderRadius: "50%",
-    border: "2px solid #ccc",
+    border: `2px solid ${theme.palette.background.paper}`,
+    boxShadow: `0 0 0 1px ${theme.palette.divider}`,
+  },
+  toolbarSecondary: {
+    [theme.breakpoints.down("sm")]: {
+      display: "none",
+    },
+  },
+  mobileOnly: {
+    display: "none",
+    [theme.breakpoints.down("sm")]: {
+      display: "inline-flex",
+    },
+  },
+  signalMark: {
+    width: 3,
+    height: 24,
+    marginRight: 10,
+    borderRadius: 4,
+    background: "#16856f",
+  },
+  pageContext: {
+    display: "flex",
+    alignItems: "center",
+    flex: 1,
+    minWidth: 0,
+  },
+  companyContext: {
+    display: "block",
+    overflow: "hidden",
+    color: theme.palette.text.secondary,
+    fontSize: 11,
+    fontWeight: 620,
+    letterSpacing: ".03em",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  accountButton: {
+    marginLeft: 6,
   },
   updateDiv: {
     display: "flex",
@@ -277,12 +332,12 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const { user, socket } = useContext(AuthContext);
 
   const theme = useTheme();
+  const location = useLocation();
   const { colorMode } = useContext(ColorModeContext);
   const greaterThenSm = useMediaQuery(theme.breakpoints.up("sm"));
 
   const [volume, setVolume] = useState(localStorage.getItem("volume") || 1);
 
-  const { dateToClient } = useDate();
   const [profileUrl, setProfileUrl] = useState(null);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -292,6 +347,31 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   );
 
   const settings = useSettings();
+
+  const pageTitle = useMemo(() => {
+    const path = location.pathname.toLowerCase();
+    const routes = [
+      ["/tickets", "Atendimento"],
+      ["/contacts", "Contatos"],
+      ["/quick-messages", "Respostas rápidas"],
+      ["/schedules", "Agenda"],
+      ["/flowbuilder", "Flow Builder"],
+      ["/campaign", "Campanhas"],
+      ["/connections", "Conexões"],
+      ["/reports", "Relatórios"],
+      ["/settings", "Configurações"],
+      ["/users", "Equipe"],
+      ["/queues", "Filas"],
+      ["/financeiro", "Financeiro"],
+      ["/kanban", "Kanban"],
+      ["/chats", "Chat interno"],
+      ["/files", "Arquivos"],
+      ["/prompts", "Prompts e IA"],
+      ["/companies", "Empresas"],
+    ];
+    const match = routes.find(([route]) => path.startsWith(route));
+    return match ? match[1] : "Central operacional";
+  }, [location.pathname]);
 
   useEffect(() => {
     const getSetting = async () => {
@@ -432,9 +512,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           <img className={drawerOpen ? classes.logo : classes.hideLogo}
             style={{
               display: "block",
-              margin: "0 auto",
-              height: "50px",
-              width: "100%",
+              margin: 0,
             }}
             alt="logo" />
           <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
@@ -458,39 +536,22 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             edge="start"
             variant="contained"
             aria-label="open drawer"
-            style={{ color: "white" }}
+            color="inherit"
             onClick={() => setDrawerOpen(!drawerOpen)}
             className={clsx(drawerOpen && classes.menuButtonHidden)}
           >
             <MenuIcon />
           </IconButton>
 
-          <Typography
-            component="h2"
-            variant="h6"
-            color="inherit"
-            noWrap
-            className={classes.title}
-          >
-            {/* {greaterThenSm && user?.profile === "admin" && getDateAndDifDays(user?.company?.dueDate).difData < 7 ? ( */}
-            {greaterThenSm &&
-              user?.profile === "admin" &&
-              user?.company?.dueDate ? (
-              <>
-                {i18n.t("mainDrawer.appBar.user.message")} <b>{user.name}</b>,{" "}
-                {i18n.t("mainDrawer.appBar.user.messageEnd")}{" "}
-                <b>{user?.company?.name}</b>! (
-                {i18n.t("mainDrawer.appBar.user.active")}{" "}
-                {dateToClient(user?.company?.dueDate)})
-              </>
-            ) : (
-              <>
-                {i18n.t("mainDrawer.appBar.user.message")} <b>{user.name}</b>,{" "}
-                {i18n.t("mainDrawer.appBar.user.messageEnd")}{" "}
-                <b>{user?.company?.name}</b>!
-              </>
-            )}
-          </Typography>
+          <div className={classes.pageContext}>
+            <span className={classes.signalMark} />
+            <Typography component="h1" noWrap className={classes.title}>
+              {pageTitle}
+              {greaterThenSm && (
+                <span className={classes.companyContext}>{user?.company?.name}</span>
+              )}
+            </Typography>
+          </div>
 
           {userToken === "enabled" && user?.companyId === 1 && (
             <Chip
@@ -498,10 +559,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               label={i18n.t("mainDrawer.appBar.user.token")}
             />
           )}
-          <VersionControl />
+          <span className={classes.toolbarSecondary}><VersionControl /></span>
 
           {/* DESABILITADO POIS TEM BUGS */}
-          {<UserLanguageSelector /> }
+          <span className={classes.toolbarSecondary}><UserLanguageSelector /></span>
           {/* <SoftPhone
             callVolume={33} //Set Default callVolume
             ringVolume={44} //Set Default ringVolume
@@ -514,22 +575,23 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             setRingVolume={setRingVolume} // Callback function
             timelocale={'UTC-3'} //Set time local for call history
           /> */}
-          <IconButton edge="start" onClick={colorMode.toggleColorMode}>
+          <IconButton className={classes.toolbarSecondary} onClick={colorMode.toggleColorMode}>
             {theme.mode === "dark" ? (
-              <Brightness7Icon style={{ color: "white" }} />
+              <Brightness7Icon />
             ) : (
-              <Brightness4Icon style={{ color: "white" }} />
+              <Brightness4Icon />
             )}
           </IconButton>
 
-          <NotificationsVolume setVolume={setVolume} volume={volume} />
+          <span className={classes.toolbarSecondary}><NotificationsVolume setVolume={setVolume} volume={volume} /></span>
 
           <IconButton
             onClick={handleRefreshPage}
             aria-label={i18n.t("mainDrawer.appBar.refresh")}
             color="inherit"
+            className={classes.toolbarSecondary}
           >
-            <CachedIcon style={{ color: "white" }} />
+            <CachedIcon />
           </IconButton>
 
           {/* <DarkMode themeToggle={themeToggle} /> */}
@@ -542,6 +604,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
           <div>
             <StyledBadge
+              className={classes.accountButton}
               overlap="circular"
               anchorOrigin={{
                 vertical: "bottom",

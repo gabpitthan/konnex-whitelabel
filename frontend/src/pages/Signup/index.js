@@ -5,48 +5,67 @@ import { useHistory } from "react-router-dom";
 import { Link as RouterLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Formik, Form, Field } from "formik";
-import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
-import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
-import Box from "@material-ui/core/Box";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
-import Container from "@material-ui/core/Container";
 import usePlans from "../../hooks/usePlans";
 import { i18n } from "../../translate/i18n";
 import { FormControl } from "@material-ui/core";
 import { InputLabel, MenuItem, Select } from "@material-ui/core";
 import { openApi } from "../../services/api";
 import toastError from "../../errors/toastError";
+import AuthShell from "../Login/AuthShell";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    marginTop: theme.spacing(6),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    background: theme.palette.background.paper,
-    padding: theme.spacing(4),
-    borderRadius: 16,
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    width: "100%",
+    animation: "$enter .35s ease-out",
   },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-    width: 56,
-    height: 56,
+  "@keyframes enter": {
+    from: { opacity: 0, transform: "translateY(8px)" },
+    to: { opacity: 1, transform: "translateY(0)" },
+  },
+  eyebrow: {
+    color: theme.palette.primary.main,
+    fontSize: 11,
+    fontWeight: 800,
+    letterSpacing: ".12em",
+    textTransform: "uppercase",
+  },
+  title: {
+    margin: "10px 0 8px",
+    fontSize: 32,
+    fontWeight: 650,
+    letterSpacing: "-.035em",
+    color: theme.palette.text.primary,
+  },
+  subtitle: {
+    color: theme.palette.text.secondary,
+    lineHeight: 1.55,
+    marginBottom: 24,
   },
   form: {
     width: "100%",
-    marginTop: theme.spacing(2),
+    "& .MuiOutlinedInput-root": {
+      borderRadius: 7,
+      background: theme.palette.type === "dark" ? "#151f1b" : "#fff",
+      "&.Mui-focused": { boxShadow: `0 0 0 3px ${theme.palette.primary.main}1c` },
+    },
   },
   submit: {
-    margin: theme.spacing(4, 0, 2),
-    fontWeight: "bold",
+    margin: theme.spacing(3, 0, 2),
+    minHeight: 48,
+    borderRadius: 7,
+    textTransform: "none",
+    fontWeight: 700,
+  },
+  loginLink: {
+    color: theme.palette.primary.main,
+    fontWeight: 600,
+    textDecoration: "none",
   },
 }));
 
@@ -153,14 +172,20 @@ const SignUp = () => {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
+    <AuthShell
+      eyebrow="Novo espaço de trabalho"
+      title="Comece organizado."
+      accent="Cresça conectado."
+      description="Configure sua operação e reúna equipe, canais e automações em um único fluxo."
+      backTo="/login"
+    >
       <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5" style={{ marginBottom: 8 }}>
+        <span className={classes.eyebrow}>Criar conta</span>
+        <Typography component="h1" className={classes.title}>
           {i18n.t("signup.title")}
+        </Typography>
+        <Typography className={classes.subtitle}>
+          Informe os dados essenciais. Você poderá configurar os detalhes da operação depois.
         </Typography>
         <Formik
           initialValues={user}
@@ -274,10 +299,10 @@ const SignUp = () => {
               <Grid container justifyContent="center">
                 <Grid item>
                   <Link
-                    href="#"
                     variant="body2"
                     component={RouterLink}
                     to="/login"
+                    className={classes.loginLink}
                   >
                     {i18n.t("signup.buttons.login")}
                   </Link>
@@ -287,8 +312,7 @@ const SignUp = () => {
           )}
         </Formik>
       </div>
-      <Box mt={5}></Box>
-    </Container>
+    </AuthShell>
   );
 };
 

@@ -2,6 +2,26 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.5] — 2026-07-28 — em desenvolvimento
+
+### Objetivo
+
+Implantar a identidade original Konnex Signal e iniciar a reformulação integral e responsiva do frontend.
+
+### Direção
+
+- Mudança de composição, navegação, hierarquia, componentes e comportamento responsivo.
+- Preservação de lógica, APIs, sockets, rotas e permissões.
+- Identidade documentada em ADR próprio.
+
+### Testes
+
+- Preflight aprovado.
+- Builds de backend e frontend aprovados.
+- Deploy Docker concluído.
+- Smoke aprovado com API em `1.5`.
+- Login inspecionado em 1440×900 e 390×844.
+
 ## [1.4] — 2026-07-28 — em desenvolvimento
 
 ### Objetivo

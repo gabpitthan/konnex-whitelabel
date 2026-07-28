@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-07-28
-Versão ativa: `1.4`, em desenvolvimento.
+Versão ativa: `1.5`, em desenvolvimento.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -56,3 +56,12 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 ## Continuidade
 
 Toda nova sessão deve ler `AGENTS.md`, este índice e `docs/project/CURRENT.md`. Toda entrega relevante deve atualizar apenas as fontes afetadas, removendo estados obsoletos em vez de acumular contradições.
+
+## Direção visual aprovada
+
+- Identidade: **Konnex Signal**.
+- Reformulação integral, não apenas cores.
+- Linguagem editorial, operacional e própria, baseada em conexão, fluxo, contexto e ação.
+- Evitar estética genérica de IA: gradientes roxo/azul, excesso de cards, glassmorphism, pills e ícones decorativos.
+- Responsividade é obrigatória em cada componente.
+- Preservar lógica, APIs, sockets, autenticação, permissões, banco e rotas durante o redesign.

@@ -1,14 +1,9 @@
 import {
-  Box,
   Button,
-  Container,
-  CssBaseline,
   Grid,
   Link,
   TextField,
   Typography,
-  Fade,
-  Grow,
   LinearProgress,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -17,50 +12,31 @@ import { Link as RouterLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import AuthShell from "../Login/AuthShell";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    minHeight: '100vh',
-    background: `linear-gradient(45deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-    '&:before': {
-      content: '""',
-      position: 'absolute',
-      top: '-50%',
-      left: '-50%',
-      width: '200%',
-      height: '200%',
-      background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 80%)',
-      animation: 'pulse 15s infinite',
-    },
-  },
-  container: {
-    position: 'relative',
-    zIndex: 1,
-  },
   formBox: {
-    background: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: '24px',
-    padding: theme.spacing(4),
-    boxShadow: '0 15px 35px rgba(0, 0, 0, 0.2)',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(17, 16, 16, 0.3)',
-    maxWidth: '380px',
-    width: '100%',
-    animation: 'float 3s ease-in-out infinite',
+    width: "100%",
+    animation: "$enter .35s ease-out",
+  },
+  eyebrow: {
+    color: theme.palette.primary.main,
+    fontSize: 11,
+    fontWeight: 800,
+    letterSpacing: ".12em",
+    textTransform: "uppercase",
   },
   title: {
-    color: theme.palette.primary.dark,
-    fontWeight: 700,
-    marginBottom: theme.spacing(3),
-    textAlign: 'center',
-    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.main})`,
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: theme.palette.text.primary,
+    fontWeight: 650,
+    fontSize: 34,
+    letterSpacing: "-.035em",
+    margin: "10px 0 10px",
+  },
+  subtitle: {
+    color: theme.palette.text.secondary,
+    lineHeight: 1.6,
+    marginBottom: 26,
   },
   form: {
     width: '100%',
@@ -68,29 +44,28 @@ const useStyles = makeStyles((theme) => ({
   textField: {
     '& .MuiOutlinedInput-root': {
       borderRadius: '12px',
-      transition: 'all 0.3s',
-      '&:hover': {
-        boxShadow: '0 0 15px rgba(1, 3, 12, 0.3)',
-      },
+      background: theme.palette.type === "dark" ? "#151f1b" : "#fff",
+      transition: 'all 0.15s',
       '&.Mui-focused': {
-        boxShadow: '0 0 20px rgba(2, 4, 15, 0.5)',
+        boxShadow: `0 0 0 3px ${theme.palette.primary.main}1c`,
       },
     },
   },
   submitButton: {
     margin: theme.spacing(3, 0, 2),
     padding: theme.spacing(1.5),
-    borderRadius: '12px',
-    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.main})`,
+    minHeight: 48,
+    borderRadius: 7,
+    background: theme.palette.primary.main,
     textTransform: 'none',
     fontWeight: 600,
-    fontSize: '1.1rem',
+    fontSize: 14,
     position: 'relative',
     overflow: 'hidden',
-    transition: 'all 0.3s',
+    transition: 'all 0.15s',
     '&:hover': {
-      transform: 'scale(1.05)',
-      boxShadow: '0 8px 25px rgba(1, 8, 15, 0.4)',
+      background: theme.palette.primary.dark,
+      boxShadow: '0 7px 18px rgba(17,32,25,.14)',
     },
   },
   loadingBar: {
@@ -103,52 +78,27 @@ const useStyles = makeStyles((theme) => ({
       background: 'rgba(255, 255, 255, 0.8)',
     },
   },
-  sentAnimation: {
-    position: 'relative',
-    background: 'linear-gradient(45deg,rgb(23, 80, 45),rgb(17, 75, 40))',
-    '&:after': {
-      content: '"✉️"',
-      position: 'absolute',
-      fontSize: '24px',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      animation: 'flyAway 1s ease-out forwards',
-    },
-  },
+  sentAnimation: { background: "#267354" },
   link: {
     color: theme.palette.grey[700],
     textDecoration: 'none',
-    transition: 'all 0.3s',
+    fontWeight: 600,
+    transition: 'color 0.15s',
     '&:hover': {
       color: theme.palette.primary.main,
-      transform: 'translateX(5px)',
     },
   },
-  '@keyframes float': {
-    '0%, 100%': { transform: 'translateY(0)' },
-    '50%': { transform: 'translateY(-10px)' },
-  },
-  '@keyframes pulse': {
-    '0%, 100%': { transform: 'scale(1)' },
-    '50%': { transform: 'scale(1.1)' },
-  },
-  '@keyframes flyAway': {
-    '0%': { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-    '100%': { transform: 'translate(-50%, -150%) scale(0.5)', opacity: 0 },
+  "@keyframes enter": {
+    from: { opacity: 0, transform: "translateY(8px)" },
+    to: { opacity: 1, transform: "translateY(0)" },
   },
 }));
 
 const EsqueciSenha = () => {
   const classes = useStyles();
   const [email, setEmail] = useState("");
-  const [visivel, setVisivel] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
-
-  React.useEffect(() => {
-    setVisivel(true);
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -166,14 +116,18 @@ const EsqueciSenha = () => {
   };
 
   return (
-    <div className={classes.root}>
-      <CssBaseline />
-      <Fade in={visivel} timeout={1000}>
-        <Container className={classes.container} maxWidth="xs">
-          <Grow in={visivel} timeout={1200}>
-            <Box className={classes.formBox}>
-              <Typography variant="h4" className={classes.title}>
-                Redefinir Senha
+    <AuthShell
+      eyebrow="Recuperação segura"
+      title="Retome o acesso."
+      accent="Sem perder o ritmo."
+      description="Enviaremos um caminho seguro para você voltar ao seu espaço de trabalho."
+      backTo="/login"
+    >
+            <div className={classes.formBox}>
+              <span className={classes.eyebrow}>Recuperar acesso</span>
+              <Typography component="h1" className={classes.title}>Esqueceu sua senha?</Typography>
+              <Typography className={classes.subtitle}>
+                Informe o e-mail da conta. Você receberá as instruções para criar uma nova senha.
               </Typography>
               <form className={classes.form} noValidate onSubmit={handleSubmit}>
                 <TextField
@@ -216,11 +170,8 @@ const EsqueciSenha = () => {
                   </Grid>
                 </Grid>
               </form>
-            </Box>
-          </Grow>
-        </Container>
-      </Fade>
-    </div>
+            </div>
+    </AuthShell>
   );
 };
 

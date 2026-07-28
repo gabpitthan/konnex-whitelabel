@@ -64,17 +64,27 @@ const packageVersion = require("../../package.json").version;
 
 const useStyles = makeStyles((theme) => ({
   listItem: {
-    height: "44px",
-    width: "auto",
+    minHeight: 42,
+    width: "100%",
+    margin: "2px 0",
+    padding: "5px 10px",
+    borderRadius: 8,
+    transition: "background-color 160ms ease, color 160ms ease",
+    "& .MuiListItemIcon-root": {
+      minWidth: 40,
+    },
+    "&:hover": {
+      backgroundColor: theme.mode === "light" ? "rgba(22,133,111,.07)" : "rgba(82,199,174,.09)",
+    },
     "&:hover $iconHoverActive": {
-      backgroundColor: theme.palette.primary.main,
-      color: "#fff",
+      color: theme.mode === "light" ? "#0f6d5b" : "#62d0b7",
     },
   },
 
   listItemText: {
-    fontSize: "14px",
-    color: theme.mode === "light" ? "#666" : "#FFF",
+    fontSize: 13,
+    fontWeight: 620,
+    color: theme.palette.text.secondary,
   },
   avatarActive: {
     backgroundColor: "transparent",
@@ -86,18 +96,17 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: "50%",
-    height: 36,
-    width: 36,
-    backgroundColor: theme.mode === "light" ? "rgba(120,120,120,0.1)" : "rgba(120,120,120,0.5)",
-    color: theme.mode === "light" ? "#666" : "#FFF",
-    // color: theme.mode === "light" ? theme.palette.primary.main : "#FFF",
+    borderRadius: 7,
+    height: 30,
+    width: 30,
+    backgroundColor: "transparent",
+    color: theme.palette.text.secondary,
     "&:hover, &.active": {
-      backgroundColor: theme.palette.primary.main,
-      color: "#fff",
+      backgroundColor: theme.mode === "light" ? "rgba(22,133,111,.11)" : "rgba(82,199,174,.13)",
+      color: theme.mode === "light" ? "#0f6d5b" : "#62d0b7",
     },
     "& .MuiSvgIcon-root": {
-      fontSize: "1.4rem",
+      fontSize: "1.2rem",
     },
   },
 }));
@@ -250,9 +259,10 @@ const MainListItems = ({ collapsed, drawerClose }) => {
     location.pathname.startsWith("/contact-lists") ||
     location.pathname.startsWith("/campaigns-config");
 
-  const isFlowbuilderRouteActive = 
-    location.pathname.startsWith("/phrase-lists")
-    location.pathname.startsWith("/flowbuilders")
+  const isFlowbuilderRouteActive =
+    location.pathname.startsWith("/phrase-lists") ||
+    location.pathname.startsWith("/flowbuilders") ||
+    location.pathname.startsWith("/flowbuilder/");
 
   useEffect(() => {
     if (location.pathname.startsWith("/tickets")) {
@@ -413,7 +423,8 @@ const MainListItems = ({ collapsed, drawerClose }) => {
               timeout="auto"
               unmountOnExit
               style={{
-                backgroundColor: theme.mode === "light" ? "rgba(120,120,120,0.1)" : "rgba(120,120,120,0.5)",
+                margin: "3px 0 8px 14px",
+                borderLeft: `1px solid ${theme.palette.divider}`,
               }}
             >
               <Can
@@ -537,8 +548,21 @@ const MainListItems = ({ collapsed, drawerClose }) => {
         perform="dashboard:view"
         yes={() => (
           <>
-            <Divider />
-            <ListSubheader inset>{i18n.t("mainDrawer.listItems.administration")}</ListSubheader>
+            <Divider style={{ margin: "14px 8px 8px" }} />
+            <ListSubheader
+              disableSticky
+              style={{
+                padding: collapsed ? "8px 0" : "8px 12px 5px",
+                color: theme.palette.text.secondary,
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: ".1em",
+                lineHeight: 1.4,
+                textTransform: "uppercase",
+              }}
+            >
+              {collapsed ? "•••" : i18n.t("mainDrawer.listItems.administration")}
+            </ListSubheader>
             {showCampaigns && (
               <Can
                 role={user.profile}
@@ -576,7 +600,8 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                       timeout="auto"
                       unmountOnExit
                       style={{
-                        backgroundColor: theme.mode === "light" ? "rgba(120,120,120,0.1)" : "rgba(120,120,120,0.5)",
+                        margin: "3px 0 8px 14px",
+                        borderLeft: `1px solid ${theme.palette.divider}`,
                       }}
                     >
                       <List dense component="div" disablePadding>
@@ -643,7 +668,8 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                     timeout="auto"
                     unmountOnExit
                     style={{
-                      backgroundColor: theme.mode === "light" ? "rgba(120,120,120,0.1)" : "rgba(120,120,120,0.5)",
+                      margin: "3px 0 8px 14px",
+                      borderLeft: `1px solid ${theme.palette.divider}`,
                     }}
                   >
                     <List dense component="div" disablePadding>

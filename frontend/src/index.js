@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import * as serviceworker from './serviceWorker';
 import App from "./App";
+import "./styles/konnex-signal.css";
 
 window.Buffer = Buffer;
 

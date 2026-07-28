@@ -8,7 +8,22 @@ const useStyles = makeStyles(theme => ({
 	customTableCell: {
 		display: "flex",
 		alignItems: "center",
-		justifyContent: "center",
+		justifyContent: "flex-start",
+		width: "100%",
+	},
+	row: {
+		height: 58,
+	},
+	skeleton: {
+		borderRadius: 5,
+		backgroundColor:
+			theme.palette.type === "dark"
+				? "rgba(255,255,255,0.08)"
+				: "rgba(15,23,42,0.08)",
+	},
+	avatarCell: {
+		width: 56,
+		paddingRight: 0,
 	},
 }));
 
@@ -16,19 +31,25 @@ const TableRowSkeleton = ({ avatar, columns }) => {
 	const classes = useStyles();
 	return (
 		<>
-			<TableRow>
+			<TableRow className={classes.row}>
 				{avatar && (
 					<>
-						<TableCell style={{ paddingRight: 0 }}>
+						<TableCell className={classes.avatarCell}>
 							<Skeleton
 								animation="wave"
 								variant="circle"
 								width={40}
 								height={40}
+								className={classes.skeleton}
 							/>
 						</TableCell>
 						<TableCell>
-							<Skeleton animation="wave" height={30} width={80} />
+							<Skeleton
+								animation="wave"
+								height={24}
+								width="70%"
+								className={classes.skeleton}
+							/>
 						</TableCell>
 					</>
 				)}
@@ -36,10 +57,10 @@ const TableRowSkeleton = ({ avatar, columns }) => {
 					<TableCell align="center" key={index}>
 						<div className={classes.customTableCell}>
 							<Skeleton
-								align="center"
 								animation="wave"
-								height={30}
-								width={80}
+								height={22}
+								width={`${58 + (index % 3) * 12}%`}
+								className={classes.skeleton}
 							/>
 						</div>
 					</TableCell>

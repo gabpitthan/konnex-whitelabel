@@ -4,10 +4,23 @@ import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles(theme => ({
 	MainHeaderButtonsWrapper: {
+		display: "flex",
 		flex: "none",
+		alignItems: "center",
+		justifyContent: "flex-end",
+		flexWrap: "wrap",
+		gap: theme.spacing(1),
 		marginLeft: "auto",
 		"& > *": {
-			margin: theme.spacing(1),
+			margin: 0,
+		},
+		[theme.breakpoints.down("xs")]: {
+			width: "100%",
+			justifyContent: "flex-start",
+			marginLeft: 0,
+			"& > button": {
+				minHeight: 40,
+			},
 		},
 	},
 }));

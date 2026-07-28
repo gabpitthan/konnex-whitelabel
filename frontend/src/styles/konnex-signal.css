@@ -1,0 +1,172 @@
+:root {
+	--knx-ink: #152521;
+	--knx-ink-soft: #41504c;
+	--knx-bone: #f7f6f1;
+	--knx-surface: #fffefa;
+	--knx-mist: #e7e9e4;
+	--knx-signal: #16856f;
+	--knx-signal-strong: #0f6d5b;
+	--knx-electric: #2368e8;
+	--knx-amber: #c78312;
+	--knx-coral: #c94f45;
+	--knx-radius-control: 7px;
+	--knx-radius-panel: 12px;
+	--knx-shadow-float: 0 18px 45px rgba(21, 37, 33, 0.14);
+	--knx-transition: 160ms cubic-bezier(.2, .8, .2, 1);
+}
+
+html,
+body,
+#root {
+	width: 100%;
+	min-height: 100%;
+	margin: 0;
+}
+
+body {
+	background: var(--knx-bone);
+	color: var(--knx-ink);
+	overscroll-behavior: none;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select {
+	font: inherit;
+}
+
+::selection {
+	background: rgba(22, 133, 111, .18);
+	color: var(--knx-ink);
+}
+
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: rgba(65, 80, 76, .28);
+	border: 2px solid transparent;
+	border-radius: 20px;
+	background-clip: padding-box;
+}
+
+.MuiPaper-root {
+	background-image: none !important;
+}
+
+.MuiTableContainer-root {
+	border: 1px solid rgba(65, 80, 76, .14);
+	border-radius: var(--knx-radius-panel) !important;
+	background: var(--knx-surface);
+}
+
+.MuiTableHead-root .MuiTableCell-root {
+	background: rgba(231, 233, 228, .52);
+	color: var(--knx-ink-soft);
+	font-size: 11px;
+	font-weight: 750;
+	letter-spacing: .055em;
+	line-height: 1.3;
+	text-transform: uppercase;
+}
+
+.MuiTableCell-root {
+	border-bottom-color: rgba(65, 80, 76, .11) !important;
+}
+
+.MuiTableRow-root {
+	transition: background-color var(--knx-transition);
+}
+
+.MuiTableBody-root .MuiTableRow-root:hover {
+	background: rgba(22, 133, 111, .045);
+}
+
+.MuiDialog-paper {
+	border: 1px solid rgba(65, 80, 76, .16);
+	border-radius: 14px !important;
+	box-shadow: var(--knx-shadow-float) !important;
+}
+
+.MuiDialogTitle-root {
+	border-bottom: 1px solid rgba(65, 80, 76, .12);
+	padding: 18px 22px !important;
+}
+
+.MuiDialogContent-root {
+	padding: 22px !important;
+}
+
+.MuiDialogActions-root {
+	position: sticky;
+	bottom: 0;
+	z-index: 2;
+	gap: 8px;
+	border-top: 1px solid rgba(65, 80, 76, .12);
+	padding: 14px 22px !important;
+}
+
+.MuiChip-root {
+	border-radius: 6px !important;
+	font-weight: 650;
+}
+
+.MuiTooltip-tooltip {
+	font-size: 12px !important;
+}
+
+@media (max-width: 767px) {
+	.MuiDialog-paper:not(.MuiDialog-paperWidthXs) {
+		width: 100% !important;
+		max-width: none !important;
+		height: 100% !important;
+		max-height: none !important;
+		margin: 0 !important;
+		border: 0;
+		border-radius: 0 !important;
+	}
+
+	.MuiDialogTitle-root {
+		position: sticky;
+		top: 0;
+		z-index: 3;
+		background: inherit;
+	}
+
+	.MuiDialogContent-root {
+		padding: 18px 16px 96px !important;
+	}
+
+	.MuiDialogActions-root {
+		padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
+		background: inherit;
+	}
+
+	.MuiTableContainer-root {
+		max-width: 100%;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+}
+
+[data-konnex-theme="dark"] {
+	--knx-ink: #edf2ef;
+	--knx-ink-soft: #aebbb6;
+	--knx-bone: #0f1715;
+	--knx-surface: #16211e;
+	--knx-mist: #26322e;
+	--knx-shadow-float: 0 22px 55px rgba(0, 0, 0, .35);
+}

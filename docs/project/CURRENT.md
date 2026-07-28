@@ -1,11 +1,11 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-28  
-Versão ativa: 1.4
+Versão ativa: 1.5
 
 ## Em foco
 
-Base de engenharia autônoma implantada. O projeto está aguardando o primeiro pedido funcional do usuário.
+Primeira fundação do redesign integral implantada com a identidade aprovada **Konnex Signal**; aguardando validação visual do usuário.
 
 ## Estado operacional
 
@@ -18,7 +18,7 @@ Base de engenharia autônoma implantada. O projeto está aguardando o primeiro p
 
 ## Próximo passo
 
-Receber o primeiro pedido funcional, registrá-lo em `tasks/ACTIVE.md` e executar o fluxo de `docs/DEVELOPMENT_WORKFLOW.md`.
+Coletar a avaliação do usuário na URL publicada e continuar a migração das áreas especializadas em subversões controladas.
 
 ## Fontes
 

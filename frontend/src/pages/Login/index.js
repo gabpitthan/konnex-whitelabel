@@ -9,90 +9,82 @@ import EmailIcon from "@material-ui/icons/Email";
 import LockIcon from "@material-ui/icons/Lock";
 import { Helmet } from "react-helmet";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import AuthShell from "./AuthShell";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "flex",
-    width: "100vw",
-    height: "100vh",
-    [theme.breakpoints.down("sm")]: {
-      flexDirection: "column",
-    },
-  },
-  imageSide: {
-    flex: 1,
-    background: `url('https://cliqueturbo.com.br/capa.png') no-repeat center center`,
-    backgroundSize: "cover",
-    height: "100%",
-  },
-  formSide: {
-    flex: 1,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "40px",
-    background: "linear-gradient(135deg, #e0f7fa, #f0f4c3)",
-    [theme.breakpoints.down("sm")]: {
-      padding: "20px",
-    },
-  },
   formContainer: {
     width: "100%",
-    maxWidth: "400px",
-    background: "#fff",
-    borderRadius: "12px",
-    boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-    padding: "30px",
-    animation: "$fadeIn 1s ease-in-out",
-    [theme.breakpoints.down("sm")]: {
-      maxWidth: "340px",
-      padding: "20px",
-    },
+    animation: "$enter .35s ease-out",
   },
-  "@keyframes fadeIn": {
-    "0%": { opacity: 0, transform: "translateY(20px)" },
+  "@keyframes enter": {
+    "0%": { opacity: 0, transform: "translateY(8px)" },
     "100%": { opacity: 1, transform: "translateY(0)" },
   },
-  logoImg: {
+  eyebrow: {
     display: "block",
-    margin: "0 auto 20px",
-    maxWidth: "150px",
-    height: "auto",
+    color: theme.palette.primary.main,
+    fontSize: 11,
+    fontWeight: 800,
+    letterSpacing: ".12em",
+    textTransform: "uppercase",
+    marginBottom: 12,
+  },
+  title: {
+    margin: 0,
+    color: theme.palette.text.primary,
+    fontSize: 34,
+    lineHeight: 1.12,
+    letterSpacing: "-.035em",
+    fontWeight: 650,
+  },
+  subtitle: {
+    color: theme.palette.text.secondary,
+    lineHeight: 1.6,
+    margin: "12px 0 28px",
+  },
+  field: {
+    marginBottom: 14,
+    "& .MuiOutlinedInput-root": {
+      borderRadius: 7,
+      background: theme.palette.type === "dark" ? "#151f1b" : "#fff",
+      transition: "border-color .15s ease, box-shadow .15s ease",
+      "&.Mui-focused": { boxShadow: `0 0 0 3px ${theme.palette.primary.main}1c` },
+    },
+    "& .MuiInputAdornment-root": { color: theme.palette.text.secondary },
   },
   submitBtn: {
-    marginTop: "20px",
+    marginTop: 18,
     background: theme.palette.primary.main,
-    backgroundSize: "200%",
     color: "#fff",
-    borderRadius: "8px",
-    padding: "12px",
-    fontWeight: "bold",
+    borderRadius: 7,
+    minHeight: 48,
+    fontWeight: 700,
+    textTransform: "none",
     width: "100%",
-    cursor: "pointer",
-    transition: "all 0.5s ease",
     "&:hover": {
-      backgroundPosition: "right",
-      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+      backgroundColor: theme.palette.primary.dark,
+      boxShadow: "0 7px 18px rgba(17,32,25,.14)",
     },
   },
   registerBtn: {
-    backgroundColor: theme.palette.primary.main,
-    color: "#fff",
-    borderRadius: "8px",
-    padding: "12px",
-    fontWeight: "bold",
+    color: theme.palette.text.primary,
+    border: `1px solid ${theme.palette.divider}`,
+    background: "transparent",
+    borderRadius: 7,
+    minHeight: 46,
+    fontWeight: 700,
+    textTransform: "none",
     width: "100%",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    marginTop: "10px",
+    marginTop: 10,
     "&:hover": {
-      backgroundColor: theme.palette.primary.dark,
-      boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+      background: theme.palette.action.hover,
     },
   },
   forgotPassword: {
-    marginTop: "15px",
-    textAlign: "center",
+    marginTop: 24,
+    paddingTop: 20,
+    borderTop: `1px solid ${theme.palette.divider}`,
+    textAlign: "left",
   },
   forgotPasswordLink: {
     color: theme.palette.primary.main,
@@ -105,42 +97,10 @@ const useStyles = makeStyles((theme) => ({
   rememberMeContainer: {
     display: "flex",
     alignItems: "center",
-    marginTop: "10px",
-  },
-  whatsappButton: {
-    position: "fixed",
-    bottom: "20px",
-    right: "20px",
-    backgroundColor: theme.palette.primary.main,
-    borderRadius: "50%",
-    width: "60px",
-    height: "60px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    boxShadow: "0 4px 12px #044012",
-    transition: "all 0.3s ease",
-    animation: "$bounce 2s infinite",
-    cursor: "pointer",
-    zIndex: 999,
-    "&:hover": {
-      backgroundColor: theme.palette.primary.dark,
-      transform: "scale(1.1)",
-      boxShadow: "0 8px 16px #05491c",
-    },
-  },
-  whatsappIcon: {
-    width: "64px",
-    height: "64px",
-    objectFit: "contain",
-  },
-  "@keyframes bounce": {
-    "0%, 100%": {
-      transform: "translateY(0)",
-    },
-    "50%": {
-      transform: "translateY(-5px)",
-    },
+    justifyContent: "space-between",
+    marginTop: 2,
+    minHeight: 42,
+    "& .MuiTypography-root": { fontSize: 13, color: theme.palette.text.secondary },
   },
 }));
 
@@ -193,17 +153,19 @@ const Login = () => {
         <title>Login</title>
       </Helmet>
 
-      <div className={classes.root}>
-        <div className={classes.imageSide}></div>
-        <div className={classes.formSide}>
+      <AuthShell>
           <form className={classes.formContainer} onSubmit={handleSubmit}>
-            <img src="/logo.png" alt="Logo" className={classes.logoImg} />
+            <span className={classes.eyebrow}>Acesso seguro</span>
+            <h2 className={classes.title}>Bem-vindo de volta.</h2>
+            <Typography className={classes.subtitle}>
+              Entre no seu espaço de trabalho para continuar a operação.
+            </Typography>
             {error && <Typography color="error">{error}</Typography>}
             <TextField
-              label="Email"
+              label="E-mail"
               variant="outlined"
               fullWidth
-              margin="normal"
+              className={classes.field}
               type="email"
               value={user.email}
               onChange={(e) => setUser({ ...user, email: e.target.value })}
@@ -216,10 +178,10 @@ const Login = () => {
               }}
             />
             <TextField
-              label="Password"
+              label="Senha"
               variant="outlined"
               fullWidth
-              margin="normal"
+              className={classes.field}
               type={showPassword ? "text" : "password"}
               value={user.password}
               onChange={(e) => setUser({ ...user, password: e.target.value })}
@@ -243,20 +205,7 @@ const Login = () => {
                 checked={user.remember}
                 onChange={(e) => setUser({ ...user, remember: e.target.checked })}
                 name="remember"
-                sx={{
-                  "& .MuiSwitch-thumb": {
-                    backgroundColor: user.remember ? "#4F0F96" : "#C3C3C3",
-                  },
-                  "& .Mui-checked": {
-                    color: "#4F0F96",
-                  },
-                  "& .Mui-checked + .MuiSwitch-track": {
-                    backgroundColor: "#4F0F96",
-                  },
-                  "& .MuiSwitch-track": {
-                    backgroundColor: user.remember ? "#4F0F96" : "#C3C3C3",
-                  },
-                }}
+                color="primary"
               />
               <Typography>Lembrar de mim</Typography>
             </div>
@@ -289,18 +238,7 @@ const Login = () => {
               </RouterLink>
             </div>
           </form>
-        </div>
-        <div
-          className={classes.whatsappButton}
-          onClick={() => window.open("https://wa.me/55000000000")}
-        >
-          <img
-            src="https://i.ibb.co/1p43y88/iconzapzap.png"
-            alt="WhatsApp"
-            className={classes.whatsappIcon}
-          />
-        </div>
-      </div>
+      </AuthShell>
     </>
   );
 };
