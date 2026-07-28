@@ -3,7 +3,8 @@
  * serviço/todas as configurações de 1 empresa |
  * @param:companyId
  */
-import sequelize from "../../database";
+import AppError from "../../errors/AppError";
+import CompaniesSettings from "../../models/CompaniesSettings";
 
 type Params = {
   companyId: any;
@@ -11,9 +12,15 @@ type Params = {
 };
 
 const FindCompanySettingOneService = async ({companyId, column}:Params): Promise<any> => {
-    
-    const [results, metadata] = await sequelize.query(`SELECT "${column}" FROM "CompaniesSettings" WHERE "companyId"=${companyId}`)
-    return results;
+    if (!Object.prototype.hasOwnProperty.call(CompaniesSettings.rawAttributes, column)) {
+      throw new AppError("ERR_INVALID_COMPANY_SETTING", 400);
+    }
+
+    return CompaniesSettings.findAll({
+      attributes: [column],
+      where: { companyId },
+      raw: true
+    });
 };
 
 export default FindCompanySettingOneService;

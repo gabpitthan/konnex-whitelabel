@@ -19,7 +19,6 @@ module.exports = {
       { key: "acceptAudioMessageContact", value: "enabled", companyId: "1" },
       { key: "enableLGPD", value: "disabled", companyId: "1" },
       { key: "requiredTag", value: "disabled", companyId: "1" },
-      { key: "wtV", value: "disabled" },
       { key: "apiTranscription", value: "", companyId: "1" },
       { key: "mpaccesstoken", value: "", companyId: "1" }
     ];

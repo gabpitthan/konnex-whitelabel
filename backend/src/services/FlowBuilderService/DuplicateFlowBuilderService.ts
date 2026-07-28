@@ -4,17 +4,24 @@ import { randomString } from "../../utils/randomCode";
 
 interface Request {
   id: number;
+  companyId: number;
 }
 
 const DuplicateFlowBuilderService = async ({
-  id
+  id,
+  companyId
 }: Request): Promise<FlowBuilderModel> => {
   try {
     const flow = await FlowBuilderModel.findOne({
       where: {
-        id: id
+        id,
+        company_id: companyId
       }
     });
+
+    if (!flow) {
+      throw new Error("Flow not found");
+    }
 
     const duplicate = await FlowBuilderModel.create({
       name: flow.name + " - copy",

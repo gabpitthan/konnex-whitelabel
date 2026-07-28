@@ -6,12 +6,11 @@ import makeWASocket, {
   WAMessage,
   WAMessageKey,
   WASocket,
-  fetchLatestWaWebVersion,
+  fetchLatestBaileysVersion,
   isJidBroadcast,
   isJidGroup,
   jidNormalizedUser,
   makeCacheableSignalKeyStore,
-  makeInMemoryStore,
 } from "@whiskeysockets/baileys";
 import { FindOptions } from "sequelize/types";
 import Whatsapp from "../models/Whatsapp";
@@ -56,6 +55,8 @@ type Session = WASocket & {
 const sessions: Session[] = [];
 
 const retriesQrCodeMap = new Map<number, number>();
+const reconnectAttemptsMap = new Map<number, number>();
+const reconnectTimersMap = new Map<number, NodeJS.Timeout>();
 
 export default function msg() {
   return {
@@ -155,20 +156,18 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
         const { id, name, allowGroup, companyId } = whatsappUpdate;
 
-        // const { version, isLatest } = await fetchLatestWaWebVersion({});
-        const versionB = [2, 2410, 1];
-        // logger.info(`using WA v${version.join(".")}, isLatest: ${isLatest}`);
+        const { version, isLatest } = await fetchLatestBaileysVersion();
+        logger.info(
+          `Using WhatsApp Web version ${version.join(".")}; latest=${isLatest}`
+        );
         logger.info(`Starting session ${name}`);
         let retriesQrCode = 0;
 
         let wsocket: Session = null;
-        const store = makeInMemoryStore({
-          logger: loggerBaileys
-        });
         const { state, saveCreds } = await useMultiFileAuthState(whatsapp);
 
         wsocket = makeWASocket({
-          version: [2, 3000, 1025052013],
+          version,
           logger: loggerBaileys,
           printQRInTerminal: false,
           // auth: state as AuthenticationState,
@@ -348,49 +347,77 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             );
 
             if (connection === "close") {
-              console.log("DESCONECTOU", JSON.stringify(lastDisconnect, null, 2))
-              logger.info(
-                `Socket  ${name} Connection Update ${connection || ""} ${lastDisconnect ? lastDisconnect.error.message : ""
-                }`
+              const statusCode = (lastDisconnect?.error as Boom)?.output
+                ?.statusCode;
+              const shouldStop =
+                statusCode === DisconnectReason.loggedOut ||
+                statusCode === DisconnectReason.badSession ||
+                statusCode === 403 ||
+                statusCode === 405;
+
+              removeWbot(id, false);
+
+              if (shouldStop) {
+                reconnectAttemptsMap.delete(id);
+                const pendingTimer = reconnectTimersMap.get(id);
+                if (pendingTimer) {
+                  clearTimeout(pendingTimer);
+                  reconnectTimersMap.delete(id);
+                }
+
+                await whatsapp.update({
+                  status: "DISCONNECTED",
+                  qrcode: "",
+                  session: ""
+                });
+                await DeleteBaileysService(whatsapp.id);
+                await cacheLayer.delFromPattern(`sessions:${whatsapp.id}:*`);
+                io.of(String(companyId))
+                  .emit(`company-${whatsapp.companyId}-whatsappSession`, {
+                    action: "update",
+                    session: whatsapp
+                  });
+                logger.warn(
+                  `Session ${name} stopped after non-recoverable disconnect (${statusCode})`
+                );
+                return;
+              }
+
+              const attempt = (reconnectAttemptsMap.get(id) || 0) + 1;
+              reconnectAttemptsMap.set(id, attempt);
+
+              if (attempt > 8) {
+                await whatsapp.update({ status: "DISCONNECTED", qrcode: "" });
+                logger.warn(
+                  `Session ${name} stopped after ${attempt - 1} reconnect attempts`
+                );
+                return;
+              }
+
+              const reconnectDelay = Math.min(
+                60_000,
+                2_000 * Math.pow(2, attempt - 1)
               );
-              if ((lastDisconnect?.error as Boom)?.output?.statusCode === 403) {
-                await whatsapp.update({ status: "PENDING", session: "" });
-                await DeleteBaileysService(whatsapp.id);
-                await cacheLayer.delFromPattern(`sessions:${whatsapp.id}:*`);
-                io.of(String(companyId))
-                  .emit(`company-${whatsapp.companyId}-whatsappSession`, {
-                    action: "update",
-                    session: whatsapp
-                  });
-                removeWbot(id, false);
-              }
-              if (
-                (lastDisconnect?.error as Boom)?.output?.statusCode !==
-                DisconnectReason.loggedOut
-              ) {
-                removeWbot(id, false);
-                setTimeout(
-                  () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
-                  2000
-                );
-              } else {
-                await whatsapp.update({ status: "PENDING", session: "" });
-                await DeleteBaileysService(whatsapp.id);
-                await cacheLayer.delFromPattern(`sessions:${whatsapp.id}:*`);
-                io.of(String(companyId))
-                  .emit(`company-${whatsapp.companyId}-whatsappSession`, {
-                    action: "update",
-                    session: whatsapp
-                  });
-                removeWbot(id, false);
-                setTimeout(
-                  () => StartWhatsAppSession(whatsapp, whatsapp.companyId),
-                  2000
-                );
-              }
+              const previousTimer = reconnectTimersMap.get(id);
+              if (previousTimer) clearTimeout(previousTimer);
+
+              const timer = setTimeout(async () => {
+                reconnectTimersMap.delete(id);
+                const current = await Whatsapp.findByPk(id);
+                if (current && current.status !== "DISCONNECTED") {
+                  StartWhatsAppSession(current, current.companyId);
+                }
+              }, reconnectDelay);
+              reconnectTimersMap.set(id, timer);
             }
 
             if (connection === "open") {
+              reconnectAttemptsMap.delete(id);
+              const pendingTimer = reconnectTimersMap.get(id);
+              if (pendingTimer) {
+                clearTimeout(pendingTimer);
+                reconnectTimersMap.delete(id);
+              }
               await whatsapp.update({
                 status: "CONNECTED",
                 qrcode: "",
@@ -419,7 +446,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
             }
 
             if (qr !== undefined) {
-              if (retriesQrCodeMap.get(id) && retriesQrCodeMap.get(id) >= 3) {
+              if (retriesQrCodeMap.get(id) && retriesQrCodeMap.get(id) >= 6) {
                 await whatsappUpdate.update({
                   status: "DISCONNECTED",
                   qrcode: ""
@@ -459,6 +486,10 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                     action: "update",
                     session: whatsapp
                   });
+
+                // Complete the start request once the QR is ready. Waiting for
+                // the phone to connect made the Connections screen hang.
+                resolve(wsocket);
               }
             }
           }

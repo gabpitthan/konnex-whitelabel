@@ -3,7 +3,7 @@
  * serviço/atualizar 1 configuração da empresa |
  * @params:companyId/column(name)/data
  */
-import sequelize from "../../database";
+import AppError from "../../errors/AppError";
 import CompaniesSettings from "../../models/CompaniesSettings";
 
 type Params = {
@@ -14,9 +14,16 @@ type Params = {
 
 const UpdateCompanySettingsService = async ({companyId, column, data}:Params): Promise<any> => {
 
-  const [results, metadata] = await sequelize.query(`UPDATE "CompaniesSettings" SET "${column}"='${data}' WHERE "companyId"=${companyId}`)
+  if (!Object.prototype.hasOwnProperty.call(CompaniesSettings.rawAttributes, column)) {
+    throw new AppError("ERR_INVALID_COMPANY_SETTING", 400);
+  }
 
-  return results;
+  const [affectedRows] = await CompaniesSettings.update(
+    { [column]: data },
+    { where: { companyId } }
+  );
+
+  return affectedRows;
 };
 
 export default UpdateCompanySettingsService;

@@ -83,6 +83,33 @@ Antes de desenvolver novas telas:
 6. Criar testes mínimos de autenticação, tenant, conexão e FlowBuilder.
 7. Depois modernizar frontend e decompor o FlowBuilder.
 
+## Implementação — fase 1 (2026-07-28)
+
+- Repositório Git criado; baseline recuperável no commit `7d7cb80`.
+- `credentials.txt` incluído no `.gitignore`.
+- Removido `backend/src/helpers/GetWhatsapp.ts`, que enviava dados para um Supabase externo e continha uma rotina destrutiva.
+- Removidos o cron de licenciamento/telemetria, o serviço órfão e o seed `wtV`.
+- Baileys migrado do fork `zennn08/Baileys` 6.7.5 para o pacote oficial `@whiskeysockets/baileys` 6.7.22.
+- Versão do WhatsApp Web deixou de ser fixada manualmente e agora usa `fetchLatestBaileysVersion`.
+- Reconexão infinita substituída por backoff exponencial limitado.
+- Erros não recuperáveis 403, 405, logout e sessão inválida agora encerram a tentativa.
+- Limite de renovações do QR aumentado de 3 para 6.
+- Inicialização da sessão passa a responder assim que o QR estiver disponível, sem aguardar o telefone conectar.
+- Teste real: `POST /whatsappsession/1` retornou HTTP 200 em menos de um segundo; registro ficou com status `qrcode` e QR válido.
+- Removidos botões de demonstração hardcoded do envio por fluxo.
+- Seeds deixaram de executar em todo restart. Só rodam quando `RUN_DB_SEEDS=true`.
+- Dockerfile ajustado para permissões de `public`, `private`, `logs` e `certs`; rebuilds posteriores ficaram significativamente mais rápidos.
+- SQL por interpolação removido da leitura/escrita de `CompaniesSettings` e da busca direta de mensagem.
+- Exclusão e duplicação de FlowBuilder agora exigem o `companyId` autenticado.
+- Build TypeScript concluído com sucesso e imagem atual implantada.
+- Login, listagem de FlowBuilder e geração do QR revalidados após o deploy.
+
+### Estado atual do teste WhatsApp
+
+- Conexão `Teste` está em status `qrcode`.
+- O usuário pode abrir o painel e escanear agora.
+- Envio, recebimento, mídia e reconexão pós-pareamento ainda dependem do escaneamento real e devem ser validados em seguida.
+
 ## Regra de continuidade
 
 Ao retomar este projeto, ler este arquivo antes de alterar código. Atualizá-lo após decisões, mudanças de arquitetura, migrations, deploys, incidentes e resultados de testes.
