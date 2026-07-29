@@ -6,6 +6,7 @@ import Tag from "../../models/Tag";
 import Ticket from "../../models/Ticket";
 import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
+import sequelize from "../../database";
 
 export interface MessageData {
   wid: string;
@@ -33,62 +34,93 @@ const CreateMessageService = async ({
   messageData,
   companyId
 }: Request): Promise<Message> => {
-  await Message.upsert({ ...messageData, companyId });
+  if (!Number.isInteger(companyId) || companyId <= 0 || !messageData.wid) {
+    throw new Error("ERR_CREATING_MESSAGE_INVALID_OWNER");
+  }
 
-  const message = await Message.findOne({
-    where: {
-      wid: messageData.wid,
-      companyId
-    },
-    include: [
-      "contact",
-      {
-        model: Ticket,
-        as: "ticket",
-        include: [
-          {
-            model: Contact,
-            attributes: ["id", "name", "number", "email", "profilePicUrl", "acceptAudioMessage", "active", "urlPicture", "companyId"],
-            include: ["extraInfo", "tags"]
-          },
-          {
-            model: Queue,
-            attributes: ["id", "name", "color"]
-          },
-          {
-            model: Whatsapp,
-            attributes: ["id", "name", "groupAsTicket"]
-          },
-          {
-            model: User,
-            attributes: ["id", "name"]
-          },
-          {
-            model: Tag,
-            as: "tags",
-            attributes: ["id", "name", "color"]
-          }
-        ]
+  const message = await sequelize.transaction(async transaction => {
+    await Message.upsert(
+      { ...messageData, companyId },
+      { transaction }
+    );
+
+    const persistedMessage = await Message.findOne({
+      where: {
+        wid: messageData.wid,
+        companyId
       },
-      {
-        model: Message,
-        as: "quotedMsg",
-        include: ["contact"]
-      }
-    ]
+      include: [
+        "contact",
+        {
+          model: Ticket,
+          as: "ticket",
+          include: [
+            {
+              model: Contact,
+              attributes: [
+                "id",
+                "name",
+                "number",
+                "email",
+                "profilePicUrl",
+                "acceptAudioMessage",
+                "active",
+                "urlPicture",
+                "companyId"
+              ],
+              include: ["extraInfo", "tags"]
+            },
+            {
+              model: Queue,
+              attributes: ["id", "name", "color"]
+            },
+            {
+              model: Whatsapp,
+              attributes: ["id", "name", "groupAsTicket"]
+            },
+            {
+              model: User,
+              attributes: ["id", "name"]
+            },
+            {
+              model: Tag,
+              as: "tags",
+              attributes: ["id", "name", "color"]
+            }
+          ]
+        },
+        {
+          model: Message,
+          as: "quotedMsg",
+          include: ["contact"]
+        }
+      ],
+      transaction
+    });
+
+    if (!persistedMessage) {
+      throw new Error("ERR_CREATING_MESSAGE");
+    }
+
+    if (
+      persistedMessage.ticket.queueId !== null &&
+      persistedMessage.queueId === null
+    ) {
+      await persistedMessage.update(
+        { queueId: persistedMessage.ticket.queueId },
+        { transaction }
+      );
+    }
+
+    if (persistedMessage.isPrivate) {
+      await persistedMessage.update(
+        { wid: `PVT${persistedMessage.id}` },
+        { transaction }
+      );
+    }
+
+    return persistedMessage;
   });
-
-  if (message.ticket.queueId !== null && message.queueId === null) {
-    await message.update({ queueId: message.ticket.queueId });
-  }
-
-  if (message.isPrivate) {
-    await message.update({ wid: `PVT${message.id}` });
-  }
-
-  if (!message) {
-    throw new Error("ERR_CREATING_MESSAGE");
-  }
 
   const io = getIO();
 

@@ -16,7 +16,15 @@ import Company from "./Company";
 import Queue from "./Queue";
 import TicketTraking from "./TicketTraking";
 
-@Table
+@Table({
+  indexes: [
+    {
+      name: "messages_company_wid_unique",
+      unique: true,
+      fields: ["companyId", "wid"]
+    }
+  ]
+})
 class Message extends Model<Message> {
   @PrimaryKey
   @Column

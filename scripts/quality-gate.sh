@@ -19,6 +19,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/libs/__tests__/whatsappLease.spec.ts \
   src/services/HealthServices/__tests__/GetReadinessService.spec.ts \
   src/services/MessageServices/__tests__/GetMessageRangeService.spec.ts \
+  src/services/MessageServices/__tests__/CreateMessageService.spec.ts \
   src/services/MessageServices/__tests__/ListMessagesServiceAll.spec.ts \
   src/services/SocketServices/__tests__/AuthorizeTicketRoomService.spec.ts \
   --runInBand --coverage=false
