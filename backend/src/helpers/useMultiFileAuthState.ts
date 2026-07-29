@@ -10,6 +10,8 @@ import {
 
 import cacheLayer from "../libs/cache";
 import Whatsapp from "../models/Whatsapp";
+import { WhatsAppLease } from "../libs/whatsappLease";
+import { scanRedisPattern } from "../libs/redisPattern";
 
 const AUTH_SCHEMA_VERSION = 2;
 
@@ -25,6 +27,7 @@ interface AuthEnvelope {
   whatsappId: number;
   checksum: string;
   payload: string;
+  fence?: string;
 }
 
 export class BaileysAuthCorruptError extends Error {
@@ -61,7 +64,8 @@ const parsePayload = (payload: string, key: string): any => {
 
 export const createBaileysAuthState = async (
   whatsapp: Whatsapp,
-  store: AuthStore = cacheLayer
+  store: AuthStore = cacheLayer,
+  lease?: WhatsAppLease
 ): Promise<{ state: AuthenticationState; saveCreds: () => Promise<void> }> => {
   if (!Number.isInteger(whatsapp.id) || !Number.isInteger(whatsapp.companyId)) {
     throw new Error("BAILEYS_AUTH_INVALID_OWNER");
@@ -75,13 +79,19 @@ export const createBaileysAuthState = async (
       companyId: whatsapp.companyId,
       whatsappId: whatsapp.id,
       checksum: checksum(payload),
-      payload
+      payload,
+      ...(lease ? { fence: lease.fence } : {})
     };
-    await store.set(key, JSON.stringify(envelope));
+    if (lease) {
+      await lease.setIfOwned(key, JSON.stringify(envelope));
+    } else {
+      await store.set(key, JSON.stringify(envelope));
+    }
   };
 
   const readV2 = async (file: string): Promise<any | undefined> => {
     const key = v2Key(whatsapp, file);
+    if (lease) await lease.assertOwned();
     const raw = await store.get(key);
     if (raw === null) return undefined;
 
@@ -119,10 +129,17 @@ export const createBaileysAuthState = async (
   };
 
   const removeData = async (file: string): Promise<void> => {
-    await Promise.all([
-      store.del(v2Key(whatsapp, file)),
-      store.del(legacyKey(whatsapp.id, file))
-    ]);
+    if (lease) {
+      // The legacy key has no tenant hash tag and therefore cannot participate
+      // in the same atomic Redis Cluster script as the lease. Leave it for
+      // controlled garbage collection; the runtime only mutates fenced v2.
+      await lease.deleteIfOwned(v2Key(whatsapp, file));
+    } else {
+      await Promise.all([
+        store.del(v2Key(whatsapp, file)),
+        store.del(legacyKey(whatsapp.id, file))
+      ]);
+    }
   };
 
   const storedCreds = await readData("creds");
@@ -163,13 +180,28 @@ export const createBaileysAuthState = async (
 };
 
 export const useMultiFileAuthState = (
-  whatsapp: Whatsapp
+  whatsapp: Whatsapp,
+  lease: WhatsAppLease
 ): Promise<{ state: AuthenticationState; saveCreds: () => Promise<void> }> =>
-  createBaileysAuthState(whatsapp);
+  createBaileysAuthState(whatsapp, cacheLayer, lease);
 
 export const purgeBaileysAuthState = async (
-  whatsapp: Pick<Whatsapp, "id" | "companyId">
+  whatsapp: Pick<Whatsapp, "id" | "companyId">,
+  lease?: WhatsAppLease
 ): Promise<void> => {
+  if (lease) {
+    await lease.assertOwned();
+    const keys = await scanRedisPattern(
+      cacheLayer.getRedisInstance(),
+      `${authKeyPrefix(whatsapp)}:*`
+    );
+    for (const key of keys) {
+      // Keep every mutation conditionally owned; stop immediately on loss.
+      // eslint-disable-next-line no-await-in-loop
+      await lease.deleteIfOwned(key);
+    }
+    return;
+  }
   await Promise.all([
     cacheLayer.delFromPattern(`${authKeyPrefix(whatsapp)}:*`),
     cacheLayer.delFromPattern(`sessions:${whatsapp.id}:*`)

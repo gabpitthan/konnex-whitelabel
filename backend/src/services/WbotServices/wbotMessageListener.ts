@@ -240,24 +240,17 @@ const getBodyButton = (msg: any): string => {
 
     if (msg?.messageType === "interactiveMessage" || msg?.message?.interactiveMessage) {
       let bodyMessage = '';
-      console.log('mensagem enviada pelo cel', msg);
 
       // Verifica se há botões na mensagem
       const buttons = msg?.message?.interactiveMessage?.nativeFlowMessage?.buttons;
-      console.log("Buttons:", buttons);
 
       // Verifica se buttons é um array e se contém o botão 'reviewand_pay'
-      const bodyTextWithPix = Array.isArray(buttons) && buttons.some(button => button.name = 'review_and_pay');
+      const bodyTextWithPix = Array.isArray(buttons) && buttons.some(button => button.name === 'review_and_pay');
 
       if (bodyTextWithPix) {
         bodyMessage += `[PIX]`;
-        console.log("Mensagem de PIX detectada, adicionando [PIX] ao bodyMessage.");
-      } else {
-        console.log("Nenhuma mensagem de PIX encontrada.");
       }
 
-      // Log do bodyMessage final antes do retorno
-      console.log("bodyMessage final:", bodyMessage);
       // Retornar bodyMessage se não estiver vazio
       return bodyMessage || null; // Verifique se este ponto é alcançado
   }
@@ -315,29 +308,25 @@ const getBodyPIX = (msg: any): string => {
     // Verifica se é uma mensagem interativa
     if (msg?.messageType === "interactiveMessage" || msg?.message?.interactiveMessage) {
       let bodyMessage = '[PIX]'; // Inicializa bodyMessage com [PIX]
-      console.log('mensagem enviada pelo cel', msg);
 
       // Verifica se há botões na mensagem
       const buttons = msg?.message?.interactiveMessage?.nativeFlowMessage?.buttons;
-      console.log("Buttons:", buttons);
 
       // Se buttons existe e contém o botão 'review_and_pay'
-      const bodyTextWithPix = Array.isArray(buttons) && buttons.some(button => button.name = 'review_and_pay');
+      const bodyTextWithPix = Array.isArray(buttons) && buttons.some(button => button.name === 'review_and_pay');
 
       // Se o botão específico foi encontrado
-      if (bodyTextWithPix) {
-        console.log("Mensagem de PIX detectada.");
-      } else {
-        console.log("Nenhuma mensagem de PIX encontrada.");
+      if (!bodyTextWithPix) {
         return ''; // Retorna vazio se não encontrar o botão
       }
 
-      // Log do bodyMessage final antes do retorno
-      console.log("bodyMessage final:", bodyMessage);
       return bodyMessage; // Retorna [PIX]
     }
   } catch (error) {
-    console.error("Erro ao processar mensagem:", error);
+    logger.error({
+      event: "whatsapp_pix_parse_failed",
+      errorClass: error instanceof Error ? error.name : "UnknownError"
+    });
   }
 
   return ''; // Retorna uma string vazia se a condição inicial não for satisfeita
@@ -431,19 +420,23 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
     const objKey = Object.keys(types).find(key => key === type);
 
     if (!objKey) {
-      logger.warn(
-        `#### Nao achou o type 152: ${type} ${JSON.stringify(msg.message)}`
-      );
-      Sentry.setExtra("Mensagem", { BodyMsg: msg.message, msg, type });
+      logger.warn({
+        event: "whatsapp_unknown_message_type",
+        messageType: type || "unknown"
+      });
       Sentry.captureException(
         new Error("Novo Tipo de Mensagem em getTypeMessage")
       );
     }
     return types[type];
   } catch (error) {
-    Sentry.setExtra("Error getTypeMessage", { msg, BodyMsg: msg.message });
-    Sentry.captureException(error);
-    console.log(error);
+    Sentry.captureException(
+      new Error("WHATSAPP_MESSAGE_TYPE_PARSE_FAILED_SANITIZED")
+    );
+    logger.warn({
+      event: "whatsapp_message_type_parse_failed",
+      errorClass: error instanceof Error ? error.name : "UnknownError"
+    });
   }
 };
 
@@ -979,16 +972,16 @@ export const verifyMediaMessage = async (
       //   // Aqui você pode fazer o que desejar com o arquivo MP3 convertido.
       // })
     } catch (err) {
-      Sentry.setExtra("Erro media", {
-        companyId: companyId,
-        ticket,
-        contact,
-        media,
-        quotedMsg
+      Sentry.captureException(
+        new Error("WHATSAPP_MEDIA_PROCESS_FAILED_SANITIZED")
+      );
+      logger.error({
+        event: "whatsapp_media_process_failed",
+        companyId,
+        ticketId: ticket.id,
+        contactId: contact.id,
+        errorClass: err instanceof Error ? err.name : "UnknownError"
       });
-      Sentry.captureException(err);
-      logger.error(err);
-      console.log(msg);
     }
 
     const body = getBodyMessage(msg);
@@ -1083,8 +1076,10 @@ export const verifyMediaMessage = async (
 
     return newMessage;
   } catch (error) {
-    console.log(error);
-    logger.warn("Erro ao baixar media: ", JSON.stringify(msg));
+    logger.warn({
+      event: "whatsapp_media_download_failed",
+      errorClass: error instanceof Error ? error.name : "UnknownError"
+    });
   }
 };
 
@@ -1206,16 +1201,18 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
       msgType === "adMetaPreview"; // Adicionado para tratar mensagens de anúncios
 
     if (!ifType) {
-      logger.warn(`#### Nao achou o type em isValidMsg: ${msgType}
-${JSON.stringify(msg?.message)}`);
-      Sentry.setExtra("Mensagem", { BodyMsg: msg.message, msg, msgType });
+      logger.warn({
+        event: "whatsapp_invalid_message_type",
+        messageType: msgType || "unknown"
+      });
       Sentry.captureException(new Error("Novo Tipo de Mensagem em isValidMsg"));
     }
 
     return !!ifType;
   } catch (error) {
-    Sentry.setExtra("Error isValidMsg", { msg });
-    Sentry.captureException(error);
+    Sentry.captureException(
+      new Error("WHATSAPP_MESSAGE_VALIDATION_FAILED_SANITIZED")
+    );
   }
 };
 
@@ -3854,8 +3851,6 @@ export const handleMessageIntegration = async (
         request(options, function (error, response) {
           if (error) {
             throw new Error(error);
-          } else {
-            console.log(response.body);
           }
         });
       } catch (error) {

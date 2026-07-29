@@ -140,8 +140,6 @@ const UpdateWhatsAppService = async ({
 
   await whatsapp.update({
     name,
-    status,
-    session,
     greetingMessage,
     complationMessage,
     outOfHoursMessage,

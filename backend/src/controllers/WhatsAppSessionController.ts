@@ -1,12 +1,11 @@
 import { Request, Response } from "express";
-import { removeWbot } from "../libs/wbot";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import Whatsapp from "../models/Whatsapp";
-import { purgeBaileysAuthState } from "../helpers/useMultiFileAuthState";
 import AppError from "../errors/AppError";
+import { RunWhatsAppDestructiveOperation } from "../services/WbotServices/RunWhatsAppDestructiveOperation";
 
 const store = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
@@ -33,12 +32,12 @@ const update = async (req: Request, res: Response): Promise<Response> => {
 
   if (!whatsapp) throw new AppError("ERR_WAPP_NOT_FOUND", 404);
 
-  await removeWbot(whatsapp.id);
-  await purgeBaileysAuthState(whatsapp);
-  await whatsapp.update({
-    session: "",
-    qrcode: "",
-    status: "DISCONNECTED"
+  await RunWhatsAppDestructiveOperation(whatsapp, async () => {
+    await whatsapp.update({
+      session: "",
+      qrcode: "",
+      status: "DISCONNECTED"
+    });
   });
   
   if (whatsapp.channel === "whatsapp") {
@@ -56,13 +55,13 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
 
 
   if (whatsapp.channel === "whatsapp") {
-    await removeWbot(whatsapp.id);
-    await purgeBaileysAuthState(whatsapp);
-    await DeleteBaileysService(whatsappId);
-    await whatsapp.update({
-      session: "",
-      qrcode: "",
-      status: "DISCONNECTED"
+    await RunWhatsAppDestructiveOperation(whatsapp, async () => {
+      await DeleteBaileysService(whatsappId);
+      await whatsapp.update({
+        session: "",
+        qrcode: "",
+        status: "DISCONNECTED"
+      });
     });
   }
 

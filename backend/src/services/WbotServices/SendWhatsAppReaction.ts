@@ -42,8 +42,6 @@ const SendWhatsAppReaction = async ({
 
     const msgFound = JSON.parse(messageToReact.dataJson);
 
-    console.log(reactionType);
-
     const msg = await wbot.sendMessage(number, {
       react: {
         text: reactionType, // O tipo de reação
@@ -55,8 +53,9 @@ const SendWhatsAppReaction = async ({
 
     return msg;
   } catch (err) {
-    Sentry.captureException(err);
-    console.log(err);
+    Sentry.captureException(
+      new Error("WHATSAPP_REACTION_SEND_FAILED_SANITIZED")
+    );
     throw new AppError("ERR_SENDING_WAPP_REACTION");
   }
 };

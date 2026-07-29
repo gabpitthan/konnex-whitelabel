@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
-import { purgeBaileysAuthState } from "../helpers/useMultiFileAuthState";
-import { removeWbot, restartWbot } from "../libs/wbot";
+import { restartWbot } from "../libs/wbot";
 import Whatsapp from "../models/Whatsapp";
 import AppError from "../errors/AppError";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
@@ -9,6 +8,7 @@ import ShowCompanyService from "../services/CompanyService/ShowCompanyService";
 import { getAccessTokenFromPage, getPageProfile, subscribeApp } from "../services/FacebookServices/graphAPI";
 import ShowPlanService from "../services/PlanService/ShowPlanService";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
+import { RunWhatsAppDestructiveOperation } from "../services/WbotServices/RunWhatsAppDestructiveOperation";
 
 import CreateWhatsAppService from "../services/WhatsappService/CreateWhatsAppService";
 import DeleteWhatsAppService from "../services/WhatsappService/DeleteWhatsAppService";
@@ -131,10 +131,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       error: "Você não possui permissão para acessar este recurso!"
     });
   }
-
-  console.log("================ WhatsAppController ==============")
-  console.log(req.body)
-  console.log("==================================================")
 
   const { whatsapp, oldDefaultWhatsapp } = await CreateWhatsAppService({
     name,
@@ -400,10 +396,10 @@ export const remove = async (
 
 
   if (whatsapp.channel === "whatsapp") {
-    await removeWbot(+whatsappId);
-    await purgeBaileysAuthState(whatsapp);
-    await DeleteBaileysService(whatsappId);
-    await DeleteWhatsAppService(whatsappId);
+    await RunWhatsAppDestructiveOperation(whatsapp, async () => {
+      await DeleteBaileysService(whatsappId);
+      await DeleteWhatsAppService(whatsappId);
+    });
 
     io.of(String(companyId))
       .emit(`company-${companyId}-whatsapp`, {
@@ -510,10 +506,10 @@ export const removeAdmin = async (
 
 
   if (whatsapp.channel === "whatsapp") {
-    await removeWbot(+whatsappId);
-    await purgeBaileysAuthState(whatsapp);
-    await DeleteBaileysService(whatsappId);
-    await DeleteWhatsAppService(whatsappId);
+    await RunWhatsAppDestructiveOperation(whatsapp, async () => {
+      await DeleteBaileysService(whatsappId);
+      await DeleteWhatsAppService(whatsappId);
+    });
 
     io.of(String(companyId))
       .emit(`admin-whatsapp`, {
@@ -556,7 +552,7 @@ export const showAdmin = async (req: Request, res: Response): Promise<Response> 
   const { whatsappId } = req.params;
   const { companyId } = req.user;
   // console.log("SHOWING WHATSAPP ADMIN", whatsappId)
-  const whatsapp = await ShowWhatsAppServiceAdmin(whatsappId);
+  const whatsapp = await ShowWhatsAppServiceAdmin(whatsappId, companyId);
 
 
   return res.status(200).json(whatsapp);

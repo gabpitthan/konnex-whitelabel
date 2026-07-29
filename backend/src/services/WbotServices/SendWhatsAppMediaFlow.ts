@@ -158,8 +158,9 @@ const SendWhatsAppMediaFlow = async ({
 
     return sentMessage;
   } catch (err) {
-    Sentry.captureException(err);
-    console.log(err);
+    Sentry.captureException(
+      new Error("WHATSAPP_MEDIA_FLOW_SEND_FAILED_SANITIZED")
+    );
     throw new AppError("ERR_SENDING_WAPP_MSG");
   }
 };

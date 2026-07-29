@@ -16,15 +16,11 @@ import { FindOptions } from "sequelize/types";
 import Whatsapp from "../models/Whatsapp";
 import logger from "../utils/logger";
 import MAIN_LOGGER from "@whiskeysockets/baileys/lib/Utils/logger";
-import {
-  purgeBaileysAuthState,
-  useMultiFileAuthState
-} from "../helpers/useMultiFileAuthState";
+import { useMultiFileAuthState } from "../helpers/useMultiFileAuthState";
 import { Boom } from "@hapi/boom";
 import AppError from "../errors/AppError";
 import { getIO } from "./socket";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
-import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
 import ImportWhatsAppMessageService from "../services/WhatsappService/ImportWhatsAppMessageService";
 import { add } from "date-fns";
 import moment from "moment";
@@ -41,6 +37,8 @@ import {
   assertApplicationRunning,
   isApplicationDraining
 } from "./shutdownState";
+import { WhatsAppLease } from "./whatsappLease";
+import { updateWhatsappLifecycleWithFence } from "./whatsappFence";
 
 const msgRetryCounterCache = new NodeCache({
   stdTTL: 600,
@@ -56,12 +54,16 @@ const msgCache = new NodeCache({
 });
 
 const loggerBaileys = MAIN_LOGGER.child({});
-loggerBaileys.level = "error";
+// Upstream warns that even default error/debug payloads may include JIDs,
+// message metadata or auth-adjacent details. Application logs below emit only
+// sanitized lifecycle fields.
+loggerBaileys.level = "silent";
 
 type Session = WASocket & {
   id?: number;
   companyId?: number;
   store?: Store;
+  lease?: WhatsAppLease;
 };
 
 const sessions: Session[] = [];
@@ -149,8 +151,9 @@ export const restartWbot = async (
 export const removeWbot = async (
   whatsappId: number,
   isLogout = true,
-  expectedSession?: Session
-): Promise<void> => {
+  expectedSession?: Session,
+  releaseLease = true
+): Promise<WhatsAppLease | undefined> => {
   try {
     const sessionIndex = sessions.findIndex(
       session =>
@@ -174,10 +177,15 @@ export const removeWbot = async (
       if (currentIndex !== -1) {
         sessions.splice(currentIndex, 1);
       }
+      if (session.lease && releaseLease) {
+        await session.lease.release().catch(() => undefined);
+      }
+      return session.lease;
     }
   } catch (err) {
     logger.error(err);
   }
+  return undefined;
 };
 
 export const shutdownWbots = async (): Promise<void> => {
@@ -199,6 +207,7 @@ export const shutdownWbots = async (): Promise<void> => {
       session.ev.removeAllListeners("connection.update");
       session.ev.removeAllListeners("creds.update");
       session.ws.close();
+      await session.lease?.release().catch(() => undefined);
     })
   );
   const failedCloses = closeResults.filter(
@@ -223,7 +232,11 @@ export var dataMessages: any = {};
 
 export const msgDB = msg();
 
-export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
+export const initWASocket = async (
+  whatsapp: Whatsapp,
+  lease: WhatsAppLease,
+  onSocketCreated?: (session: Session) => void
+): Promise<Session> => {
   return new Promise((resolve, reject) => {
     void (async () => {
       let startTimeout: NodeJS.Timeout;
@@ -242,6 +255,12 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         const { id, name, allowGroup, companyId } = whatsappUpdate;
         const owner = { whatsappId: id, companyId };
         const generation = activateSessionGeneration(owner);
+        const updateLifecycle = async (
+          values: Parameters<typeof updateWhatsappLifecycleWithFence>[2]
+        ): Promise<Whatsapp> => {
+          await lease.assertOwned();
+          return updateWhatsappLifecycleWithFence(owner, lease.fence, values);
+        };
 
         const { version, isLatest } = await getBaileysVersion();
         logger.info(
@@ -250,7 +269,10 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         logger.info(`Starting session ${name}`);
         let retriesQrCode = 0;
 
-        const { state, saveCreds } = await useMultiFileAuthState(whatsapp);
+        const { state, saveCreds } = await useMultiFileAuthState(
+          whatsappUpdate,
+          lease
+        );
 
         // This is the last asynchronous boundary before the socket is created
         // and registered. If drain began while DB/Baileys/Redis were loading,
@@ -290,7 +312,33 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         });
         wsocket.id = whatsapp.id;
         wsocket.companyId = companyId;
+        wsocket.lease = lease;
+        const sendMessage = wsocket.sendMessage.bind(wsocket);
+        wsocket.sendMessage = (async (...args: Parameters<WASocket["sendMessage"]>) => {
+          await lease.assertOwned();
+          return sendMessage(...args);
+        }) as WASocket["sendMessage"];
+        const relayMessage = wsocket.relayMessage.bind(wsocket);
+        wsocket.relayMessage = (async (
+          ...args: Parameters<WASocket["relayMessage"]>
+        ) => {
+          await lease.assertOwned();
+          return relayMessage(...args);
+        }) as WASocket["relayMessage"];
+        const registerEvent = wsocket.ev.on.bind(wsocket.ev) as any;
+        (wsocket.ev as any).on = (event: string, listener: (...args: any[]) => any) =>
+          registerEvent(event, async (...args: any[]) => {
+            try {
+              await lease.assertOwned();
+            } catch {
+              invalidateSessionGeneration(owner, generation);
+              wsocket?.ws?.close();
+              return;
+            }
+            return listener(...args);
+          });
         sessions.push(wsocket);
+        onSocketCreated?.(wsocket);
 
         let startSettled = false;
         const completeStart = (): void => {
@@ -455,22 +503,25 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               invalidateSessionGeneration(owner, generation);
               return;
             }
-            logger.info(
-              `Socket  ${name} Connection Update ${connection || ""} ${lastDisconnect ? lastDisconnect.error.message : ""
-              }`
-            );
-
             if (connection === "close") {
               const statusCode = (lastDisconnect?.error as Boom)?.output
                 ?.statusCode;
+              logger.info({
+                event: "whatsapp_connection_update",
+                whatsappId: id,
+                companyId,
+                connection,
+                statusCode: statusCode || null,
+                errorClass:
+                  lastDisconnect?.error instanceof Error
+                    ? lastDisconnect.error.name
+                    : null
+              });
               const shouldStop =
                 statusCode === DisconnectReason.loggedOut ||
                 statusCode === DisconnectReason.badSession ||
                 statusCode === 403 ||
                 statusCode === 405;
-
-              await removeWbot(id, false, wsocket);
-              invalidateSessionGeneration(owner, generation);
 
               if (shouldStop) {
                 reconnectAttemptsMap.delete(id);
@@ -480,17 +531,17 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                   reconnectTimersMap.delete(id);
                 }
 
-                await whatsapp.update({
+                const disconnected = await updateLifecycle({
                   status: "DISCONNECTED",
                   qrcode: "",
                   session: ""
                 });
-                await DeleteBaileysService(whatsapp.id);
-                await purgeBaileysAuthState(whatsapp);
+                await removeWbot(id, false, wsocket);
+                invalidateSessionGeneration(owner, generation);
                 io.of(String(companyId))
                   .emit(`company-${whatsapp.companyId}-whatsappSession`, {
                     action: "update",
-                    session: whatsapp
+                    session: disconnected
                   });
                 logger.warn(
                   `Session ${name} stopped after non-recoverable disconnect (${statusCode})`
@@ -502,12 +553,20 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               reconnectAttemptsMap.set(id, attempt);
 
               if (attempt > 8) {
-                await whatsapp.update({ status: "DISCONNECTED", qrcode: "" });
+                await updateLifecycle({
+                  status: "DISCONNECTED",
+                  qrcode: ""
+                });
+                await removeWbot(id, false, wsocket);
+                invalidateSessionGeneration(owner, generation);
                 logger.warn(
                   `Session ${name} stopped after ${attempt - 1} reconnect attempts`
                 );
                 return;
               }
+
+              await removeWbot(id, false, wsocket);
+              invalidateSessionGeneration(owner, generation);
 
               const reconnectDelay = Math.min(
                 60_000,
@@ -519,7 +578,9 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               const timer = setTimeout(async () => {
                 reconnectTimersMap.delete(id);
                 if (isApplicationDraining()) return;
-                const current = await Whatsapp.findByPk(id);
+                const current = await Whatsapp.findOne({
+                  where: { id, companyId, channel: "whatsapp" }
+                });
                 if (current && current.status !== "DISCONNECTED") {
                   StartWhatsAppSession(current, current.companyId);
                 }
@@ -534,7 +595,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 clearTimeout(pendingTimer);
                 reconnectTimersMap.delete(id);
               }
-              await whatsapp.update({
+              const connected = await updateLifecycle({
                 status: "CONNECTED",
                 qrcode: "",
                 retries: 0,
@@ -547,7 +608,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
               io.of(String(companyId))
                 .emit(`company-${whatsapp.companyId}-whatsappSession`, {
                   action: "update",
-                  session: whatsapp
+                  session: connected
                 });
 
               completeStart();
@@ -555,26 +616,25 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
             if (qr !== undefined) {
               if (retriesQrCodeMap.get(id) && retriesQrCodeMap.get(id) >= 6) {
-                await whatsappUpdate.update({
+                const disconnected = await updateLifecycle({
                   status: "DISCONNECTED",
                   qrcode: ""
                 });
-                await DeleteBaileysService(whatsappUpdate.id);
-                await purgeBaileysAuthState(whatsapp);
                 io.of(String(companyId))
                   .emit(`company-${whatsapp.companyId}-whatsappSession`, {
                     action: "update",
-                    session: whatsappUpdate
+                    session: disconnected
                   });
                 wsocket.ev.removeAllListeners("connection.update");
                 wsocket.ws.close();
+                await removeWbot(id, false, wsocket);
                 wsocket = null;
                 retriesQrCodeMap.delete(id);
               } else {
                 logger.info(`Session QRCode Generate ${name}`);
                 retriesQrCodeMap.set(id, (retriesQrCode += 1));
 
-                await whatsapp.update({
+                const pairing = await updateLifecycle({
                   qrcode: qr,
                   status: "qrcode",
                   retries: 0,
@@ -583,7 +643,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                 io.of(String(companyId))
                   .emit(`company-${whatsapp.companyId}-whatsappSession`, {
                     action: "update",
-                    session: whatsapp
+                    session: pairing
                   });
 
                 // Complete the start request once the QR is ready. Waiting for
@@ -597,7 +657,9 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           try {
             await saveCreds();
           } catch (error) {
-            Sentry.captureException(error);
+            Sentry.captureException(
+              new Error("WHATSAPP_CREDS_UPDATE_FAILED_SANITIZED")
+            );
             logger.error({
               event: "whatsapp_auth_persist_failed",
               whatsappId: whatsapp.id,
@@ -621,7 +683,9 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           wsocket.ws.close();
           await removeWbot(whatsapp.id, false, wsocket);
         }
-        Sentry.captureException(error);
+        Sentry.captureException(
+          new Error("WHATSAPP_SOCKET_INIT_FAILED_SANITIZED")
+        );
         logger.error({
           event: "whatsapp_session_start_failed",
           whatsappId: whatsapp.id,

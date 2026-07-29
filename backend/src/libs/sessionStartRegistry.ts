@@ -4,6 +4,7 @@ interface SessionOwner {
 }
 
 const starts = new Map<string, Promise<void>>();
+const lifecycleTails = new Map<string, Promise<void>>();
 const generations = new Map<string, number>();
 const activeGenerations = new Map<string, number>();
 
@@ -29,6 +30,28 @@ export const runSessionStartSingleFlight = (
 
 export const hasSessionStartInFlight = (owner: SessionOwner): boolean =>
   starts.has(sessionOwnerKey(owner));
+
+export const runSessionLifecycleExclusive = async <T>(
+  owner: SessionOwner,
+  operation: () => Promise<T>
+): Promise<T> => {
+  const key = sessionOwnerKey(owner);
+  const previous = lifecycleTails.get(key) || Promise.resolve();
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => {
+    release = resolve;
+  });
+  const tail = previous.catch(() => undefined).then(() => gate);
+  lifecycleTails.set(key, tail);
+
+  await previous.catch(() => undefined);
+  try {
+    return await operation();
+  } finally {
+    release();
+    if (lifecycleTails.get(key) === tail) lifecycleTails.delete(key);
+  }
+};
 
 export const clearSessionStartRegistryForTests = (): void => starts.clear();
 
@@ -60,6 +83,7 @@ export const invalidateSessionGeneration = (
 
 export const clearSessionLifecycleRegistryForTests = (): void => {
   starts.clear();
+  lifecycleTails.clear();
   generations.clear();
   activeGenerations.clear();
 };

@@ -8,6 +8,7 @@ import Contact from "../../models/Contact";
 import { isNil } from "lodash";
 
 import formatBody from "../../helpers/Mustache";
+import logger from "../../utils/logger";
 
 interface Request {
   body: string;
@@ -98,8 +99,15 @@ const SendWhatsAppMessage = async ({
       await ticket.update({ lastMessage: formatBody(vcard, ticket), imported: null });
       return sentMessage;
     } catch (err) {
-      Sentry.captureException(err);
-      console.log(err);
+      Sentry.captureException(
+        new Error("WHATSAPP_MEDIA_SEND_FAILED_SANITIZED")
+      );
+      logger.error({
+        event: "whatsapp_vcard_send_failed",
+        companyId: ticket.companyId,
+        ticketId: ticket.id,
+        errorClass: err instanceof Error ? err.name : "UnknownError"
+      });
       throw new AppError("ERR_SENDING_WAPP_MSG");
     }
   };
@@ -118,14 +126,18 @@ const SendWhatsAppMessage = async ({
     await ticket.update({ lastMessage: formatBody(body, ticket), imported: null });
     return sentMessage;
   } catch (err) {
-    console.log(`erro ao enviar mensagem na company ${ticket.companyId} - `, body,
-      ticket,
-      quotedMsg,
-      msdelay,
-      vCard,
-      isForwarded)
-    Sentry.captureException(err);
-    console.log(err);
+    Sentry.captureException(
+      new Error("WHATSAPP_MESSAGE_SEND_FAILED_SANITIZED")
+    );
+    logger.error({
+      event: "whatsapp_text_send_failed",
+      companyId: ticket.companyId,
+      ticketId: ticket.id,
+      hasQuote: Boolean(quotedMsg),
+      hasVCard: Boolean(vCard),
+      isForwarded,
+      errorClass: err instanceof Error ? err.name : "UnknownError"
+    });
     throw new AppError("ERR_SENDING_WAPP_MSG");
   }
 };

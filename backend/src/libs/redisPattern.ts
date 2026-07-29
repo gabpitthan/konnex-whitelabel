@@ -1,4 +1,4 @@
-interface RedisScanner {
+export interface RedisScanner {
   scan(
     cursor: string,
     matchToken: "MATCH",
@@ -8,6 +8,29 @@ interface RedisScanner {
   ): Promise<[string, string[]]>;
   unlink(...keys: string[]): Promise<number>;
 }
+
+export const scanRedisPattern = async (
+  redis: RedisScanner,
+  pattern: string,
+  count = 100
+): Promise<string[]> => {
+  let cursor = "0";
+  const keys = new Set<string>();
+  do {
+    // SCAN is cursor-dependent and must remain sequential.
+    // eslint-disable-next-line no-await-in-loop
+    const [nextCursor, page] = await redis.scan(
+      cursor,
+      "MATCH",
+      pattern,
+      "COUNT",
+      Math.max(10, Math.min(count, 1000))
+    );
+    cursor = nextCursor;
+    page.forEach(key => keys.add(key));
+  } while (cursor !== "0");
+  return [...keys];
+};
 
 interface UnlinkPatternOptions {
   count?: number;

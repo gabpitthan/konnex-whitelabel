@@ -5,11 +5,15 @@ import {
   hasSessionStartInFlight,
   invalidateSessionGeneration,
   isCurrentSessionGeneration,
+  runSessionLifecycleExclusive,
   runSessionStartSingleFlight
 } from "../sessionStartRegistry";
 
 describe("WhatsApp session start single-flight", () => {
-  beforeEach(clearSessionStartRegistryForTests);
+  beforeEach(() => {
+    clearSessionStartRegistryForTests();
+    clearSessionLifecycleRegistryForTests();
+  });
 
   it("runs one starter for concurrent calls of the same tenant/session", async () => {
     let calls = 0;
@@ -72,5 +76,34 @@ describe("WhatsApp session start single-flight", () => {
     expect(isCurrentSessionGeneration(owner, second)).toBe(true);
     invalidateSessionGeneration(owner, second);
     expect(isCurrentSessionGeneration(owner, second)).toBe(false);
+  });
+
+  it("serializes start and destructive lifecycle operations per tenant", async () => {
+    const owner = { whatsappId: 7, companyId: 2 };
+    const order: string[] = [];
+    let release!: () => void;
+    let signalEntered!: () => void;
+    const gate = new Promise<void>(resolve => {
+      release = resolve;
+    });
+    const entered = new Promise<void>(resolve => {
+      signalEntered = resolve;
+    });
+
+    const first = runSessionLifecycleExclusive(owner, async () => {
+      order.push("first:start");
+      signalEntered();
+      await gate;
+      order.push("first:end");
+    });
+    const second = runSessionLifecycleExclusive(owner, async () => {
+      order.push("second");
+    });
+
+    await entered;
+    expect(order).toEqual(["first:start"]);
+    release();
+    await Promise.all([first, second]);
+    expect(order).toEqual(["first:start", "first:end", "second"]);
   });
 });

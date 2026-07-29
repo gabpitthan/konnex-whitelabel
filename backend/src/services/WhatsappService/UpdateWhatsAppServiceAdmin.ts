@@ -116,6 +116,7 @@ const UpdateWhatsAppServiceAdmin = async ({
       where: {
         isDefault: true,
         id: { [Op.not]: whatsappId },
+        companyId
       }
     });
     if (oldDefaultWhatsapp) {
@@ -123,12 +124,10 @@ const UpdateWhatsAppServiceAdmin = async ({
     }
   }
 
-  const whatsapp = await ShowWhatsAppServiceAdmin(whatsappId);
+  const whatsapp = await ShowWhatsAppServiceAdmin(whatsappId, companyId);
 
   await whatsapp.update({
     name,
-    status,
-    session,
     greetingMessage,
     complationMessage,
     outOfHoursMessage,

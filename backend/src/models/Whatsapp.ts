@@ -44,6 +44,11 @@ class Whatsapp extends Model<Whatsapp> {
   @Column
   status: string;
 
+  @Default("0")
+  @AllowNull(false)
+  @Column(DataType.BIGINT)
+  sessionFence: string;
+
   @Column
   battery: string;
 

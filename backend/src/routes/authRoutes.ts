@@ -11,12 +11,6 @@ authRoutes.post("/login", SessionController.store);
 authRoutes.post("/refresh_token", SessionController.update);
 authRoutes.delete("/logout", isAuth, SessionController.remove);
 authRoutes.get("/me", isAuth, SessionController.me);
-authRoutes.post("/forgot-password", (req, res) => {
-    console.log("Rota /forgot-password chamada com body:", req.body);
-    return SessionController.forgotPassword(req, res);
-  });
-authRoutes.post("/reset-password", (req, res) => {
-    console.log("Rota /reset-password chamada com body:", req.body);
-    return SessionController.resetPassword(req, res);
-  });
+authRoutes.post("/forgot-password", SessionController.forgotPassword);
+authRoutes.post("/reset-password", SessionController.resetPassword);
 export default authRoutes;

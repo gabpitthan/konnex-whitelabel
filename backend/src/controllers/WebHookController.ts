@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Whatsapp from "../models/Whatsapp";
 import { handleMessage } from "../services/FacebookServices/facebookMessageListener";
+import logger from "../utils/logger";
 // import { handleMessage } from "../services/FacebookServices/facebookMessageListener";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -27,7 +28,11 @@ export const webHook = async (
 ): Promise<Response> => {
   try {
     const { body } = req;
-    console.log(30, "WebHookController", { body })
+    logger.info({
+      event: "social_webhook_received",
+      object: typeof body?.object === "string" ? body.object : "unknown",
+      entries: Array.isArray(body?.entry) ? body.entry.length : 0
+    });
 
     if (body.object === "page" || body.object === "instagram") {
       let channel: string;

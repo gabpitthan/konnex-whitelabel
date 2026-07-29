@@ -14,9 +14,18 @@ import {
   completeApplicationShutdown
 } from "./libs/shutdownState";
 import { shutdownWbots } from "./libs/wbot";
+import cacheLayer from "./libs/cache";
 // import { ScheduledMessagesJob, ScheduleMessagesGenerateJob, ScheduleMessagesEnvioJob, ScheduleMessagesEnvioForaHorarioJob } from "./wbotScheduledMessages";
 
 const server = app.listen(process.env.PORT, async () => {
+  try {
+    await cacheLayer.waitUntilReady();
+  } catch (error) {
+    logger.error({
+      event: "redis_not_ready_at_boot",
+      errorClass: error instanceof Error ? error.name : "UnknownError"
+    });
+  }
   const companies = await Company.findAll({
     where: { status: true },
     attributes: ["id"]

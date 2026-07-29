@@ -94,8 +94,28 @@ class CacheSingleton {
   public getRedisInstance(): Redis {
     return this.redis;
   }
+
+  public async waitUntilReady(timeoutMs = 10_000): Promise<void> {
+    if (this.redis.status === "ready") return;
+    await new Promise<void>((resolve, reject) => {
+      const onReady = (): void => {
+        clearTimeout(timer);
+        this.redis.removeListener("ready", onReady);
+        resolve();
+      };
+      const timer = setTimeout(() => {
+        this.redis.removeListener("ready", onReady);
+        reject(new Error("REDIS_READY_TIMEOUT"));
+      }, timeoutMs);
+      this.redis.once("ready", onReady);
+    });
+  }
 }
 
-const redisInstance = new Redis(REDIS_URI_CONNECTION);
+const redisInstance = new Redis(REDIS_URI_CONNECTION, {
+  enableOfflineQueue: false,
+  maxRetriesPerRequest: 1,
+  connectTimeout: 5_000
+});
 
 export default CacheSingleton.getInstance(redisInstance);
