@@ -8,8 +8,6 @@ import { unlinkRedisPattern } from "./redisPattern";
 class CacheSingleton {
   private redis: Redis;
 
-  private keys: (pattern: string) => Promise<string[]>;
-
   private static instance: CacheSingleton;
 
   private constructor(redisInstance: Redis) {
@@ -17,7 +15,6 @@ class CacheSingleton {
 
     this.set = util.promisify(this.redis.set).bind(this.redis);
     this.get = util.promisify(this.redis.get).bind(this.redis);
-    this.keys = util.promisify(this.redis.keys).bind(this.redis);
     this.del = util.promisify(this.redis.del).bind(this.redis);
   }
 
@@ -51,11 +48,6 @@ class CacheSingleton {
   public async get(key: string): Promise<string | null> {
     const getPromisefy = util.promisify(this.redis.get).bind(this.redis);
     return getPromisefy(key);
-  }
-
-  public async getKeys(pattern: string): Promise<string[]> {
-    const getKeysPromisefy = util.promisify(this.redis.keys).bind(this.redis);
-    return getKeysPromisefy(pattern);
   }
 
   public async del(key: string): Promise<number> {
@@ -93,6 +85,11 @@ class CacheSingleton {
 
   public getRedisInstance(): Redis {
     return this.redis;
+  }
+
+  public async ping(): Promise<void> {
+    const result = await this.redis.ping();
+    if (result !== "PONG") throw new Error("REDIS_PING_FAILED");
   }
 
   public async waitUntilReady(timeoutMs = 10_000): Promise<void> {

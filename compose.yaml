@@ -48,6 +48,18 @@ services:
       PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
     ports:
       - "127.0.0.1:3007:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/health/ready').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 30s
     volumes:
       - whitelabel_public:/app/public
     networks: [whitelabel_internal]
@@ -61,6 +73,11 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:8090:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
     networks: [whitelabel_internal]
 
 networks:

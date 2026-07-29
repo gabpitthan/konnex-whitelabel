@@ -1,17 +1,6 @@
-import { FindOptions } from "sequelize/types";
 import { Op } from "sequelize";
 import AppError from "../../errors/AppError";
 import Message from "../../models/Message";
-import Ticket from "../../models/Ticket";
-import ShowTicketService from "../TicketServices/ShowTicketService";
-import Queue from "../../models/Queue";
-
-import { Sequelize } from "sequelize-typescript";
-import { QueryTypes } from "sequelize";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const dbConfig = require("../../config/database");
-const sequelize = new Sequelize(dbConfig);
 
 interface Request {
   companyId: number;
@@ -24,50 +13,44 @@ interface Response {
   count: number;
 }
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const isIsoDate = (value: string): boolean => {
+  if (!ISO_DATE.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+};
+
 const ListMessagesServiceAll = async ({
   companyId,
   fromMe,
   dateStart,
   dateEnd
 }: Request): Promise<Response> => {
+  if (!Number.isInteger(companyId) || companyId <= 0) {
+    throw new AppError("INVALID_COMPANY", 400);
+  }
+  if (
+    (dateStart || dateEnd) &&
+    (!isIsoDate(dateStart) ||
+      !isIsoDate(dateEnd) ||
+      dateStart > dateEnd)
+  ) {
+    throw new AppError("INVALID_MESSAGE_RANGE", 400);
+  }
 
-  let ticketsCounter: any
+  const where: Record<string, unknown> = { companyId };
+  if (fromMe) where.fromMe = true;
   if (dateStart && dateEnd) {
-    if (fromMe) {
-      ticketsCounter = await sequelize.query(
-        `select COUNT(*) from "Messages" m where "companyId" = ${companyId} and "fromMe" = ${fromMe} and "createdAt"  between '${dateStart} 00:00:00' and '${dateEnd} 23:59:59'`,
-        {
-          type: QueryTypes.SELECT
-        }
-      );
-    } else {
-      ticketsCounter = await sequelize.query(
-        `select COUNT(*) from "Messages" m where "companyId" = ${companyId} and "createdAt" between '${dateStart} 00:00:00' and '${dateEnd} 23:59:59'`,
-        {
-          type: QueryTypes.SELECT
-        }
-      );
-    }
-  } else {
-    if (fromMe) {
-      ticketsCounter = await sequelize.query(
-        `select COUNT(*) from "Messages" m where "companyId" = ${companyId} and "fromMe" = ${fromMe}`,
-        {
-          type: QueryTypes.SELECT
-        }
-      );
-    } else {
-      ticketsCounter = await sequelize.query(
-        `select COUNT(*) from "Messages" m where "companyId" = ${companyId}`,
-        {
-          type: QueryTypes.SELECT
-        }
-      );
-    }
+    const endExclusive = new Date(`${dateEnd}T00:00:00.000Z`);
+    endExclusive.setUTCDate(endExclusive.getUTCDate() + 1);
+    where.createdAt = {
+      [Op.gte]: new Date(`${dateStart}T00:00:00.000Z`),
+      [Op.lt]: endExclusive
+    };
   }
 
   return {
-    count: ticketsCounter,
+    count: await Message.count({ where })
   };
 };
 
