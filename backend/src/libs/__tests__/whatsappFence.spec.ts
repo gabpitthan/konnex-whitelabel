@@ -1,6 +1,9 @@
+const transactionToken = { LOCK: { UPDATE: "UPDATE" } };
+const transaction = jest.fn(async callback => callback(transactionToken));
+
 jest.mock("../../database", () => ({
   __esModule: true,
-  default: { query: jest.fn() }
+  default: { query: jest.fn(), transaction }
 }));
 
 jest.mock("../../models/Whatsapp", () => ({
@@ -19,7 +22,8 @@ import {
   assertWhatsappSessionFence,
   claimWhatsappSessionFence,
   nextWhatsappSessionFence,
-  updateWhatsappLifecycleWithFence
+  updateWhatsappLifecycleWithFence,
+  withWhatsappSessionFenceTransaction
 } from "../whatsappFence";
 
 const owner = { companyId: 2, whatsappId: 7 };
@@ -86,5 +90,40 @@ describe("PostgreSQL WhatsApp fencing", () => {
     await expect(
       assertWhatsappSessionFence({ companyId: 3, whatsappId: 7 }, "9")
     ).rejects.toBeInstanceOf(WhatsappFenceLostError);
+  });
+
+  it("locks the exact owner row while the domain transaction runs", async () => {
+    mockedWhatsapp.findOne.mockResolvedValueOnce({
+      id: 7,
+      companyId: 2,
+      sessionFence: "9"
+    } as Whatsapp);
+    const operation = jest.fn().mockResolvedValue("committed");
+
+    await expect(
+      withWhatsappSessionFenceTransaction(owner, "9", operation)
+    ).resolves.toBe("committed");
+
+    expect(mockedWhatsapp.findOne).toHaveBeenCalledWith({
+      where: {
+        id: 7,
+        companyId: 2,
+        channel: "whatsapp",
+        sessionFence: "9"
+      },
+      transaction: transactionToken,
+      lock: "UPDATE"
+    });
+    expect(operation).toHaveBeenCalledWith(transactionToken);
+  });
+
+  it("fails closed before domain writes when the fence is stale", async () => {
+    mockedWhatsapp.findOne.mockResolvedValueOnce(null);
+    const operation = jest.fn();
+
+    await expect(
+      withWhatsappSessionFenceTransaction(owner, "8", operation)
+    ).rejects.toBeInstanceOf(WhatsappFenceLostError);
+    expect(operation).not.toHaveBeenCalled();
   });
 });

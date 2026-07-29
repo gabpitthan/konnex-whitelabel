@@ -7,6 +7,7 @@ import Ticket from "../../models/Ticket";
 import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import sequelize from "../../database";
+import { Transaction } from "sequelize";
 
 export interface MessageData {
   wid: string;
@@ -28,17 +29,19 @@ export interface MessageData {
 interface Request {
   messageData: MessageData;
   companyId: number;
+  transaction?: Transaction;
 }
 
 const CreateMessageService = async ({
   messageData,
-  companyId
+  companyId,
+  transaction: externalTransaction
 }: Request): Promise<Message> => {
   if (!Number.isInteger(companyId) || companyId <= 0 || !messageData.wid) {
     throw new Error("ERR_CREATING_MESSAGE_INVALID_OWNER");
   }
 
-  const message = await sequelize.transaction(async transaction => {
+  const persistMessage = async (transaction: Transaction): Promise<Message> => {
     await Message.upsert(
       { ...messageData, companyId },
       { transaction }
@@ -120,25 +123,28 @@ const CreateMessageService = async ({
     }
 
     return persistedMessage;
-  });
+  };
 
-  const io = getIO();
+  const emitMessage = (message: Message): void => {
+    if (messageData?.ticketImported) return;
 
-  if (!messageData?.ticketImported) {
-    // console.log("emitiu socket 96", message.ticketId)
+    const io = getIO();
+    io.of(String(companyId)).emit(`company-${companyId}-appMessage`, {
+      action: "create",
+      message,
+      ticket: message.ticket,
+      contact: message.ticket.contact
+    });
+  };
 
-    io.of(String(companyId))
-      // .to(message.ticketId.toString())
-      // .to(message.ticket.status)
-      // .to("notification")
-      .emit(`company-${companyId}-appMessage`, {
-        action: "create",
-        message,
-        ticket: message.ticket,
-        contact: message.ticket.contact
-      });
+  if (externalTransaction) {
+    const message = await persistMessage(externalTransaction);
+    externalTransaction.afterCommit(() => emitMessage(message));
+    return message;
   }
 
+  const message = await sequelize.transaction(persistMessage);
+  emitMessage(message);
 
   return message;
 };

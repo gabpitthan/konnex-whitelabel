@@ -1,7 +1,7 @@
 const upsert = jest.fn();
 const findOne = jest.fn();
 const emit = jest.fn();
-const transactionToken = { id: "transaction" };
+const transactionToken = { id: "transaction", afterCommit: jest.fn() };
 const transaction = jest.fn(async callback => callback(transactionToken));
 
 jest.mock("../../../database", () => ({
@@ -32,6 +32,7 @@ describe("CreateMessageService", () => {
     findOne.mockReset();
     emit.mockReset();
     transaction.mockClear();
+    transactionToken.afterCommit.mockReset();
   });
 
   it("persists and loads in one transaction, then emits after commit", async () => {
@@ -84,5 +85,33 @@ describe("CreateMessageService", () => {
       CreateMessageService({ messageData, companyId: 0 })
     ).rejects.toThrow("ERR_CREATING_MESSAGE_INVALID_OWNER");
     expect(transaction).not.toHaveBeenCalled();
+  });
+
+  it("joins an external transaction and emits only from afterCommit", async () => {
+    const message = {
+      id: 1,
+      wid: "wamid-1",
+      queueId: null,
+      isPrivate: false,
+      ticketId: 11,
+      ticket: { queueId: null, contact: { id: 4 } },
+      update: jest.fn()
+    };
+    findOne.mockResolvedValue(message);
+
+    await expect(
+      CreateMessageService({
+        messageData,
+        companyId: 7,
+        transaction: transactionToken as any
+      })
+    ).resolves.toBe(message);
+
+    expect(transaction).not.toHaveBeenCalled();
+    expect(emit).not.toHaveBeenCalled();
+    expect(transactionToken.afterCommit).toHaveBeenCalledTimes(1);
+
+    transactionToken.afterCommit.mock.calls[0][0]();
+    expect(emit).toHaveBeenCalledTimes(1);
   });
 });

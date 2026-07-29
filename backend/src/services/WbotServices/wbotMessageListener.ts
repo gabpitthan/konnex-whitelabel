@@ -29,9 +29,9 @@ import {
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
-import { Mutex } from "async-mutex";
 import { getIO, statusRoom } from "../../libs/socket";
 import CreateMessageService from "../MessageServices/CreateMessageService";
+import PersistFencedMessageService from "../MessageServices/PersistFencedMessageService";
 import logger from "../../utils/logger";
 import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateContactService";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
@@ -94,6 +94,8 @@ import { FlowCampaignModel } from "../../models/FlowCampaign";
 import ShowTicketService from "../TicketServices/ShowTicketService";
 import { handleOpenAi } from "../IntegrationsServices/OpenAiService";
 import { IOpenAi } from "../../@types/openai";
+import { WhatsAppLease } from "../../libs/whatsappLease";
+import { WhatsappFenceLostError } from "../../libs/whatsappFence";
 
 const os = require("os");
 
@@ -107,6 +109,36 @@ setInterval(() => {
 
 type Session = WASocket & {
   id?: number;
+  companyId?: number;
+  lease?: WhatsAppLease;
+};
+
+const persistWhatsappMessage = async (
+  wbot: Session | undefined,
+  ticket: Ticket,
+  messageData: any,
+  ticketValues: { lastMessage: string; status?: string }
+): Promise<Message> => {
+  if (!wbot) {
+    return CreateMessageService({
+      messageData,
+      companyId: ticket.companyId
+    });
+  }
+
+  if (!wbot.lease || !wbot.id) throw new WhatsappFenceLostError();
+
+  await wbot.lease.assertOwned();
+  return PersistFencedMessageService({
+    owner: {
+      whatsappId: wbot.id,
+      companyId: ticket.companyId
+    },
+    fence: wbot.lease.fence,
+    ticket,
+    messageData,
+    ticketValues
+  });
 };
 
 interface ImessageUpsert {
@@ -878,11 +910,10 @@ export const verifyMediaMessage = async (
         isPrivate
       };
 
-      await ticket.update({
+      logger.error(Error("ERR_WAPP_DOWNLOAD_MEDIA"));
+      return persistWhatsappMessage(wbot, ticket, messageData, {
         lastMessage: body
       });
-      logger.error(Error("ERR_WAPP_DOWNLOAD_MEDIA"));
-      return CreateMessageService({ messageData, companyId: companyId });
     }
 
     if (!media) {
@@ -1013,17 +1044,13 @@ export const verifyMediaMessage = async (
       isPrivate
     };
 
-    await ticket.update({
-      lastMessage: body || media.filename
+    const shouldReopen = !msg.key.fromMe && ticket.status === "closed";
+    const newMessage = await persistWhatsappMessage(wbot, ticket, messageData, {
+      lastMessage: body || media.filename,
+      ...(shouldReopen ? { status: "pending" } : {})
     });
 
-    const newMessage = await CreateMessageService({
-      messageData,
-      companyId: companyId
-    });
-
-    if (!msg.key.fromMe && ticket.status === "closed") {
-      await ticket.update({ status: "pending" });
+    if (shouldReopen) {
       await ticket.reload({
         attributes: [
           "id",
@@ -1090,7 +1117,8 @@ export const verifyMessage = async (
   contact: Contact,
   ticketTraking?: TicketTraking,
   isPrivate?: boolean,
-  isForwarded: boolean = false
+  isForwarded: boolean = false,
+  wbot?: Session
 ) => {
   // console.log("Mensagem recebida:", JSON.stringify(msg, null, 2));
   const io = getIO();
@@ -1122,15 +1150,14 @@ export const verifyMessage = async (
     isForwarded
   };
 
-  await ticket.update({
-    lastMessage: body
+  const shouldReopen = !msg.key.fromMe && ticket.status === "closed";
+  await persistWhatsappMessage(wbot, ticket, messageData, {
+    lastMessage: body,
+    ...(shouldReopen ? { status: "pending" } : {})
   });
 
-  await CreateMessageService({ messageData, companyId: companyId });
-
-  if (!msg.key.fromMe && ticket.status === "closed") {
+  if (shouldReopen) {
     console.log("===== CHANGE =====");
-    await ticket.update({ status: "pending" });
     await ticket.reload({
       include: [
         { model: Queue, as: "queue" },
@@ -4144,24 +4171,19 @@ const handleMessage = async (
       order: [["id", "DESC"]]
     });
 
-    const mutex = new Mutex();
-    // Inclui a busca de ticket aqui, se realmente não achar um ticket, então vai para o findorcreate
-    const ticket = await mutex.runExclusive(async () => {
-      const result = await FindOrCreateTicketService(
-        contact,
-        whatsapp,
-        unreadMessages,
-        companyId,
-        queueId,
-        userId,
-        groupContact,
-        "whatsapp",
-        isImported,
-        false,
-        settings
-      );
-      return result;
-    });
+    const ticket = await FindOrCreateTicketService(
+      contact,
+      whatsapp,
+      unreadMessages,
+      companyId,
+      queueId,
+      userId,
+      groupContact,
+      "whatsapp",
+      isImported,
+      false,
+      settings
+    );
 
     let bodyRollbackTag = "";
     let bodyNextTag = "";
@@ -4313,7 +4335,15 @@ const handleMessage = async (
               );
             } else {
               console.log("log... 3148");
-              await verifyMessage(msg, ticket, contact, ticketTraking);
+              await verifyMessage(
+                msg,
+                ticket,
+                contact,
+                ticketTraking,
+                false,
+                false,
+                wbot
+              );
             }
 
             console.log("log... 3152");
@@ -4361,7 +4391,8 @@ const handleMessage = async (
           contact,
           ticketTraking,
           false,
-          isMsgForwarded
+          isMsgForwarded,
+          wbot
         );
       }
     }
