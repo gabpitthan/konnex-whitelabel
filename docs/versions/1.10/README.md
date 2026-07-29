@@ -2,6 +2,7 @@
 
 Data: 2026-07-29  
 Estado: publicada
+Commit funcional: `dde65fe`
 
 ## Objetivo
 

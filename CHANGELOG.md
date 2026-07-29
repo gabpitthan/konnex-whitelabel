@@ -4,6 +4,8 @@ Todas as alterações relevantes deste projeto são documentadas aqui.
 
 ## [1.10] — 2026-07-29 — publicada
 
+Commit funcional: `dde65fe`.
+
 ### Objetivo
 
 Tornar encerramentos e reinícios do backend previsíveis e eliminar limpeza Redis bloqueante antes da futura adoção de lease/fencing distribuído.
