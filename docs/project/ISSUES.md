@@ -7,7 +7,7 @@
 | WA-001 | Alto | parcial | QR funciona; envio, recebimento, mídia e reconexão aguardam teste real. |
 | FE-001 | Alto | aberto | Frontend possui 105 vulnerabilidades npm reportadas no build. |
 | BE-001 | Alto | aberto | Backend reporta 77 vulnerabilidades npm (8 críticas) e dependências legadas; atualização exige lotes controlados. |
-| OPS-001 | Alto | aberto | Backend/frontend ainda não possuem healthchecks próprios. |
+| OPS-001 | Alto | mitigado | Backend/frontend possuem healthchecks; faltam monitor externo, SLO e alerta. |
 | OBS-001 | Médio | aberto | Logs sem correlação completa e observabilidade incompleta. |
 | FE-002 | Médio | aberto | Bundle principal grande e muitos avisos legados de lint. |
 | API-001 | Médio | investigar | Há indícios de montagem duplicada de rotas de mensagens/webhooks. |
@@ -21,5 +21,8 @@
 | REDIS-001 | Alto | parcial | Auth state v2 possui envelope/checksum e purge sem `KEYS`; batches, manifesto e restore ensaiado continuam pendentes. |
 | ENG-002 | Médio | aberto | Lint global voltou a executar e expõe 2.975 problemas legados; arquivos novos da 1.10 passam isoladamente. |
 | OPS-002 | Médio | parcial | Shutdown fecha WhatsApp e Socket.IO; Bull, Sequelize e clientes Redis ainda não têm encerramento explícito central. |
+| API-002 | Crítico | aberto | O token global de endpoints `/api` não vincula identidade ao tenant; `companyId` ainda é informado pelo cliente. |
+| DB-002 | Alto | parcial | Pool único e orçamento seguro entregues; faltam `pg_stat_statements`, timeouts por workload e métricas de espera. |
+| REDIS-002 | Alto | aberto | Auth/lease, cache e filas compartilham Redis; separar papéis antes de eviction ou escala horizontal. |
 
 Problemas corrigidos pertencem ao changelog e aos READMEs de versão, não devem continuar descritos como falhas atuais.

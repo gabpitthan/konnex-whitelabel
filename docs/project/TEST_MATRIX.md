@@ -17,5 +17,8 @@
 | Reconexão WhatsApp | sim | política limitada | não | não | pendente canário |
 | Jobs Bull/idempotência | sim | não | não | não | pendente |
 | Mídia WhatsApp | sim | não | não | não | pendente |
+| Liveness/readiness | sim | runtime | n/a | n/a | aprovado |
+| Pool PostgreSQL | sim | runtime | n/a | n/a | aprovado, 6→1 idle |
+| Range/contagem mensagens | sim | unitário | n/a | companyId | parcial, token global |
 
 Cada tarefa deve atualizar as linhas afetadas e registrar evidência no README da subversão.

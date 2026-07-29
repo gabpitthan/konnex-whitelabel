@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-29
-Versão ativa: 1.11
+Versão ativa: 1.12
 
 ## Em foco
 
-Programa P0 de confiabilidade. A 1.11 foi publicada com lease Redis,
-fencing PostgreSQL e mutações de lifecycle/auth state condicionadas ao owner.
+Programa P0 de confiabilidade e escala. A 1.12 foi publicada com pool único,
+SQL parametrizado, readiness e baseline de PostgreSQL/Redis.
 
 ## Estado operacional
 
@@ -35,12 +35,17 @@ fencing PostgreSQL e mutações de lifecycle/auth state condicionadas ao owner.
 - Migration aplicada, API/frontend em 1.11 e smoke pós-deploy aprovados.
 - Restart real recebeu `SIGTERM`, fechou os recursos em 1 ms e retornou sem
   migration pendente.
+- Backend/frontend possuem healthchecks; readiness exige aplicação fora de
+  drain, PostgreSQL e Redis disponíveis.
+- Conexões ociosas da aplicação caíram de 6 para 1 após estabilização.
+- Redis está em `noeviction` com AOF `everysec`; como guarda auth/leases, não
+  será tratado como cache descartável.
 
 ## Próximo passo
 
-Propagar o fence até as mesmas transações PostgreSQL de mensagens, tickets,
-contatos e contadores. Depois validar em conta canário: QR, conexão, texto,
-mídia, queda de rede, restart, perda de lease e logout.
+Vincular tokens externos a tenants e propagar o fence até as mesmas transações
+PostgreSQL de mensagens, tickets, contatos e contadores. Em seguida habilitar
+medição de queries e validar WhatsApp em conta canário.
 
 ## Fontes
 

@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-07-29
-Versão ativa: `1.11`, publicada.
+Versão ativa: `1.12`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -33,6 +33,8 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
   as transações de tickets, mensagens, contatos e contadores.
 - Migration, versão, smoke e restart coordenado foram aprovados; o fechamento
   de recursos após `SIGTERM` levou 1 ms.
+- A 1.12 removeu pools ad hoc e SQL interpolado, adicionou readiness e reduziu
+  conexões ociosas da aplicação de 6 para 1.
 
 ## Memória estruturada
 
@@ -70,9 +72,10 @@ Toda nova sessão deve ler `AGENTS.md`, este índice e `docs/project/CURRENT.md`
 Antes de continuar o redesign, executar o P0 de confiabilidade:
 
 1. propagar o fence às mutações PostgreSQL dos handlers WhatsApp;
-2. validar auth state v2 com conta canário, restart e mensagens;
-3. criar regressão automatizada para jornadas completas de WhatsApp;
-4. migrar emissores Socket.IO legados para o namespace canônico.
+2. vincular tokens de API ao tenant;
+3. habilitar medição de queries antes de novos índices;
+4. validar auth state v2 com conta canário, restart e mensagens;
+5. criar regressão automatizada para jornadas completas de WhatsApp.
 
 ## Direção visual aprovada
 

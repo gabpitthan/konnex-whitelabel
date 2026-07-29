@@ -10,6 +10,9 @@
 - Smoke autenticado sem exposição de credenciais.
 - Backup e restauração testados antes de migrations destrutivas.
 - Validar WhatsApp: pareamento, envio, recebimento, mídia e reconexão.
+- Propagar fencing WhatsApp para dentro das transações de domínio.
+- Vincular tokens de API a um tenant, sem `companyId` confiado do cliente.
+- Ensaiar backup e restauração de PostgreSQL e auth state Redis.
 
 ## P1 — engenharia
 
@@ -21,6 +24,10 @@
 - Logs estruturados com request ID e sanitização.
 - Remover rotas duplicadas após teste de compatibilidade.
 - Reduzir vulnerabilidades sem upgrades cegos.
+- Medir queries reais com `pg_stat_statements` antes de criar índices.
+- Impor orçamento total de pools por número de réplicas/processos.
+- Separar Redis de estado/lease do Redis de cache/filas.
+- Medir event-loop, pool, locks, filas e latências p95/p99.
 
 ## P2 — evolução
 

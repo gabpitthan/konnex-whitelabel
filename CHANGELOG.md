@@ -2,6 +2,43 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.12] — 2026-07-29 — publicada
+
+### Objetivo
+
+Eliminar multiplicação de pools/SQL interpolado e adicionar readiness real.
+
+### Entregue
+
+- instância Sequelize única por processo;
+- defaults e produção com `DB_POOL_MIN=0`, idle 10 s e teto 20;
+- ranges/contagens de mensagens com tenant, validação e bind/ORM;
+- liveness independente e readiness de PostgreSQL, Redis e drain;
+- healthchecks Docker de backend/frontend;
+- API `KEYS` não utilizada removida do cache;
+- `.env.example` documentado, completo e sem segredos;
+- governança permanente de pesquisa, escala, cache e integridade.
+
+### Banco e cache
+
+- nenhuma migration;
+- conexões ociosas da aplicação reduziram de 6 para 1;
+- Redis manteve `noeviction` porque contém credenciais e leases, não só cache.
+
+### Testes
+
+- 11 suítes e 44 testes aprovados;
+- builds backend/frontend aprovados;
+- healthchecks e smoke da API 1.12 aprovados;
+- restart real fechou recursos em 2 ms e recuperou readiness/smoke;
+- histórico Git sem padrões conhecidos de tokens/chaves privadas.
+
+### Limitações
+
+- token global da API de range ainda não representa um tenant;
+- `pg_stat_statements`, métricas p95/p99 e alertas ainda pendentes;
+- cluster WhatsApp segue bloqueado por CAS transacional pendente.
+
 ## [1.11] — 2026-07-29 — publicada
 
 ### Objetivo

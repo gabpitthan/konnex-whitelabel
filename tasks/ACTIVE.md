@@ -1,5 +1,32 @@
 # Tarefa ativa
 
+## Versão 1.12 — escala, pool e readiness
+
+Estado: publicada; próximo P0 selecionado
+
+### Objetivo
+
+Corrigir multiplicadores comprovados de conexão/SQL e implantar sinais de saúde
+adequados antes de continuar a expansão de produção.
+
+### Critérios de aceite
+
+- nenhum serviço cria pool Sequelize ad hoc;
+- ranges usam bind parameters e rejeitam datas/tenant inválidos;
+- liveness não reinicia por falha transitória de dependência;
+- readiness falha fechado para drain, PostgreSQL ou Redis;
+- Docker expõe health status real;
+- testes induzem dependência indisponível e validação inválida;
+- pesquisa, baseline, decisão, rollback e riscos ficam persistidos;
+- build, smoke, restart e versão 1.12 aprovados.
+
+### Riscos
+
+- healthcheck mal calibrado pode criar restart loop;
+- redução imediata do pool de produção sem observar workload pode elevar espera;
+- endpoint legado de range usa token global e ainda requer identidade tenant
+  vinculada antes de ser considerado multiempresa forte.
+
 Estado: versão 1.11 em implementação — fundação de lease/fencing distribuído.
 
 ## Pedido atual

@@ -78,3 +78,35 @@ Quando o usuário disser que a versão está pronta:
 - Realizar deploy somente com build aprovado e teste de regressão de login, API e serviços críticos.
 - Não ler, imprimir ou copiar `credentials.txt` ou `.env`; scripts podem consumir variáveis sem exibi-las.
 - Migrations destrutivas exigem backup verificável e plano de rollback.
+
+## Pesquisa, escala e produção
+
+- Antes de decisões sobre arquitetura, banco, cache, filas, segurança,
+  dependências ou infraestrutura, pesquisar profundamente documentação primária,
+  casos upstream e limitações conhecidas. Pesquisa superficial não autoriza
+  mudança de produção.
+- Auditar também o que já foi implementado. Se a evidência contrariar uma
+  decisão existente, planejar e executar a menor correção segura, reversível e
+  testável.
+- Toda mudança deve considerar simultaneamente: escala horizontal, latência,
+  throughput, backpressure, integridade transacional, isolamento por tenant,
+  cardinalidade, crescimento de dados, limites de conexão, cache invalidation,
+  falhas parciais e recuperação.
+- Cache nunca é fonte de verdade para dados de negócio sem uma decisão
+  arquitetural explícita. Definir owner, TTL, invalidação, limite de memória,
+  política de eviction e comportamento em indisponibilidade.
+- Índices e otimizações de SQL exigem evidência de workload/plano
+  (`pg_stat_statements`, estatísticas e `EXPLAIN`) ou padrão de consulta
+  comprovado. Evitar índices especulativos que ampliem custo de escrita.
+- Dimensionar pools pelo orçamento total do banco:
+  `réplicas × processos × pools por processo`, reservando conexões operacionais.
+  É proibido criar instâncias Sequelize ad hoc em serviços.
+- Não otimizar apenas média: registrar p95/p99, erros, saturação e recuperação.
+- Registrar fontes, baseline, decisão, alternativas, rollout, rollback e “como
+  ainda pode falhar” na memória persistente.
+- Seguir continuamente `docs/project/ROADMAP.md` e o próximo passo de
+  `docs/project/CURRENT.md`; ao concluir um lote, selecionar o próximo P0/P1
+  baseado em risco e evidência.
+- Manter commits pequenos por subversão e sincronizar o repositório remoto
+  configurado. Nunca publicar `.env`, tokens, credenciais, bancos, uploads,
+  certificados privados ou logs.
