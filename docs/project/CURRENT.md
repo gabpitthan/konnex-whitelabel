@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-29
-Versão ativa: 1.13
+Versão ativa: 1.14
 
 ## Em foco
 
-Programa P0 de integridade e escala. A 1.13 foi publicada com idempotência
-tenant-aware e transação central de Message.
+Programa P0 de integridade e escala. A 1.14 foi publicada com todos os lookups
+ativos de Message por `wid` vinculados ao tenant.
 
 ## Estado operacional
 
@@ -44,12 +44,15 @@ tenant-aware e transação central de Message.
   Socket.IO ocorre após commit.
 - Backup pré-1.13 foi restaurado com sucesso; o primeiro rollout falhou fechado
   ao encontrar dependência de constraint e foi recuperado sem alteração de dados.
+- Quoted messages WhatsApp/Facebook, ACK direto/Bull e deleção consultam Message
+  por `wid + companyId`.
+- A regressão total passou em 13 suítes/48 testes; smoke da API 1.14 passou
+  antes/depois do restart e o shutdown fechou recursos em 4 ms.
 
 ## Próximo passo
 
-Corrigir buscas de Message por `wid` sem tenant e incorporar Ticket/Contact mais
-fence à transação de ingestão. Em seguida habilitar medição de queries e validar
-WhatsApp em conta canário.
+Incorporar Ticket/Contact e o fence à transação de ingestão. Em seguida
+habilitar medição de queries e validar WhatsApp em conta canário.
 
 ## Fontes
 

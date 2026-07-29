@@ -170,6 +170,19 @@ não prova que o objeto seja substituível.
 4. Definir timeouts por conexão/workload e limites de concorrência/backpressure.
 5. Revisar queries N+1, paginação sem limite e payloads/mídia em memória.
 
+## Decisão para 1.14
+
+A unique constraint da 1.13 tornou explícito que `wid` não é identidade global:
+ela é única somente dentro de `companyId`. A auditoria encontrou lookups ativos
+de quoted message, ACK e delete usando apenas `wid`. Mesmo sem colisões atuais,
+isso viola o modelo multiempresa e poderia atualizar/carregar uma mensagem de
+outro tenant.
+
+Correção: propagar `companyId` pelo callback direto e pelo payload do job e
+incluí-lo em todo lookup ativo identificado. Não foi removido o índice global de
+`wid` nesta etapa, pois código legado não carregado ainda será eliminado em lote
+separado.
+
 ## Como o sistema ainda pode falhar
 
 - pool correto não resolve queries lentas nem transações longas;

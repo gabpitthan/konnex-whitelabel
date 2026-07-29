@@ -2,6 +2,31 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.14] — 2026-07-29 — publicada
+
+### Entregue
+
+- todos os lookups ativos de Message por `wid` exigem `companyId`;
+- quoted messages WhatsApp e Facebook permanecem no tenant do ticket;
+- ACK direto e Bull transportam o tenant até a consulta;
+- deleção não perde o escopo tenant no segundo lookup;
+- regressão automatizada cobre propagação do tenant pelo job.
+
+### Evidência
+
+- 13 suítes e 48 testes aprovados;
+- builds Docker backend/frontend aprovados;
+- API 1.14 e smoke aprovados antes e depois do restart;
+- nenhuma migration pendente;
+- shutdown real fechou recursos em 4 ms.
+
+### Limitações
+
+- Ticket/Contact/fence ainda não compartilham a transação de ingestão;
+- payloads de jobs ainda não possuem schema runtime uniforme;
+- arquivo listener legado inativo permanece para remoção;
+- frontend mantém 105 alertas npm e bundle principal comprimido de 1,68 MB.
+
 ## [1.13] — 2026-07-29 — publicada
 
 ### Entregue

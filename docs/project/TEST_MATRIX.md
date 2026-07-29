@@ -21,5 +21,6 @@
 | Pool PostgreSQL | sim | runtime | n/a | n/a | aprovado, 6→1 idle |
 | Range/contagem mensagens | sim | unitário | n/a | companyId | parcial, token global |
 | Idempotência Message | sim | migration+unitário | unique+transação | companyId+wid | aprovado |
+| Lookup Message por wid | sim | unitário+runtime | n/a | companyId obrigatório | aprovado |
 
 Cada tarefa deve atualizar as linhas afetadas e registrar evidência no README da subversão.

@@ -1,5 +1,25 @@
 # Tarefa ativa
 
+## Versão 1.14 — lookup de Message tenant-aware
+
+Estado: publicada
+
+### Critérios de aceite
+
+- nenhuma busca ativa por `wid` omite `companyId`;
+- ACK mantém tenant tanto no caminho direto quanto no Bull;
+- quoted messages não cruzam tenants;
+- build, regressão, smoke e restart aprovados;
+- limites ficam na memória persistente.
+
+### Resultado
+
+- 13 suítes e 48 testes aprovados;
+- imagens backend/frontend compiladas;
+- API 1.14 e smoke aprovados antes/depois do restart;
+- shutdown real fechou recursos em 4 ms;
+- próximo P0: Ticket/Contact/fence na transação de ingestão.
+
 ## Versão 1.13 — idempotência de mensagens
 
 Estado: publicada; incidente e recuperação registrados
