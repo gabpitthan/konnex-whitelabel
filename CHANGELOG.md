@@ -2,6 +2,39 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.15] — 2026-07-29 — publicada
+
+### Entregue
+
+- validação `id + companyId + sessionFence` dentro da transação;
+- row lock da conexão bloqueia takeover durante o commit corrente;
+- row lock do Ticket valida tenant e conexão;
+- `Ticket.lastMessage`, reabertura e Message no mesmo commit;
+- Socket.IO de Message somente em `afterCommit`;
+- I/O externo e mídia fora da transação;
+- mutex local ineficaz removido.
+
+### Banco e rollback
+
+- nenhuma migration;
+- rollback por imagem 1.14, sem alteração de schema.
+
+### Evidência
+
+- preflight aprovado;
+- 14 suítes e 53 testes aprovados;
+- builds backend/frontend aprovados;
+- API 1.15 e smoke aprovados antes/depois do restart;
+- nenhuma migration pendente;
+- shutdown real fechou recursos em 3 ms.
+
+### Limitações
+
+- criação inicial de Contact/Ticket ainda antecede a transação fenced;
+- disputa entre dois processos com sessão real aguarda conta canário;
+- espera de row lock ainda não possui p95/p99;
+- cluster continua bloqueado.
+
 ## [1.14] — 2026-07-29 — publicada
 
 ### Entregue

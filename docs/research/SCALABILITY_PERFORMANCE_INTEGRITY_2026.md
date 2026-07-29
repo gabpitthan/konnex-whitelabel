@@ -183,6 +183,33 @@ incluí-lo em todo lookup ativo identificado. Não foi removido o índice global
 `wid` nesta etapa, pois código legado não carregado ainda será eliminado em lote
 separado.
 
+## Decisão para 1.15 — fence dentro do commit de domínio
+
+Fontes primárias consultadas:
+
+- PostgreSQL 17, explicit locking: `SELECT FOR UPDATE` bloqueia updates e locks
+  concorrentes da mesma linha até o fim da transação;
+- PostgreSQL, isolamento: locks explícitos são necessários quando MVCC sozinho
+  não expressa a regra de negócio, e transações podem exigir retry;
+- Sequelize, transactions: transações gerenciadas fazem rollback por exceção,
+  queries precisam receber a transação e `afterCommit` não executa em rollback;
+- Redis, distributed locks: consumidores que gravam em armazenamento devem usar
+  fencing tokens, não apenas confiar no TTL do lock.
+
+O `assertWhatsappSessionFence` anterior era uma leitura isolada: havia TOCTOU
+entre validar o fence e gravar Message/Ticket. A solução escolhida é bloquear a
+linha `Whatsapps` por `id + companyId + sessionFence` dentro da mesma transação
+que altera Ticket e Message. A aquisição de um fence novo atualiza essa mesma
+linha e portanto espera o commit atual; depois do takeover, o owner antigo não
+encontra a combinação anterior e falha fechado.
+
+Downloads, Baileys e transcodificação permanecem fora da transação. Manter I/O
+externo sob row lock aumentaria contenção, uso do pool e risco de timeout.
+Contact e a criação inicial de Ticket serão incorporados em lote posterior,
+pois hoje misturam I/O externo, filesystem e efeitos Socket.IO com persistência.
+
+Rollback: voltar à imagem 1.14; não há alteração de schema neste lote.
+
 ## Como o sistema ainda pode falhar
 
 - pool correto não resolve queries lentas nem transações longas;

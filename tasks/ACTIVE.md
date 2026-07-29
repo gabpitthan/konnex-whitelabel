@@ -1,5 +1,39 @@
 # Tarefa ativa
 
+## Versão 1.15 — commit Message/Ticket protegido por fence
+
+Estado: publicada
+
+### Objetivo
+
+Impedir que um owner WhatsApp obsoleto confirme Message e estado do Ticket
+depois que outro processo assumiu a sessão.
+
+### Critérios de aceite
+
+- a linha de `Whatsapp` é validada por `id + companyId + sessionFence` e
+  bloqueada durante a transação;
+- troca concorrente do fence não pode ultrapassar a transação em andamento;
+- `Ticket.lastMessage` e Message entram no mesmo commit;
+- Socket.IO da Message somente ocorre após commit;
+- rede, download e transcodificação não ficam dentro do lock;
+- owner ou tenant incorreto falha fechado;
+- testes, build, smoke e restart são aprovados.
+
+### Fora deste lote
+
+- criação/atualização de Contact e criação inicial de Ticket;
+- desbloqueio do modo cluster;
+- conta canário WhatsApp real.
+
+### Resultado
+
+- preflight, 14 suítes/53 testes e builds aprovados;
+- API 1.15 e smoke aprovados antes/depois do restart;
+- shutdown concluiu em 3 ms;
+- próximo P0: tornar criação de Contact/Ticket concorrente e fenced sem manter
+  I/O externo dentro da transação.
+
 ## Versão 1.14 — lookup de Message tenant-aware
 
 Estado: publicada

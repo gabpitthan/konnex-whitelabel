@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-29
-Versão ativa: 1.14
+Versão ativa: 1.15
 
 ## Em foco
 
-Programa P0 de integridade e escala. A 1.14 foi publicada com todos os lookups
-ativos de Message por `wid` vinculados ao tenant.
+Programa P0 de integridade e escala. A 1.15 foi publicada com o commit de
+Message e atualização do Ticket protegido pelo fence da sessão.
 
 ## Estado operacional
 
@@ -48,11 +48,16 @@ ativos de Message por `wid` vinculados ao tenant.
   por `wid + companyId`.
 - A regressão total passou em 13 suítes/48 testes; smoke da API 1.14 passou
   antes/depois do restart e o shutdown fechou recursos em 4 ms.
+- A transação de mensagem bloqueia `Whatsapps` pelo fence e o Ticket pelo
+  tenant/conexão; Socket.IO ocorre somente após commit.
+- A regressão total passou em 14 suítes/53 testes; smoke da API 1.15 passou
+  antes/depois do restart e o shutdown fechou recursos em 3 ms.
 
 ## Próximo passo
 
-Incorporar Ticket/Contact e o fence à transação de ingestão. Em seguida
-habilitar medição de queries e validar WhatsApp em conta canário.
+Separar I/O externo da persistência de Contact e tornar a criação inicial de
+Contact/Ticket concorrente e fenced. Em seguida habilitar medição de queries e
+validar WhatsApp em conta canário.
 
 ## Fontes
 
