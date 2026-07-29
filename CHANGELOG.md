@@ -2,6 +2,42 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.11] — 2026-07-29 — publicada
+
+### Objetivo
+
+Adicionar a fundação segura de exclusividade distribuída das sessões WhatsApp.
+
+### Entregue
+
+- lease Redis tenant-aware com token opaco, TTL, heartbeat e release condicional;
+- fence monotônico PostgreSQL e CAS dos estados do lifecycle;
+- auth state v2 escrito e removido atomicamente somente pelo owner;
+- fail-closed para Redis indisponível e perda de ownership;
+- serialização de start, reset, logout e exclusão;
+- fechamento sem logout/purge ao perder o lease;
+- guard central de `sendMessage` e `relayMessage`;
+- logs críticos de lifecycle, credenciais e mídia sanitizados;
+- migration aditiva de `sessionFence`.
+
+### Testes
+
+- 8 suítes P0, 34 testes aprovados;
+- integração Redis 7 aprovou TTL, ABA e auth write atômico;
+- TypeScript/backend e bundle/frontend aprovados;
+- migration aplicada e estrutura confirmada sem consultar dados de clientes;
+- API/frontend em 1.11 e smoke pós-deploy aprovados;
+- restart real recebeu `SIGTERM`, fechou recursos em 1 ms e recuperou sem
+  migration pendente.
+
+### Limitações
+
+- modo cluster continua bloqueado até o fence participar da mesma transação
+  PostgreSQL das mutações de mensagens, tickets, contatos e contadores;
+- teste canário WhatsApp real continua pendente;
+- dívidas npm permanecem: backend 77 vulnerabilidades (8 críticas), frontend
+  105 (4 críticas), exigindo atualizações controladas.
+
 ## [1.10] — 2026-07-29 — publicada
 
 Commit funcional: `dde65fe`.

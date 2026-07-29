@@ -10,8 +10,8 @@
 | Endpoint de versão | sim | automático | n/a | n/a | aprovado |
 | Socket.IO autenticado | sim | runtime publicado | sessão | namespace A/B | aprovado |
 | Sala de ticket Socket.IO | sim | serviço automatizado | n/a | ticket+empresa | aprovado com limite |
-| Auth state Redis | sim | unitário fail-closed | v2/legacy | chave tenant-aware | parcial |
-| Lifecycle WhatsApp | sim | unitário concorrência | local | owner tenant-aware | parcial |
+| Auth state Redis | sim | unitário + Redis 7 | v2/legacy fenced | chave tenant-aware | parcial |
+| Lifecycle WhatsApp | sim | concorrência + TTL/ABA | fence PostgreSQL | owner tenant-aware | parcial |
 | Shutdown do backend | sim | estado unitário | auth preservado por desenho | owner tenant-aware | parcial, runtime pendente |
 | Purge Redis | sim | SCAN/UNLINK unitário | n/a | pattern do chamador | aprovado |
 | Reconexão WhatsApp | sim | política limitada | não | não | pendente canário |

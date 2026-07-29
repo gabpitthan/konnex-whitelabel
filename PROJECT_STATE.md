@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-07-29
-Versão ativa: `1.10`, publicada.
+Versão ativa: `1.11`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -28,8 +28,11 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 - Versão 1.3 foi implantada e `/version` respondeu corretamente.
 - Baileys oficial 6.7.22 gera QR.
 - Validação completa de pareamento, mensagens, mídia e reconexão ainda depende de teste real.
-- Versão 1.10 foi implantada; restart coordenado e smoke pós-restart foram
-  aprovados.
+- A 1.11 foi implantada com lease Redis, fencing PostgreSQL e CAS do
+  lifecycle/auth state. O modo cluster permanece bloqueado até o fence alcançar
+  as transações de tickets, mensagens, contatos e contadores.
+- Migration, versão, smoke e restart coordenado foram aprovados; o fechamento
+  de recursos após `SIGTERM` levou 1 ms.
 
 ## Memória estruturada
 
@@ -66,7 +69,7 @@ Toda nova sessão deve ler `AGENTS.md`, este índice e `docs/project/CURRENT.md`
 
 Antes de continuar o redesign, executar o P0 de confiabilidade:
 
-1. concluir lifecycle Baileys com lease distribuído, cleanup central e shutdown;
+1. propagar o fence às mutações PostgreSQL dos handlers WhatsApp;
 2. validar auth state v2 com conta canário, restart e mensagens;
 3. criar regressão automatizada para jornadas completas de WhatsApp;
 4. migrar emissores Socket.IO legados para o namespace canônico.

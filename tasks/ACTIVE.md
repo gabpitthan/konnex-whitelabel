@@ -1,7 +1,57 @@
 # Tarefa ativa
 
-Estado: aguardando próximo pedido. Versão 1.10 publicada; builds, 22 testes,
-restart controlado e smoke aprovados.
+Estado: versão 1.11 em implementação — fundação de lease/fencing distribuído.
+
+## Pedido atual
+
+Continuar o programa P0 após a publicação da 1.10.
+
+## Resultado observável esperado
+
+- apenas um runtime pode criar o socket de uma conexão WhatsApp;
+- aquisição, renovação e release do lease são atômicos e tenant-aware;
+- o fence monotônico vem do PostgreSQL e não regride com perda do Redis;
+- status e credenciais rejeitam owners obsoletos;
+- perda ou incerteza de ownership fecha o socket sem logout/purge;
+- socket obsoleto não envia novas mensagens;
+- modo cluster permanece bloqueado até as mutações internas de mensagens,
+  tickets e contatos também serem transacionais e fenced.
+
+## Componentes afetados
+
+- lifecycle Baileys e registry de sessões;
+- Redis, PostgreSQL e migration aditiva;
+- auth state;
+- status/QR da conexão;
+- shutdown e reconexão;
+- testes P0 e documentação operacional.
+
+## Riscos e fronteiras
+
+- pausa do processo além do TTL e takeover por outro runtime;
+- owner antigo retomando callbacks atrasados;
+- Redis indisponível ou resposta ambígua;
+- purge/logout concorrente;
+- isolamento por `companyId`;
+- handlers longos ainda possuem janela TOCTOU fora deste lote.
+
+## Critérios de aceite 1.11
+
+- sequence PostgreSQL monotônica e `sessionFence` aditivo;
+- Lua compare-token para acquire/renew/release;
+- CAS por `id + companyId + sessionFence` nos estados do lifecycle;
+- auth writes/deletes condicionadas ao lease;
+- heartbeat e perda de lease testados sem logout/purge;
+- tenant A/B e owner antigo negados;
+- testes, builds, migration, restart e smoke aprovados;
+- rollback por imagem 1.10 preservando coluna/sequence aditivas.
+
+## Fora deste lote
+
+- desbloquear `server-cluster.ts`;
+- garantir atomicidade fenced em todas as mutações de Message/Ticket/Contact;
+- idempotência/outbox de mensagens;
+- canário WhatsApp real sem conta isolada disponível;
 
 ## Pedido
 
