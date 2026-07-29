@@ -1,5 +1,24 @@
 # Tarefa ativa
 
+## Versão 1.13 — idempotência de mensagens
+
+Estado: publicada; incidente e recuperação registrados
+
+### Critérios de aceite
+
+- migration aborta com duplicidade e nunca reconcilia dados automaticamente;
+- `companyId + wid` é único no banco e conhecido pelo modelo;
+- persistência e ajustes são transacionais;
+- nenhum Socket.IO é emitido se a transação falhar;
+- índices exatamente redundantes são removidos;
+- build, testes, migration, smoke e rollback operacional são registrados.
+
+### Risco residual
+
+O fence WhatsApp ainda não alcança todas as mutações de Ticket/Contact que
+envolvem a mensagem. A 1.13 fecha a idempotência da linha Message, não libera
+cluster.
+
 ## Versão 1.12 — escala, pool e readiness
 
 Estado: publicada; próximo P0 selecionado

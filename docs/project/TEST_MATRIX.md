@@ -20,5 +20,6 @@
 | Liveness/readiness | sim | runtime | n/a | n/a | aprovado |
 | Pool PostgreSQL | sim | runtime | n/a | n/a | aprovado, 6→1 idle |
 | Range/contagem mensagens | sim | unitário | n/a | companyId | parcial, token global |
+| Idempotência Message | sim | migration+unitário | unique+transação | companyId+wid | aprovado |
 
 Cada tarefa deve atualizar as linhas afetadas e registrar evidência no README da subversão.

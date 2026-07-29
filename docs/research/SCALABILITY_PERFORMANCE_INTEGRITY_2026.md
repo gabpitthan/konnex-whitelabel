@@ -112,6 +112,42 @@ Refinamento pós-rollout:
    credenciais/leases; eviction desses dados violaria disponibilidade e
    integridade.
 
+## Descoberta e decisão para 1.13
+
+Baseline read-only da tabela `Messages`:
+
+- zero grupos duplicados por `companyId + wid`;
+- `idx_messages_wid` não era único;
+- `CreateMessageService` chamava `upsert`, mas o modelo/banco não declaravam
+  unicidade no identificador de mensagem por tenant; sem conflito conhecido,
+  PostgreSQL poderia inserir novamente;
+- `Message.upsert`, `findOne` e updates derivados não compartilhavam transação;
+- Socket.IO era emitido antes de existir uma fronteira transacional explícita;
+- `Messages_id_key` parecia duplicar a primary key de `id`, mas foreign keys
+  legadas dependem diretamente dessa constraint;
+- `idx_message_company_id` duplicava outro índice simples de `companyId`, e
+  ainda existem índices compostos iniciados por `companyId`.
+
+Decisão:
+
+1. bloquear a migration se aparecer qualquer duplicidade, sem escolher
+   automaticamente qual mensagem apagar;
+2. criar unique constraint `companyId + wid`;
+3. declarar o índice no modelo para o `upsert` gerar `ON CONFLICT` correto;
+4. executar upsert, reload e ajustes em uma transação;
+5. emitir Socket.IO somente após o commit;
+6. remover somente `idx_message_company_id`, comprovadamente duplicado;
+7. preservar `Messages_id_key`: o primeiro rollout mostrou dependências de
+   foreign key não capturadas pela inspeção inicial.
+
+Esta mudança é necessária por integridade e idempotência, não por conjectura de
+performance. O banco vazio torna o rollout de constraint de baixo risco; em
+bases maiores a criação deverá ser planejada com índice concorrente.
+
+Regra aprendida no rollout: antes de remover uma constraint, consultar também
+suas dependências em foreign keys/`pg_depend`; igualdade de definição de índice
+não prova que o objeto seja substituível.
+
 ## Plano priorizado
 
 ### P0

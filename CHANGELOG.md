@@ -2,6 +2,38 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.13] — 2026-07-29 — publicada
+
+### Entregue
+
+- unicidade de mensagem por `companyId + wid`;
+- migration bloqueia qualquer base com duplicidades;
+- criação/reload/ajustes de Message em uma transação;
+- Socket.IO emitido somente após commit;
+- índice simples de `companyId` duplicado removido.
+
+### Evidência
+
+- backup binário e restore real aprovados;
+- 12 suítes e 47 testes aprovados;
+- migration final em 74 ms;
+- zero duplicidades antes/depois;
+- API 1.13, readiness e smoke aprovados.
+- restart final fechou recursos em 2 ms e retornou saudável.
+
+### Incidente
+
+A primeira tentativa tentou remover `Messages_id_key`, mas foreign keys
+legadas dependem dessa constraint. PostgreSQL recusou sem alterar o schema; o
+backend entrou em restart loop até a imagem corrigida preservar a constraint.
+A duração exata não foi medida. O aprendizado foi incorporado à pesquisa.
+
+### Limitações
+
+- Ticket/Contact ainda não compartilham a transação/fence da Message;
+- existem buscas legadas por `wid` sem `companyId`;
+- cluster WhatsApp continua bloqueado.
+
 ## [1.12] — 2026-07-29 — publicada
 
 ### Objetivo

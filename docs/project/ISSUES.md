@@ -24,5 +24,8 @@
 | API-002 | Crítico | aberto | O token global de endpoints `/api` não vincula identidade ao tenant; `companyId` ainda é informado pelo cliente. |
 | DB-002 | Alto | parcial | Pool único e orçamento seguro entregues; faltam `pg_stat_statements`, timeouts por workload e métricas de espera. |
 | REDIS-002 | Alto | aberto | Auth/lease, cache e filas compartilham Redis; separar papéis antes de eviction ou escala horizontal. |
+| MSG-001 | Crítico | parcial | Message agora é única por tenant e transacional; Ticket/Contact e fence ainda não estão na mesma transação. |
+| MSG-002 | Alto | aberto | Há buscas legadas por `wid` sem `companyId`, incompatíveis com isolamento forte. |
+| OPS-003 | Alto | mitigado | Rollout 1.13 reiniciou por drop de constraint dependente; schema ficou intacto e a regra foi incorporada. |
 
 Problemas corrigidos pertencem ao changelog e aos READMEs de versão, não devem continuar descritos como falhas atuais.

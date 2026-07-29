@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-29
-Versão ativa: 1.12
+Versão ativa: 1.13
 
 ## Em foco
 
-Programa P0 de confiabilidade e escala. A 1.12 foi publicada com pool único,
-SQL parametrizado, readiness e baseline de PostgreSQL/Redis.
+Programa P0 de integridade e escala. A 1.13 foi publicada com idempotência
+tenant-aware e transação central de Message.
 
 ## Estado operacional
 
@@ -40,12 +40,16 @@ SQL parametrizado, readiness e baseline de PostgreSQL/Redis.
 - Conexões ociosas da aplicação caíram de 6 para 1 após estabilização.
 - Redis está em `noeviction` com AOF `everysec`; como guarda auth/leases, não
   será tratado como cache descartável.
+- `Messages(companyId,wid)` agora é único; criação e reload são transacionais e
+  Socket.IO ocorre após commit.
+- Backup pré-1.13 foi restaurado com sucesso; o primeiro rollout falhou fechado
+  ao encontrar dependência de constraint e foi recuperado sem alteração de dados.
 
 ## Próximo passo
 
-Vincular tokens externos a tenants e propagar o fence até as mesmas transações
-PostgreSQL de mensagens, tickets, contatos e contadores. Em seguida habilitar
-medição de queries e validar WhatsApp em conta canário.
+Corrigir buscas de Message por `wid` sem tenant e incorporar Ticket/Contact mais
+fence à transação de ingestão. Em seguida habilitar medição de queries e validar
+WhatsApp em conta canário.
 
 ## Fontes
 

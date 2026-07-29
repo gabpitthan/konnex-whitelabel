@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-07-29
-Versão ativa: `1.12`, publicada.
+Versão ativa: `1.13`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -35,6 +35,9 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
   de recursos após `SIGTERM` levou 1 ms.
 - A 1.12 removeu pools ad hoc e SQL interpolado, adicionou readiness e reduziu
   conexões ociosas da aplicação de 6 para 1.
+- A 1.13 tornou `Message` idempotente por tenant e transacional. O primeiro
+  rollout encontrou dependência de constraint e foi recuperado sem mudança de
+  dados; a migration corrigida, readiness e smoke foram aprovados.
 
 ## Memória estruturada
 
