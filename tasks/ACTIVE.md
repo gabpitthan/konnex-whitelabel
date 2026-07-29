@@ -1,5 +1,41 @@
 # Tarefa ativa
 
+## Versão 1.16 — contexto inicial WhatsApp fenced e idempotente
+
+Estado: publicada
+
+### Objetivo
+
+Criar/atualizar Contact e localizar/criar Ticket sob o fence da sessão, com
+unicidade real para tickets ativos e contador de não lidas atômico no banco.
+
+### Critérios de aceite
+
+- Contact usa a identidade `companyId + number` já protegida no PostgreSQL;
+- conexão e Ticket são bloqueados dentro da transação;
+- somente um Ticket ativo existe por `companyId + contactId + whatsappId`;
+- incremento de não lidas é atômico no PostgreSQL;
+- Redis passa a ser espelho, nunca fonte de verdade desse contador;
+- chamadas Baileys, download de perfil e filesystem ficam fora do lock;
+- sockets só são emitidos após commit;
+- migration aborta se encontrar duplicidades, sem reconciliar dados;
+- backup/restore, testes, build, deploy, smoke e restart são aprovados.
+
+### Rollback
+
+Imagem 1.15; o índice parcial pode permanecer por ser compatível. A remoção do
+índice só deve ocorrer de forma deliberada após validar ausência de dependência.
+
+### Resultado
+
+- backup/restore e migration up/down/up aprovados;
+- índice parcial aplicado em produção em 77 ms;
+- 18 suítes/62 testes e builds aprovados;
+- API 1.16, smoke e restart aprovados;
+- shutdown concluiu em 1 ms;
+- próximo P0: vincular autenticação dos endpoints `/api` ao tenant e eliminar
+  `companyId` confiado do cliente.
+
 ## Versão 1.15 — commit Message/Ticket protegido por fence
 
 Estado: publicada

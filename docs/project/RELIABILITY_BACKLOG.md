@@ -35,8 +35,9 @@ migração lazy e purge condicionado ao owner.
 
 ### REL-011 — exclusividade distribuída da sessão WhatsApp
 
-Estado: fundação entregue na 1.11; escala horizontal ainda bloqueada por CAS
-transacional pendente nos handlers de domínio.
+Estado: Contact/Ticket inicial e commit Message/Ticket estão fenced nas
+versões 1.15–1.16; escala horizontal ainda bloqueada por caminhos auxiliares e
+canário de duas instâncias pendentes.
 
 - lease Redis com token único, TTL e renovação;
 - fencing token monotônico;

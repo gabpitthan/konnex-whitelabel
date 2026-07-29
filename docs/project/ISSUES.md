@@ -21,10 +21,10 @@
 | REDIS-001 | Alto | parcial | Auth state v2 possui envelope/checksum e purge sem `KEYS`; batches, manifesto e restore ensaiado continuam pendentes. |
 | ENG-002 | Médio | aberto | Lint global voltou a executar e expõe 2.975 problemas legados; arquivos novos da 1.10 passam isoladamente. |
 | OPS-002 | Médio | parcial | Shutdown fecha WhatsApp e Socket.IO; Bull, Sequelize e clientes Redis ainda não têm encerramento explícito central. |
-| API-002 | Crítico | aberto | O token global de endpoints `/api` não vincula identidade ao tenant; `companyId` ainda é informado pelo cliente. |
+| API-002 | Crítico | próximo | O token global de endpoints `/api` não vincula identidade ao tenant; `companyId` ainda é informado pelo cliente. |
 | DB-002 | Alto | parcial | Pool único e orçamento seguro entregues; faltam `pg_stat_statements`, timeouts por workload e métricas de espera. |
 | REDIS-002 | Alto | aberto | Auth/lease, cache e filas compartilham Redis; separar papéis antes de eviction ou escala horizontal. |
-| MSG-001 | Crítico | parcial | Message e atualização do Ticket estão na transação fenced; criação inicial de Contact/Ticket ainda ocorre antes dela. |
+| MSG-001 | Alto | parcial | Contact/Ticket e Message usam commits fenced separados; caminhos auxiliares e atomicidade integral da ingestão ainda requerem canário/outbox. |
 | OPS-003 | Alto | mitigado | Rollout 1.13 reiniciou por drop de constraint dependente; schema ficou intacto e a regra foi incorporada. |
 
 Problemas corrigidos pertencem ao changelog e aos READMEs de versão, não devem continuar descritos como falhas atuais.

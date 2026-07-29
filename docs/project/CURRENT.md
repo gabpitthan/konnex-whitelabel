@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-29
-Versão ativa: 1.15
+Versão ativa: 1.16
 
 ## Em foco
 
-Programa P0 de integridade e escala. A 1.15 foi publicada com o commit de
-Message e atualização do Ticket protegido pelo fence da sessão.
+Programa P0 de integridade e escala. A 1.16 foi publicada com contexto inicial
+Contact/Ticket fenced, Ticket ativo único e não lidas autoritativas no banco.
 
 ## Estado operacional
 
@@ -52,12 +52,19 @@ Message e atualização do Ticket protegido pelo fence da sessão.
   tenant/conexão; Socket.IO ocorre somente após commit.
 - A regressão total passou em 14 suítes/53 testes; smoke da API 1.15 passou
   antes/depois do restart e o shutdown fechou recursos em 3 ms.
+- Contact e Ticket inicial são persistidos sob o row lock do fence; chamadas de
+  perfil permanecem fora da transação.
+- Ticket WhatsApp ativo é único por tenant/contato/conexão.
+- `unreadMessages` usa incremento atômico PostgreSQL; Redis é somente espelho.
+- Backup foi restaurado com 57 tabelas e a migration passou em up/down/up.
+- Produção aplicou o índice em 77 ms; 18 suítes/62 testes, builds, smoke e
+  restart passaram; shutdown fechou recursos em 1 ms.
 
 ## Próximo passo
 
-Separar I/O externo da persistência de Contact e tornar a criação inicial de
-Contact/Ticket concorrente e fenced. Em seguida habilitar medição de queries e
-validar WhatsApp em conta canário.
+Vincular os tokens dos endpoints `/api` ao tenant, removendo `companyId`
+confiado do cliente. Em seguida habilitar medição de queries e validar WhatsApp
+em conta canário.
 
 ## Fontes
 

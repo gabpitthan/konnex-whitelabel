@@ -210,6 +210,30 @@ pois hoje misturam I/O externo, filesystem e efeitos Socket.IO com persistência
 
 Rollback: voltar à imagem 1.14; não há alteração de schema neste lote.
 
+## Decisão para 1.16 — criação concorrente e contador autoritativo
+
+O schema contém `number_companyid_unique`, coerente com a identidade de Contact,
+mas a constraint histórica de Ticket inclui `id`, tornando-se sempre única e
+não impedindo dois tickets ativos para o mesmo contato/conexão. A base medida
+possuía zero grupos duplicados, mas estava vazia para tickets; isso prova
+compatibilidade atual, não ausência futura da corrida.
+
+O PostgreSQL documenta que unicidade condicional deve ser expressa por índice
+único parcial. Será criado um índice em
+`companyId + contactId + whatsappId WHERE status IN (...)`, exatamente o
+predicado usado pelo serviço para procurar tickets ativos. A migration abortará
+antes do DDL se existirem duplicidades.
+
+O contador anterior fazia `Redis GET`, soma em JavaScript e `SET`. Esse
+read-modify-write perde incrementos concorrentes e transforma cache em fonte de
+verdade. A decisão é usar incremento atômico do Ticket sob row lock; Redis
+recebe apenas o valor confirmado após commit para compatibilidade temporária.
+
+`findOrCreate` depende de constraint única para resolver a corrida entre busca
+e insert. Contact declara no modelo a mesma composição do banco. O fence da
+linha Whatsapp serializa os commits de uma conexão entre owners, enquanto os
+índices protegem invariantes contra outros caminhos da aplicação.
+
 ## Como o sistema ainda pode falhar
 
 - pool correto não resolve queries lentas nem transações longas;

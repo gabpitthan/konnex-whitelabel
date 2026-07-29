@@ -2,6 +2,43 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.16] — 2026-07-29 — publicada
+
+### Entregue
+
+- Contact WhatsApp criado/atualizado por identidade tenant-aware sob fence;
+- contexto inicial de Ticket na mesma transação fenced;
+- incremento atômico de `unreadMessages` no PostgreSQL;
+- Redis rebaixado de fonte de verdade para espelho compatível pós-commit;
+- índice único parcial para um Ticket WhatsApp ativo por
+  tenant/contato/conexão;
+- Socket.IO de Contact somente após commit;
+- I/O remoto de perfil fora do row lock.
+
+### Banco e recuperação
+
+- backup binário pré-1.16 com SHA-256 registrado;
+- restore real com 57 tabelas;
+- migration up/down/up aprovada na restauração;
+- zero duplicidades e owners inválidos antes do DDL;
+- migration em produção concluída em 77 ms;
+- índice e zero duplicidades confirmados após deploy.
+
+### Testes e runtime
+
+- 18 suítes e 62 testes aprovados;
+- builds backend/frontend aprovados;
+- API 1.16 e smoke aprovados antes/depois do restart;
+- restart sem migration pendente;
+- shutdown fechou recursos em 1 ms.
+
+### Limitações
+
+- conta canário e disputa real de duas instâncias continuam pendentes;
+- commits de contexto e Message são fenced, mas separados;
+- caminhos auxiliares ainda precisam de auditoria antes de liberar cluster;
+- espera de lock ainda não possui p95/p99.
+
 ## [1.15] — 2026-07-29 — publicada
 
 ### Entregue

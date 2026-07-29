@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-07-29
-Versão ativa: `1.15`, publicada.
+Versão ativa: `1.16`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -44,6 +44,9 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 - A 1.15 moveu a validação do fence para a transação que bloqueia a conexão e
   o Ticket, gravando `Ticket.lastMessage/status + Message` em um único commit e
   emitindo Message somente após commit. O gate passou com 53 testes.
+- A 1.16 colocou criação de Contact/contexto de Ticket sob o fence, tornou o
+  contador de não lidas atômico no PostgreSQL e impôs unicidade parcial para
+  Ticket WhatsApp ativo. Backup/restore, migration, 62 testes e deploy passaram.
 
 ## Memória estruturada
 
@@ -80,11 +83,11 @@ Toda nova sessão deve ler `AGENTS.md`, este índice e `docs/project/CURRENT.md`
 
 Antes de continuar o redesign, executar o P0 de confiabilidade:
 
-1. tornar criação de Contact/Ticket concorrente e fenced, separando I/O externo;
-2. vincular tokens de API ao tenant;
-3. habilitar medição de queries antes de novos índices;
-4. validar auth state v2 com conta canário, restart e mensagens;
-5. criar regressão automatizada para jornadas completas de WhatsApp.
+1. vincular tokens de API ao tenant;
+2. habilitar medição de queries antes de novos índices;
+3. validar auth state v2 com conta canário, restart e mensagens;
+4. criar regressão automatizada para jornadas completas de WhatsApp;
+5. ampliar fencing aos caminhos auxiliares antes de liberar cluster.
 
 ## Direção visual aprovada
 
