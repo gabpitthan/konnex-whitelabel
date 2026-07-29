@@ -9,10 +9,12 @@ import Whatsapp from "../../models/Whatsapp";
 import Company from "../../models/Company";
 import QueueIntegrations from "../../models/QueueIntegrations";
 import TicketTag from "../../models/TicketTag";
+import { Transaction } from "sequelize";
 
 const ShowTicketService = async (
   id: string | number,
-  companyId: number
+  companyId: number,
+  transaction?: Transaction
 ): Promise<Ticket> => {
   const ticket = await Ticket.findOne({
     where: {
@@ -108,7 +110,8 @@ const ShowTicketService = async (
         as: "ticketTags",
         attributes: ["tagId"]
       }
-    ]
+    ],
+    transaction
   });
 
   if (ticket?.companyId !== companyId) {

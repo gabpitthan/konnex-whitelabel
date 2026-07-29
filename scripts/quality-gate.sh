@@ -10,6 +10,7 @@ echo "Executando a suíte P0 em uma imagem de build isolada..."
 docker build --target build -t whitelabel-whaticket-backend-test "$PROJECT_DIR/backend"
 docker run --rm whitelabel-whaticket-backend-test \
   npx jest \
+  src/database/migrations/__tests__/enforceActiveTicketIdempotency.spec.ts \
   src/helpers/__tests__/useMultiFileAuthState.spec.ts \
   src/jobs/__tests__/handleMessageAckQueue.spec.ts \
   src/libs/__tests__/redisPattern.spec.ts \
@@ -18,12 +19,15 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/libs/__tests__/socketContract.spec.ts \
   src/libs/__tests__/whatsappFence.spec.ts \
   src/libs/__tests__/whatsappLease.spec.ts \
+  src/services/ContactServices/__tests__/UpsertWhatsappContactService.spec.ts \
   src/services/HealthServices/__tests__/GetReadinessService.spec.ts \
   src/services/MessageServices/__tests__/GetMessageRangeService.spec.ts \
   src/services/MessageServices/__tests__/CreateMessageService.spec.ts \
   src/services/MessageServices/__tests__/PersistFencedMessageService.spec.ts \
   src/services/MessageServices/__tests__/ListMessagesServiceAll.spec.ts \
   src/services/SocketServices/__tests__/AuthorizeTicketRoomService.spec.ts \
+  src/services/TicketServices/__tests__/FindOrCreateTicketService.spec.ts \
+  src/services/WbotServices/__tests__/FindOrCreateFencedWhatsappContextService.spec.ts \
   --runInBand --coverage=false
 
 echo "Compilando backend e frontend em imagens reproduzíveis..."

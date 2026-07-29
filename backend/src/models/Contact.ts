@@ -7,7 +7,6 @@ import {
   PrimaryKey,
   AutoIncrement,
   AllowNull,
-  Unique,
   Default,
   HasMany,
   ForeignKey,
@@ -24,7 +23,15 @@ import ContactWallet from "./ContactWallet";
 import User from "./User";
 import Whatsapp from "./Whatsapp";
 
-@Table
+@Table({
+  indexes: [
+    {
+      name: "number_companyid_unique",
+      unique: true,
+      fields: ["number", "companyId"]
+    }
+  ]
+})
 class Contact extends Model<Contact> {
   @PrimaryKey
   @AutoIncrement
@@ -35,7 +42,6 @@ class Contact extends Model<Contact> {
   name: string;
 
   @AllowNull(false)
-  @Unique
   @Column
   number: string;
 

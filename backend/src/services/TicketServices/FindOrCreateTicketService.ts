@@ -1,23 +1,18 @@
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import { sub } from "date-fns";
 
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
-import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import { isNil } from "lodash";
-import { getIO } from "../../libs/socket";
-import logger from "../../utils/logger";
 import Whatsapp from "../../models/Whatsapp";
-import CompaniesSettings from "../../models/CompaniesSettings";
 import CreateLogTicketService from "./CreateLogTicketService";
 import AppError from "../../errors/AppError";
-import UpdateTicketService from "./UpdateTicketService";
 
-// interface Response {
-//   ticket: Ticket;
-//   // isCreated: boolean;
-// }
+interface PersistenceOptions {
+  transaction?: Transaction;
+  incrementUnread?: boolean;
+}
 
 const FindOrCreateTicketService = async (
   contact: Contact,
@@ -32,7 +27,8 @@ const FindOrCreateTicketService = async (
   isForward?: boolean,
   settings?: any,
   isTransfered?: boolean,
-  isCampaign: boolean = false
+  isCampaign: boolean = false,
+  persistence: PersistenceOptions = {}
 ): Promise<Ticket> => {
   // try {
   // let isCreated = false;
@@ -48,9 +44,8 @@ const FindOrCreateTicketService = async (
         (settings.lgpdConsent === "disabled" && isNil(contact?.lgpdAcceptedAt)))
   }
 
-  const io = getIO();
-
   const DirectTicketsToWallets = settings.DirectTicketsToWallets;
+  const { transaction, incrementUnread = false } = persistence;
 
   let ticket = await Ticket.findOne({
     where: {
@@ -61,7 +56,11 @@ const FindOrCreateTicketService = async (
       companyId,
       whatsappId: whatsapp.id
     },
-    order: [["id", "DESC"]]
+    order: [["id", "DESC"]],
+    transaction,
+    ...(transaction
+      ? { lock: transaction.LOCK.UPDATE }
+      : {})
   });
 
 
@@ -72,12 +71,21 @@ const FindOrCreateTicketService = async (
       await ticket.update({
         userId: userId !== ticket.userId ? ticket.userId : userId,
         queueId: queueId !== ticket.queueId ? ticket.queueId : queueId,
-      })
+      }, { transaction })
+    } else if (incrementUnread) {
+      await ticket.increment("unreadMessages", {
+        by: 1,
+        transaction
+      });
+      await ticket.update({ isBot: false }, { transaction });
     } else {
-      await ticket.update({ unreadMessages, isBot: false });
+      await ticket.update(
+        { unreadMessages, isBot: false },
+        { transaction }
+      );
     }
 
-    ticket = await ShowTicketService(ticket.id, companyId);
+    ticket = await ShowTicketService(ticket.id, companyId, transaction);
     // console.log(ticket.id)
 
     if (!isCampaign && !isForward) {
@@ -115,17 +123,27 @@ const FindOrCreateTicketService = async (
           companyId,
           whatsappId: whatsapp.id
         },
-        order: [["updatedAt", "DESC"]]
+        order: [["updatedAt", "DESC"]],
+        transaction,
+        ...(transaction
+          ? { lock: transaction.LOCK.UPDATE }
+          : {})
       });
     }
 
     if (ticket && ticket.status !== "nps") {
+      if (incrementUnread) {
+        await ticket.increment("unreadMessages", {
+          by: 1,
+          transaction
+        });
+      }
       await ticket.update({
         status: "pending",
-        unreadMessages,
+        ...(!incrementUnread ? { unreadMessages } : {}),
         companyId,
         // queueId: timeCreateNewTicket === 0 ? null : ticket.queueId
-      });
+      }, { transaction });
     }
   }
 
@@ -140,7 +158,7 @@ const FindOrCreateTicketService = async (
           "pending" : //caso  é para tratar grupo como ticket ou não é grupo, abre como pendente
           "group", // se não é para tratar grupo como ticket, vai direto para grupos
       isGroup: !!groupContact,
-      unreadMessages,
+      unreadMessages: incrementUnread ? 1 : unreadMessages,
       whatsappId: whatsapp.id,
       companyId,
       isBot: groupContact ? false : true,
@@ -151,7 +169,7 @@ const FindOrCreateTicketService = async (
 
     if (DirectTicketsToWallets && contact.id) {
       const wallet: any = contact;
-      const wallets = await wallet.getWallets();
+      const wallets = await wallet.getWallets({ transaction });
       if (wallets && wallets[0]?.id) {
         ticketData.status = (!isImported && !isNil(settings.enableLGPD)
           && openAsLGPD && !groupContact) ? //verifica se lgpd está habilitada e não é grupo e se tem a mensagem e link da política
@@ -163,9 +181,7 @@ const FindOrCreateTicketService = async (
       }
     }
 
-    ticket = await Ticket.create(
-      ticketData
-    );
+    ticket = await Ticket.create(ticketData, { transaction });
 
     // await FindOrCreateATicketTrakingService({
     //   ticketId: ticket.id,
@@ -178,19 +194,20 @@ const FindOrCreateTicketService = async (
 
   if (queueId != 0 && !isNil(queueId)) {
     //Determina qual a fila esse ticket pertence.
-    await ticket.update({ queueId: queueId });
+    await ticket.update({ queueId: queueId }, { transaction });
   }
 
   if (userId != 0 && !isNil(userId)) {
     //Determina qual a fila esse ticket pertence.
-    await ticket.update({ userId: userId });
+    await ticket.update({ userId: userId }, { transaction });
   }
 
-  ticket = await ShowTicketService(ticket.id, companyId);
+  ticket = await ShowTicketService(ticket.id, companyId, transaction);
 
   await CreateLogTicketService({
     ticketId: ticket.id,
-    type: openAsLGPD ? "lgpd" : "create"
+    type: openAsLGPD ? "lgpd" : "create",
+    transaction
   });
 
 

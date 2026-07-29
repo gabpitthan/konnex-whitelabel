@@ -96,6 +96,7 @@ import { handleOpenAi } from "../IntegrationsServices/OpenAiService";
 import { IOpenAi } from "../../@types/openai";
 import { WhatsAppLease } from "../../libs/whatsappLease";
 import { WhatsappFenceLostError } from "../../libs/whatsappFence";
+import FindOrCreateFencedWhatsappContextService from "./FindOrCreateFencedWhatsappContextService";
 
 const os = require("os");
 
@@ -846,6 +847,27 @@ const verifyContact = async (
   const contact = await CreateOrUpdateContactService(contactData);
 
   return contact;
+};
+
+const buildWhatsappContactData = (
+  msgContact: IMe,
+  wbot: Session,
+  companyId: number,
+  acceptAudioMessage: boolean = true
+) => {
+  const isGroup = msgContact.id.includes("g.us");
+  return {
+    name: msgContact.name || msgContact.id.replace(/\D/g, ""),
+    number: isGroup
+      ? msgContact.id.replace("@g.us", "")
+      : msgContact.id.replace(/\D/g, ""),
+    profilePicUrl: "",
+    isGroup,
+    companyId,
+    remoteJid: msgContact.id,
+    whatsappId: wbot.id!,
+    acceptAudioMessage
+  };
 };
 
 const verifyQuotedMessage = async (
@@ -4040,6 +4062,9 @@ const handleMessage = async (
   try {
     let msgContact: IMe;
     let groupContact: Contact | undefined;
+    let groupContactData:
+      | ReturnType<typeof buildWhatsappContactData>
+      | undefined;
     let queueId: number = null;
     let tagsId: number = null;
     let userId: number = null;
@@ -4136,54 +4161,79 @@ const handleMessage = async (
         id: grupoMeta.id,
         name: grupoMeta.subject
       };
-      groupContact = await verifyContact(msgGroupContact, wbot, companyId);
-    }
-
-    const contact = await verifyContact(msgContact, wbot, companyId);
-
-    let unreadMessages = 0;
-
-    if (msg.key.fromMe) {
-      console.log("log... 2980");
-      await cacheLayer.set(`contacts:${contact.id}:unreads`, "0");
-    } else {
-      console.log("log... 2983");
-      const unreads = await cacheLayer.get(`contacts:${contact.id}:unreads`);
-      unreadMessages = +unreads + 1;
-      await cacheLayer.set(
-        `contacts:${contact.id}:unreads`,
-        `${unreadMessages}`
+      groupContactData = buildWhatsappContactData(
+        msgGroupContact,
+        wbot,
+        companyId
       );
     }
 
     const settings = await CompaniesSettings.findOne({
       where: { companyId }
     });
+    if (!settings) throw new Error("ERR_COMPANY_SETTINGS_NOT_FOUND");
+    if (!wbot.lease || !wbot.id) throw new WhatsappFenceLostError();
 
-    const enableLGPD = settings.enableLGPD === "enabled";
-
-    const isFirstMsg = await Ticket.findOne({
-      where: {
-        contactId: groupContact ? groupContact.id : contact.id,
-        companyId,
-        whatsappId: whatsapp.id
-      },
-      order: [["id", "DESC"]]
-    });
-
-    const ticket = await FindOrCreateTicketService(
-      contact,
-      whatsapp,
-      unreadMessages,
+    const contactData = buildWhatsappContactData(
+      msgContact,
+      wbot,
       companyId,
+      settings.acceptAudioMessageContact === "enabled"
+    );
+    if (groupContactData) {
+      groupContactData.acceptAudioMessage =
+        settings.acceptAudioMessageContact === "enabled";
+    }
+
+    const profileContacts = groupContactData
+      ? [contactData, groupContactData]
+      : [contactData];
+    await Promise.all(
+      profileContacts.map(async data => {
+        try {
+          data.profilePicUrl = await wbot.profilePictureUrl(
+            data.remoteJid,
+            "image"
+          );
+        } catch (error) {
+          Sentry.captureException(
+            new Error("WHATSAPP_PROFILE_LOOKUP_FAILED_SANITIZED")
+          );
+          data.profilePicUrl = `${process.env.FRONTEND_URL}/nopicture.png`;
+        }
+      })
+    );
+
+    await wbot.lease.assertOwned();
+    const context = await FindOrCreateFencedWhatsappContextService({
+      owner: { whatsappId: wbot.id, companyId },
+      fence: wbot.lease.fence,
+      contactData,
+      groupContactData,
+      whatsapp,
+      fromMe: !!msg.key.fromMe,
       queueId,
       userId,
-      groupContact,
-      "whatsapp",
+      channel: "whatsapp",
       isImported,
-      false,
       settings
-    );
+    });
+    const { contact, ticket, previousTicket: isFirstMsg } = context;
+    groupContact = context.groupContact;
+    const unreadMessages = ticket.unreadMessages;
+
+    // Temporary compatibility mirror. PostgreSQL is authoritative; failure to
+    // update Redis must never roll back or alter the confirmed counter.
+    await cacheLayer
+      .set(`contacts:${contact.id}:unreads`, `${unreadMessages}`)
+      .catch(error =>
+        logger.warn({
+          event: "whatsapp_unread_cache_mirror_failed",
+          companyId,
+          contactId: contact.id,
+          errorClass: error instanceof Error ? error.name : "UnknownError"
+        })
+      );
 
     let bodyRollbackTag = "";
     let bodyNextTag = "";

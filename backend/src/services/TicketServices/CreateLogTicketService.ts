@@ -1,6 +1,7 @@
 // import AppError from "../../errors/AppError";
 // import socketEmit from "../../helpers/socketEmit";
 import LogTicket from "../../models/LogTicket";
+import { Transaction } from "sequelize";
 
 type logType =
   | "access"
@@ -27,20 +28,25 @@ interface Request {
   ticketId: number | string;
   userId?: number | string;
   queueId?: number | string;
+  transaction?: Transaction;
 }
 
 const CreateLogTicketService = async ({
   type,
   userId,
   ticketId,
-  queueId
+  queueId,
+  transaction
 }: Request): Promise<void> => {
-  await LogTicket.create({
-    userId,
-    ticketId,
-    type,
-    queueId
-  });
+  await LogTicket.create(
+    {
+      userId,
+      ticketId,
+      type,
+      queueId
+    },
+    { transaction }
+  );
 
   // socketEmit({
   //   companyId,
