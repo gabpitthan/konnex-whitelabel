@@ -31,6 +31,7 @@ services:
   backend:
     build: ./backend
     restart: unless-stopped
+    stop_grace_period: 40s
     depends_on:
       postgres: {condition: service_healthy}
       redis: {condition: service_healthy}

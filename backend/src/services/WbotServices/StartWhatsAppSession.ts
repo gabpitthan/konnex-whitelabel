@@ -7,14 +7,25 @@ import logger from "../../utils/logger";
 import * as Sentry from "@sentry/node";
 import AppError from "../../errors/AppError";
 import { runSessionStartSingleFlight } from "../../libs/sessionStartRegistry";
+import {
+  assertApplicationRunning,
+  isApplicationDraining
+} from "../../libs/shutdownState";
 
 export const StartWhatsAppSession = async (
   whatsapp: Whatsapp,
   companyId: number
 ): Promise<void> => {
+  if (isApplicationDraining()) {
+    throw new AppError("APP_SHUTTING_DOWN", 503);
+  }
+
   return runSessionStartSingleFlight(
     { whatsappId: whatsapp.id, companyId },
     async () => {
+      if (isApplicationDraining()) {
+        throw new AppError("APP_SHUTTING_DOWN", 503);
+      }
       const ownedWhatsapp = await Whatsapp.findOne({
         where: { id: whatsapp.id, companyId, channel: "whatsapp" }
       });
@@ -26,6 +37,7 @@ export const StartWhatsAppSession = async (
       if (hasWbot(ownedWhatsapp.id)) return;
 
       await ownedWhatsapp.update({ status: "OPENING" });
+      assertApplicationRunning();
 
       const io = getIO();
       io.of(String(companyId)).emit(`company-${companyId}-whatsappSession`, {
@@ -35,6 +47,7 @@ export const StartWhatsAppSession = async (
 
       try {
         const wbot = await initWASocket(ownedWhatsapp);
+        assertApplicationRunning();
 
         if (wbot.id) {
           wbotMessageListener(wbot, companyId);

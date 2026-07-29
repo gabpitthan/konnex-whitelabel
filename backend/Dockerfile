@@ -3,7 +3,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends git python3 make g++ ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
-COPY tsconfig.json jest.config.js .sequelizerc ./
+COPY tsconfig.json jest.config.js .sequelizerc .eslintrc.json .eslintignore ./
 COPY src ./src
 RUN npm run build
 
@@ -19,4 +19,4 @@ COPY .sequelizerc ./
 RUN mkdir -p public private logs certs \
     && chown -R node:node /app/public /app/private /app/logs /app/certs
 USER node
-CMD ["sh","-c","npx sequelize db:migrate && if [ \"${RUN_DB_SEEDS:-false}\" = \"true\" ]; then npx sequelize db:seed:all; fi && node dist/server.js"]
+CMD ["sh","-c","npx sequelize db:migrate && if [ \"${RUN_DB_SEEDS:-false}\" = \"true\" ]; then npx sequelize db:seed:all; fi && exec node dist/server.js"]

@@ -6,6 +6,18 @@ cd "$PROJECT_DIR"
 
 "$PROJECT_DIR/scripts/preflight.sh"
 
+echo "Executando a suíte P0 em uma imagem de build isolada..."
+docker build --target build -t whitelabel-whaticket-backend-test "$PROJECT_DIR/backend"
+docker run --rm whitelabel-whaticket-backend-test \
+  npx jest \
+  src/helpers/__tests__/useMultiFileAuthState.spec.ts \
+  src/libs/__tests__/redisPattern.spec.ts \
+  src/libs/__tests__/sessionStartRegistry.spec.ts \
+  src/libs/__tests__/shutdownState.spec.ts \
+  src/libs/__tests__/socketContract.spec.ts \
+  src/services/SocketServices/__tests__/AuthorizeTicketRoomService.spec.ts \
+  --runInBand --coverage=false
+
 echo "Compilando backend e frontend em imagens reproduzíveis..."
 docker compose build backend frontend
 

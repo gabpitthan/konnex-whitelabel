@@ -2,7 +2,50 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
-## [1.9] — 2026-07-29 — em desenvolvimento
+## [1.10] — 2026-07-29 — publicada
+
+### Objetivo
+
+Tornar encerramentos e reinícios do backend previsíveis e eliminar limpeza Redis bloqueante antes da futura adoção de lease/fencing distribuído.
+
+### Entregue
+
+- estado monotônico de shutdown (`running`, `draining`, `closed`);
+- bloqueio de novas inicializações WhatsApp durante drain;
+- cancelamento de reconexões e invalidação das gerações ativas;
+- fechamento de sockets sem logout nem exclusão de credenciais;
+- encerramento coordenado do Socket.IO;
+- janela Docker de 40 segundos para shutdown;
+- purge por `SCAN` + `UNLINK`, paginado e limitado;
+- modo cluster inseguro bloqueado explicitamente;
+- configuração de lint legada reparada para permitir medir a dívida real.
+
+### Banco e migrations
+
+- nenhuma migration;
+- PostgreSQL e modelo Redis inalterados.
+
+### Testes
+
+- 22 testes automatizados aprovados;
+- TypeScript/backend e bundle/frontend aprovados;
+- lint dos arquivos novos aprovado;
+- lint global executável, com 2.975 problemas legados registrados;
+- quality gate agora executa obrigatoriamente as 6 suítes P0;
+- processo Node confirmado como processo principal do container;
+- restart real recebeu `SIGTERM` e concluiu o cleanup monitorado em 2 ms;
+- smoke pós-restart confirmou frontend ativo e API em `1.10`.
+
+### Limitações
+
+- conta canário WhatsApp real, mídia e reconexão continuam pendentes;
+- Bull, Sequelize, Redis e listeners especializados ainda aguardam registry
+  completo de disposers;
+- QA autenticado desktop/mobile e prova Socket.IO tenant A/B não foram
+  repetidos neste deploy; o frontend e o contrato Socket.IO não mudaram neste
+  lote e permanecem cobertos pela evidência da 1.9/1.8.
+
+## [1.9] — 2026-07-29 — publicada
 
 ### Objetivo
 

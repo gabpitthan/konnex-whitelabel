@@ -2,13 +2,18 @@ import 'dotenv/config';
 import gracefulShutdown from "http-graceful-shutdown";
 import app from "./app";
 import cron from "node-cron";
-import { initIO } from "./libs/socket";
+import { closeIO, initIO } from "./libs/socket";
 import logger from "./utils/logger";
 import { StartAllWhatsAppsSessions } from "./services/WbotServices/StartAllWhatsAppsSessions";
 import Company from "./models/Company";
 import BullQueue from './libs/queue';
 
 import { startQueueProcess } from "./queues";
+import {
+  beginApplicationDrain,
+  completeApplicationShutdown
+} from "./libs/shutdownState";
+import { shutdownWbots } from "./libs/wbot";
 // import { ScheduledMessagesJob, ScheduleMessagesGenerateJob, ScheduleMessagesEnvioJob, ScheduleMessagesEnvioForaHorarioJob } from "./wbotScheduledMessages";
 
 const server = app.listen(process.env.PORT, async () => {
@@ -77,4 +82,30 @@ process.on("unhandledRejection", (reason, p) => {
 // });
 
 initIO(server);
-gracefulShutdown(server);
+gracefulShutdown(server, {
+  signals: "SIGINT SIGTERM",
+  timeout: 30000,
+  forceExit: true,
+  preShutdown: async signal => {
+    const started = beginApplicationDrain();
+    logger.info({
+      event: "application_shutdown_started",
+      signal,
+      firstRequest: started
+    });
+  },
+  onShutdown: async signal => {
+    const startedAt = Date.now();
+    await shutdownWbots();
+    await closeIO();
+    completeApplicationShutdown();
+    logger.info({
+      event: "application_shutdown_resources_closed",
+      signal,
+      durationMs: Date.now() - startedAt
+    });
+  },
+  finally: () => {
+    logger.info({ event: "application_shutdown_completed" });
+  }
+});

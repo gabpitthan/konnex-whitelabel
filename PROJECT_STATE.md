@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
-Última atualização: 2026-07-28
-Versão ativa: `1.9`, em desenvolvimento.
+Última atualização: 2026-07-29
+Versão ativa: `1.10`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -28,6 +28,8 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 - Versão 1.3 foi implantada e `/version` respondeu corretamente.
 - Baileys oficial 6.7.22 gera QR.
 - Validação completa de pareamento, mensagens, mídia e reconexão ainda depende de teste real.
+- Versão 1.10 foi implantada; restart coordenado e smoke pós-restart foram
+  aprovados.
 
 ## Memória estruturada
 

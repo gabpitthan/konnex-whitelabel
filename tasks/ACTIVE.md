@@ -1,6 +1,7 @@
 # Tarefa ativa
 
-Estado: versão 1.9 em implementação — primeira fase de `REL-002`/`REL-003`.
+Estado: aguardando próximo pedido. Versão 1.10 publicada; builds, 22 testes,
+restart controlado e smoke aprovados.
 
 ## Pedido
 
@@ -88,20 +89,16 @@ Atendimento e Contatos, seguidos por Kanban, Campanhas, FlowBuilder, Conexões e
 
 ## Próximo passo
 
-Implementar e validar:
+Implementar `REL-002/003` com lease Redis, fencing/CAS e registry completo de
+disposers. Preparar uma conta canário isolada antes de validar pareamento,
+texto, mídia, queda de rede, restart e logout.
 
-- auth state Redis fail-closed para indisponibilidade e corrupção;
-- namespace v2 com `companyId + whatsappId` e migração lazy;
-- propagação real de falhas de leitura, escrita e remoção;
-- single-flight em processo para início de sessão;
-- correção da Promise pendente/unhandled rejection;
-- testes de isolamento, serialização, corrupção, falha Redis e concorrência.
+Fora deste lote:
 
-Fora deste lote, mas obrigatório no seguinte:
-
-- lease distribuído/fencing para múltiplos processos;
-- cleanup central de todos os listeners e timers;
-- shutdown coordenado;
+- lease distribuído + fencing/CAS;
+- registry de disposers completo;
+- shutdown explícito de Bull, Sequelize e Redis;
+- manifesto atômico de auth state;
 - máquina de estados completa e canário WhatsApp real.
 
 Ao iniciar uma tarefa, registrar:

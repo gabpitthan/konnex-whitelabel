@@ -37,6 +37,10 @@ import {
   invalidateSessionGeneration,
   isCurrentSessionGeneration
 } from "./sessionStartRegistry";
+import {
+  assertApplicationRunning,
+  isApplicationDraining
+} from "./shutdownState";
 
 const msgRetryCounterCache = new NodeCache({
   stdTTL: 600,
@@ -176,6 +180,45 @@ export const removeWbot = async (
   }
 };
 
+export const shutdownWbots = async (): Promise<void> => {
+  reconnectTimersMap.forEach(timer => clearTimeout(timer));
+  reconnectTimersMap.clear();
+  reconnectAttemptsMap.clear();
+  retriesQrCodeMap.clear();
+
+  const activeSessions = sessions.splice(0, sessions.length);
+  const closeResults = await Promise.allSettled(
+    activeSessions.map(async session => {
+      if (session.id && session.companyId) {
+        invalidateSessionGeneration({
+          whatsappId: session.id,
+          companyId: session.companyId
+        });
+      }
+      session.ev.removeAllListeners("messaging-history.set");
+      session.ev.removeAllListeners("connection.update");
+      session.ev.removeAllListeners("creds.update");
+      session.ws.close();
+    })
+  );
+  const failedCloses = closeResults.filter(
+    result => result.status === "rejected"
+  );
+  msgRetryCounterCache.close();
+  msgCache.close();
+
+  if (failedCloses.length > 0) {
+    logger.error({
+      event: "whatsapp_shutdown_close_failed",
+      failedSessions: failedCloses.length,
+      totalSessions: activeSessions.length
+    });
+    throw new Error(
+      `Failed to close ${failedCloses.length} WhatsApp session(s)`
+    );
+  }
+};
+
 export var dataMessages: any = {};
 
 export const msgDB = msg();
@@ -184,6 +227,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
   return new Promise((resolve, reject) => {
     void (async () => {
       let startTimeout: NodeJS.Timeout;
+      let wsocket: Session = null;
       try {
         const io = getIO();
 
@@ -206,8 +250,12 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         logger.info(`Starting session ${name}`);
         let retriesQrCode = 0;
 
-        let wsocket: Session = null;
         const { state, saveCreds } = await useMultiFileAuthState(whatsapp);
+
+        // This is the last asynchronous boundary before the socket is created
+        // and registered. If drain began while DB/Baileys/Redis were loading,
+        // fail closed so shutdown cannot miss a late session.
+        assertApplicationRunning();
 
         wsocket = makeWASocket({
           version,
@@ -240,7 +288,9 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           // keepAliveIntervalMs: 60_000,
           getMessage: msgDB.get,
         });
+        wsocket.id = whatsapp.id;
         wsocket.companyId = companyId;
+        sessions.push(wsocket);
 
         let startSettled = false;
         const completeStart = (): void => {
@@ -399,6 +449,12 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
           "connection.update",
           async ({ connection, lastDisconnect, qr }) => {
             if (!isCurrentSessionGeneration(owner, generation)) return;
+
+            if (connection === "close" && isApplicationDraining()) {
+              await removeWbot(id, false, wsocket);
+              invalidateSessionGeneration(owner, generation);
+              return;
+            }
             logger.info(
               `Socket  ${name} Connection Update ${connection || ""} ${lastDisconnect ? lastDisconnect.error.message : ""
               }`
@@ -462,6 +518,7 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
               const timer = setTimeout(async () => {
                 reconnectTimersMap.delete(id);
+                if (isApplicationDraining()) return;
                 const current = await Whatsapp.findByPk(id);
                 if (current && current.status !== "DISCONNECTED") {
                   StartWhatsAppSession(current, current.companyId);
@@ -493,14 +550,6 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                   session: whatsapp
                 });
 
-              const sessionIndex = sessions.findIndex(
-                s => s.id === whatsapp.id
-              );
-              if (sessionIndex === -1) {
-                wsocket.id = whatsapp.id;
-                sessions.push(wsocket);
-              }
-
               completeStart();
             }
 
@@ -531,15 +580,6 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
                   retries: 0,
                   number: ""
                 });
-                const sessionIndex = sessions.findIndex(
-                  s => s.id === whatsapp.id
-                );
-
-                if (sessionIndex === -1) {
-                  wsocket.id = whatsapp.id;
-                  sessions.push(wsocket);
-                }
-
                 io.of(String(companyId))
                   .emit(`company-${whatsapp.companyId}-whatsappSession`, {
                     action: "update",
@@ -574,6 +614,13 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
         // store.bind(wsocket.ev);
       } catch (error) {
         if (startTimeout) clearTimeout(startTimeout);
+        if (wsocket) {
+          wsocket.ev.removeAllListeners("messaging-history.set");
+          wsocket.ev.removeAllListeners("connection.update");
+          wsocket.ev.removeAllListeners("creds.update");
+          wsocket.ws.close();
+          await removeWbot(whatsapp.id, false, wsocket);
+        }
         Sentry.captureException(error);
         logger.error({
           event: "whatsapp_session_start_failed",

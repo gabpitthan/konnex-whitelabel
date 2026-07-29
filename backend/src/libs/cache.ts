@@ -3,6 +3,7 @@ import Redis from "ioredis";
 import hmacSHA512 from "crypto-js/hmac-sha512";
 import Base64 from "crypto-js/enc-base64";
 import { REDIS_URI_CONNECTION } from "../config/redis";
+import { unlinkRedisPattern } from "./redisPattern";
 
 class CacheSingleton {
   private redis: Redis;
@@ -63,8 +64,7 @@ class CacheSingleton {
   }
 
   public async delFromPattern(pattern: string): Promise<void> {
-    const all = await this.getKeys(pattern);
-    await Promise.all(all.map(item => this.del(item)));
+    await unlinkRedisPattern(this.redis, pattern);
   }
 
   public async setFromParams(

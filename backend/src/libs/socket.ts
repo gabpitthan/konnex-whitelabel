@@ -268,3 +268,10 @@ export const getIO = (): SocketIOServer => {
   }
   return io;
 };
+
+export const closeIO = async (): Promise<void> => {
+  if (!io) return;
+  const activeIO = io;
+  io = undefined;
+  await new Promise<void>(resolve => activeIO.close(() => resolve()));
+};

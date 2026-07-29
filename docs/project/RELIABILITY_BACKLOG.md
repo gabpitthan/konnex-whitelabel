@@ -13,23 +13,33 @@
 
 ### REL-002 — máquina de estados da sessão WhatsApp
 
-Estado: parcial na 1.9 — single-flight local, generation, timeout e falha propagada.
+Estado: parcial na 1.10 — single-flight local, generation, timeout, falha propagada e shutdown coordenado.
 
 - `idle`, `pairing`, `connecting`, `connected`, `degraded`, `reconnecting`, `logged_out`, `failed`;
 - lock single-flight por sessão;
 - epoch/generation para ignorar eventos de socket antigo;
-- cleanup central de listeners/timers;
+- ampliar o cleanup atual para registry/disposers de todos os listeners/timers especializados;
 - diferenciar erro recuperável, autenticação revogada e incidente externo.
 
 ### REL-003 — integridade do auth state
 
-Estado: parcial na 1.9 — fail-closed, envelope v2, checksum, ownership e migração lazy.
+Estado: parcial na 1.10 — fail-closed, envelope v2, checksum, ownership, migração lazy e purge por SCAN/UNLINK.
 
 - erro Redis deve falhar de forma segura, nunca virar credencial vazia;
 - persistência atômica/versionada;
 - namespace com tenant e sessão;
 - detecção de estado parcial;
 - teste de restart, Redis indisponível e corrupção.
+
+### REL-011 — exclusividade distribuída da sessão WhatsApp
+
+- lease Redis com token único, TTL e renovação;
+- fencing token monotônico;
+- persistência do fence corrente no PostgreSQL;
+- compare-and-set antes de credenciais, mensagens e mudanças de status;
+- perda do lease encerra imediatamente o socket sem logout;
+- reconciler para sessão órfã;
+- testes com dois processos e pausas maiores que o TTL.
 
 ### REL-004 — suíte mínima P0
 
