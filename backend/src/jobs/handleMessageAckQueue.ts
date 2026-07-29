@@ -7,8 +7,8 @@ export default {
   },
   async handle({ data }) {
     try {
-      const { msg, chat } = data;
-      await handleMsgAck(msg, chat);
+      const { msg, chat, companyId } = data;
+      await handleMsgAck(msg, chat, companyId);
     } catch (error) {
       console.log("error", error)
     }

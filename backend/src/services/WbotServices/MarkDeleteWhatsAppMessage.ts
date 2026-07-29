@@ -21,6 +21,7 @@ const MarkDeleteWhatsAppMessage = async (from: any, timestamp?: any, msgId?: str
             const messageToUpdate = await Message.findOne({
                 where: {
                     wid: messages[0].wid,
+                    companyId
                 },
                 include: [
                     "contact",

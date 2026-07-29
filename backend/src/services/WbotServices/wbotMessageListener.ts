@@ -817,7 +817,8 @@ const verifyContact = async (
 };
 
 const verifyQuotedMessage = async (
-  msg: proto.IWebMessageInfo
+  msg: proto.IWebMessageInfo,
+  companyId: number
 ): Promise<Message | null> => {
   if (!msg) return null;
   const quoted = getQuotedMessageId(msg);
@@ -825,7 +826,7 @@ const verifyQuotedMessage = async (
   if (!quoted) return null;
 
   const quotedMsg = await Message.findOne({
-    where: { wid: quoted }
+    where: { wid: quoted, companyId }
   });
 
   if (!quotedMsg) return null;
@@ -843,7 +844,7 @@ export const verifyMediaMessage = async (
   wbot: Session
 ): Promise<Message> => {
   const io = getIO();
-  const quotedMsg = await verifyQuotedMessage(msg);
+  const quotedMsg = await verifyQuotedMessage(msg, ticket.companyId);
   const companyId = ticket.companyId;
 
   try {
@@ -1093,7 +1094,7 @@ export const verifyMessage = async (
 ) => {
   // console.log("Mensagem recebida:", JSON.stringify(msg, null, 2));
   const io = getIO();
-  const quotedMsg = await verifyQuotedMessage(msg);
+  const quotedMsg = await verifyQuotedMessage(msg, ticket.companyId);
   const body = getBodyMessage(msg);
   const companyId = ticket.companyId;
 
@@ -3475,7 +3476,7 @@ const flowbuilderIntegration = async (
   isTranfered?: boolean
 ) => {
   const io = getIO();
-  const quotedMsg = await verifyQuotedMessage(msg);
+  const quotedMsg = await verifyQuotedMessage(msg, ticket.companyId);
   const body = getBodyMessage(msg);
 
   /*
@@ -4934,7 +4935,8 @@ const handleMessage = async (
 };
 const handleMsgAck = async (
   msg: WAMessage,
-  chat: number | null | undefined
+  chat: number | null | undefined,
+  companyId: number
 ) => {
   await new Promise(r => setTimeout(r, 500));
   const io = getIO();
@@ -4942,7 +4944,8 @@ const handleMsgAck = async (
   try {
     const messageToUpdate = await Message.findOne({
       where: {
-        wid: msg.key.id
+        wid: msg.key.id,
+        companyId
       },
       include: [
         "contact",
@@ -5189,14 +5192,14 @@ const wbotUserJid = wbot?.user?.id;
         if (REDIS_URI_MSG_CONN !== "") {
           BullQueues.add(
             `${process.env.DB_NAME}-handleMessageAck`,
-            { msg: message, chat: 2 },
+            { msg: message, chat: 2, companyId },
             {
               priority: 1,
               jobId: `${wbot.id}-handleMessageAck-${message.key.id}`
             }
           );
         } else {
-          handleMsgAck(message, 2);
+          handleMsgAck(message, 2, companyId);
         }
       }
     });
@@ -5243,14 +5246,14 @@ const wbotUserJid = wbot?.user?.id;
       if (REDIS_URI_MSG_CONN !== "") {
         BullQueues.add(
           `${process.env.DB_NAME}-handleMessageAck`,
-          { msg: message, chat: ack },
+          { msg: message, chat: ack, companyId },
           {
             priority: 1,
             jobId: `${wbot.id}-handleMessageAck-${message.key.id}`
           }
         );
       } else {
-        handleMsgAck(message, ack);
+        handleMsgAck(message, ack, companyId);
       }
     });
   });

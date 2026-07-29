@@ -112,7 +112,7 @@ export const verifyMessageFace = async (
   contact: Contact,
   fromMe: boolean = false
 ) => {
-  const quotedMsg = await verifyQuotedMessage(msg);
+  const quotedMsg = await verifyQuotedMessage(msg, ticket.companyId);
   const messageData = {
     wid: msg.mid || msg.message_id,
     ticketId: ticket.id,
@@ -184,14 +184,17 @@ export const verifyMessageMedia = async (
   // });
 };
 
-export const verifyQuotedMessage = async (msg: any): Promise<Message | null> => {
+export const verifyQuotedMessage = async (
+  msg: any,
+  companyId: number
+): Promise<Message | null> => {
   if (!msg) return null;
   const quoted = msg?.reply_to?.mid;
 
   if (!quoted) return null;
 
   const quotedMsg = await Message.findOne({
-    where: { wid: quoted }
+    where: { wid: quoted, companyId }
   });
 
   if (!quotedMsg) return null;

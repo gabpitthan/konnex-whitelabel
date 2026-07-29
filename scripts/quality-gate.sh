@@ -11,6 +11,7 @@ docker build --target build -t whitelabel-whaticket-backend-test "$PROJECT_DIR/b
 docker run --rm whitelabel-whaticket-backend-test \
   npx jest \
   src/helpers/__tests__/useMultiFileAuthState.spec.ts \
+  src/jobs/__tests__/handleMessageAckQueue.spec.ts \
   src/libs/__tests__/redisPattern.spec.ts \
   src/libs/__tests__/sessionStartRegistry.spec.ts \
   src/libs/__tests__/shutdownState.spec.ts \
