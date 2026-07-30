@@ -20,6 +20,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/libs/__tests__/socketContract.spec.ts \
   src/libs/__tests__/whatsappFence.spec.ts \
   src/libs/__tests__/whatsappLease.spec.ts \
+  src/middleware/__tests__/apiRateLimit.spec.ts \
   src/middleware/__tests__/tokenAuth.spec.ts \
   src/services/ApiServices/__tests__/RecordApiUsageService.spec.ts \
   src/services/ContactServices/__tests__/UpsertWhatsappContactService.spec.ts \

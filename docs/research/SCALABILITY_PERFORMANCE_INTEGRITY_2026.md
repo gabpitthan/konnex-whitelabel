@@ -271,3 +271,27 @@ dual será projetado separadamente.
 - lease sem CAS dentro da transação de domínio ainda permite escrita obsoleta;
 - uma única instância PostgreSQL/Redis continua sendo ponto único de falha;
 - métricas sem SLO e alerta não reduzem tempo de detecção.
+
+## Decisão para 1.18 — rate limiting distribuído
+
+OWASP recomenda API key em toda chamada protegida, revogação em caso de abuso
+e resposta 429 quando as solicitações chegam rápido demais. RFC 7009 reforça
+revogação imediata e alerta que o próprio caminho de credenciais precisa de
+proteção contra negação de serviço.
+
+O limitador local existente para relatórios do navegador usa `Map` e diverge
+entre réplicas; não serve para API externa. A documentação Redis mostra que
+`INCR` seguido condicionalmente de `EXPIRE` pode vazar uma chave se houver
+falha entre comandos. A decisão é executar incremento, primeiro TTL e leitura
+do TTL dentro de Lua, atômico no Redis.
+
+O middleware executa após Bearer auth e antes de Multer. A chave contém apenas
+versão, `companyId` e `whatsappId`, evitando vazar credencial. Redis
+indisponível retorna 503, porque permitir tráfego ilimitado justamente durante
+falha ampliaria sobrecarga. Defaults são 60 chamadas/60 s, configuráveis e
+limitados defensivamente.
+
+Esta é uma medida necessária, mas não substitui digest, rotação e revogação.
+Também não justifica tratar o Redis compartilhado como cache descartável:
+chaves expiram e a cardinalidade é limitada a conexões ativas, enquanto a
+separação entre auth/lease e dados efêmeros continua no backlog.

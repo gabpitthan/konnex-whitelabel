@@ -1,5 +1,33 @@
 # Tarefa ativa
 
+## Versão 1.18 — rate limiting distribuído da API
+
+Estado: publicada
+
+### Objetivo
+
+Proteger os endpoints externos contra abuso e custo descontrolado usando a
+identidade autenticada da 1.17, sem contador local por processo.
+
+### Critérios de aceite
+
+- limite compartilhado entre processos por tenant/conexão;
+- token nunca participa da chave Redis;
+- incremento e TTL atômicos;
+- execução antes do upload;
+- 429 com `Retry-After` e orçamento restante;
+- Redis incerto falha fechado;
+- configuração inválida volta a defaults limitados;
+- teste Redis 7 concorrente, regressão, builds e runtime aprovados.
+
+### Resultado
+
+- implementação Lua e middleware concluídos;
+- 22 suítes/85 testes e builds aprovados;
+- integração Redis 7 aprovou 20 incrementos concorrentes, TTL e isolamento.
+- API 1.18, negativa 401 e restart aprovados; shutdown em 3 ms;
+- próximo: digest, rotação dual e revogação auditável de tokens.
+
 ## Versão 1.17 — contexto autenticado e uso atômico da API
 
 Estado: publicada

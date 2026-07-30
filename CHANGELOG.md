@@ -2,6 +2,29 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.18] — 2026-07-30 — publicada
+
+### Entregue
+
+- rate limit distribuído por tenant/conexão autenticados;
+- contador e TTL atômicos via Lua no Redis;
+- execução antes de upload/mídia;
+- 429 com `Retry-After` e headers de orçamento;
+- falha fechada 503 quando Redis não garante o limite;
+- configuração segura no `.env.example`.
+
+### Evidência
+
+- 22 suítes/85 testes e integração Redis 7 aprovados;
+- builds, API 1.18, negativa 401 e restart aprovados;
+- shutdown concluiu em 3 ms.
+
+### Limitações
+
+- janela fixa permite burst na fronteira;
+- digest, rotação dual e revogação de tokens seguem pendentes;
+- Redis compartilhado ainda deve ser separado por papel.
+
 ## [1.17] — 2026-07-29 — publicada
 
 ### Entregue

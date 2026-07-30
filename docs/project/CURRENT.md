@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
-Atualizado em: 2026-07-29
-Versão ativa: 1.17
+Atualizado em: 2026-07-30
+Versão ativa: 1.18
 
 ## Em foco
 
-Programa P0 de integridade e escala. A 1.17 foi publicada com identidade
-autenticada da API e contabilização concorrente atômica.
+Programa P0 de integridade e escala. A 1.18 foi publicada com rate limiting
+distribuído da API por identidade autenticada.
 
 ## Estado operacional
 
@@ -64,12 +64,14 @@ autenticada da API e contabilização concorrente atômica.
 - Backup 1.17 restaurou 57 tabelas e migration passou em up/down/up.
 - Produção aplicou os índices em 113 ms; 21 suítes/81 testes e builds passaram.
 - API 1.17, negativa 401 e restart passaram; shutdown fechou recursos em 2 ms.
+- Rate limit usa Lua atômico, TTL e chave tenant/conexão sem credencial.
+- Integração Redis 7 aprovou concorrência 1–20 e isolamento entre conexões.
+- 22 suítes/85 testes, builds, API 1.18 e restart passaram; shutdown em 3 ms.
 
 ## Próximo passo
 
-Projetar digest e rotação dual dos tokens, revogação e rate limiting por
-credencial. Em seguida habilitar medição de queries e validar WhatsApp em conta
-canário.
+Projetar digest e rotação dual dos tokens e revogação auditável. Em seguida
+habilitar medição de queries e validar WhatsApp em conta canário.
 
 ## Fontes
 
