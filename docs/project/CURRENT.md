@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-30
-Versão ativa: 1.18
+Versão ativa: 1.19
 
 ## Em foco
 
-Programa P0 de integridade e escala. A 1.18 foi publicada com rate limiting
-distribuído da API por identidade autenticada.
+Programa P0 de integridade e escala. A 1.19 publicou a fase expand da migração
+de credenciais, removendo exposição e geração client-side.
 
 ## Estado operacional
 
@@ -67,11 +67,15 @@ distribuído da API por identidade autenticada.
 - Rate limit usa Lua atômico, TTL e chave tenant/conexão sem credencial.
 - Integração Redis 7 aprovou concorrência 1–20 e isolamento entre conexões.
 - 22 suítes/85 testes, builds, API 1.18 e restart passaram; shutdown em 3 ms.
+- Tokens novos usam CSPRNG backend e só aparecem em create/rotate.
+- Listas, detalhe, updates, sockets e upload não dependem de expor/reler token.
+- `/whatsapp/all` foi corrigido para o tenant autenticado.
+- 26 suítes/90 testes, builds e runtime 1.19 passaram; shutdown em 1 ms.
 
 ## Próximo passo
 
-Projetar digest e rotação dual dos tokens e revogação auditável. Em seguida
-habilitar medição de queries e validar WhatsApp em conta canário.
+Adicionar digest com pepper, fallback legado medido, rotação dual e revogação
+auditável. Em seguida habilitar medição de queries e validar conta canário.
 
 ## Fontes
 

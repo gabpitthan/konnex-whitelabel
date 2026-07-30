@@ -21,6 +21,11 @@ whatsappRoutes.post("/whatsapp/", isAuth, WhatsAppController.store);
 whatsappRoutes.post("/facebook/", isAuth, WhatsAppController.storeFacebook);
 whatsappRoutes.get("/whatsapp/:whatsappId", isAuth, WhatsAppController.show);
 whatsappRoutes.put("/whatsapp/:whatsappId", isAuth, WhatsAppController.update);
+whatsappRoutes.post(
+  "/whatsapp/:whatsappId/api-token/rotate",
+  isAuth,
+  WhatsAppController.rotateApiToken
+);
 whatsappRoutes.delete("/whatsapp/:whatsappId", isAuth, WhatsAppController.remove);
 whatsappRoutes.post("/closedimported/:whatsappId", isAuth, WhatsAppController.closedTickets);
 

@@ -12,6 +12,7 @@ const ShowWhatsAppService = async (
   session?: any
 ): Promise<Whatsapp> => {
   const findOptions: FindOptions = {
+    attributes: { exclude: ["token"] },
     include: [
       {
         model: FlowBuilderModel,
@@ -40,7 +41,7 @@ const ShowWhatsAppService = async (
   };
 
   if (session !== undefined && session == 0) {
-    findOptions.attributes = { exclude: ["session"] };
+    findOptions.attributes = { exclude: ["session", "token"] };
   }
 
   const whatsapp = await Whatsapp.findByPk(id, findOptions);

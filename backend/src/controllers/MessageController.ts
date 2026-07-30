@@ -21,7 +21,6 @@ import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import CreateMessageService from "../services/MessageServices/CreateMessageService";
 import { sendFacebookMessageMedia } from "../services/FacebookServices/sendFacebookMessageMedia";
 import sendFaceMessage from "../services/FacebookServices/sendFacebookMessage";
-import ShowPlanCompanyService from "../services/CompanyService/ShowPlanCompanyService";
 import ListMessagesServiceAll from "../services/MessageServices/ListMessagesServiceAll";
 import ShowContactService from "../services/ContactServices/ShowContactService";
 import FindOrCreateTicketService from "../services/TicketServices/FindOrCreateTicketService";
@@ -948,81 +947,6 @@ export const allMe = async (req: Request, res: Response): Promise<Response> => {
   });
 
   return res.json({ count });
-};
-
-// Enviar mensagem
-export const send = async (req: Request, res: Response): Promise<Response> => {
-  const messageData: MessageData = req.body;
-  const medias = req.files as Express.Multer.File[];
-
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      throw new AppError("Token de autorização não fornecido", 401);
-    }
-
-    const [, token] = authHeader.split(" ");
-    const whatsapp = await Whatsapp.findOne({ where: { token } });
-    if (!whatsapp) {
-      throw new AppError("Não foi possível realizar a operação", 404);
-    }
-
-    const companyId = whatsapp.companyId;
-    const company = await ShowPlanCompanyService(companyId);
-    const sendMessageWithExternalApi = company.plan.useExternalApi;
-
-    if (!sendMessageWithExternalApi) {
-      throw new AppError(
-        "Essa empresa não tem permissão para usar a API Externa. Entre em contato com o Suporte para verificar nossos planos!",
-        403
-      );
-    }
-
-    if (messageData.number === undefined) {
-      throw new AppError("O número é obrigatório", 400);
-    }
-
-    const number = messageData.number;
-    const body = messageData.body;
-
-    if (medias) {
-      await Promise.all(
-        medias.map(async (media: Express.Multer.File) => {
-          await req.app.get("queues").messageQueue.add(
-            "SendMessage",
-            {
-              whatsappId: whatsapp.id,
-              data: {
-                number,
-                body: media.originalname.replace("/", "-"),
-                mediaPath: media.path,
-              },
-            },
-            { removeOnComplete: true, attempts: 3 }
-          );
-        })
-      );
-    } else {
-      await req.app.get("queues").messageQueue.add(
-        "SendMessage",
-        {
-          whatsappId: whatsapp.id,
-          data: {
-            number,
-            body,
-          },
-        },
-        { removeOnComplete: true, attempts: 3 }
-      );
-    }
-    return res.status(200).json({ mensagem: "Mensagem enviada!" });
-  } catch (err) {
-    console.error("Erro ao enviar mensagem:", err);
-    if (err instanceof AppError) {
-      return res.status(err.statusCode).json({ message: err.message });
-    }
-    throw new AppError("Não foi possível enviar a mensagem, tente novamente em alguns instantes", 500);
-  }
 };
 
 // Editar mensagem

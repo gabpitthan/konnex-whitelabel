@@ -1,8 +1,6 @@
 import path from "path";
 import multer from "multer";
 import fs from "fs";
-import Whatsapp from "../models/Whatsapp";
-import { isEmpty, isNil } from "lodash";
 
 const publicFolder = path.resolve(__dirname, "..", "..", "public");
 
@@ -11,15 +9,11 @@ export default {
   storage: multer.diskStorage({
     destination: async function (req, file, cb) {
 
-      let companyId;
-      companyId = req.user?.companyId
+      const companyId = req.user?.companyId || req.apiConnection?.companyId;
       const { typeArch, fileId } = req.body;
 
-      if (companyId === undefined && isNil(companyId) && isEmpty(companyId)) {
-        const authHeader = req.headers.authorization;
-        const [, token] = authHeader.split(" ");
-        const whatsapp = await Whatsapp.findOne({ where: { token } });
-        companyId = whatsapp.companyId;
+      if (!Number.isInteger(companyId) || companyId <= 0) {
+        return cb(new Error("ERR_UPLOAD_OWNER_REQUIRED"), "");
       }
       let folder;
 

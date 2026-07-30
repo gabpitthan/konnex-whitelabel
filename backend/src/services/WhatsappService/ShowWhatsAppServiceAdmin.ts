@@ -12,6 +12,7 @@ const ShowWhatsAppServiceAdmin = async (
 ): Promise<Whatsapp> => {
 
   const findOptions: FindOptions = {
+    attributes: { exclude: ["token"] },
     include: [
       {
         model: Queue,

@@ -2,6 +2,31 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.19] — 2026-07-30 — publicada
+
+### Entregue
+
+- tokens novos gerados por CSPRNG no backend;
+- segredo revelado somente na criação/rotação;
+- rotação admin, tenant-aware e restrita a WhatsApp;
+- GET, listas, responses e sockets sem token;
+- update comum não altera credencial;
+- upload não relê Bearer;
+- `/whatsapp/all` corrigido para filtrar tenant;
+- autenticação duplicada sem rota removida.
+
+### Evidência
+
+- 26 suítes/90 testes e builds aprovados;
+- API/frontend 1.19;
+- lista, lista total e detalhe autenticados sem chave `token`;
+- restart limpo em 1 ms.
+
+### Limitações
+
+- plaintext legado permanece somente no banco/autenticador;
+- digest, rotação dual e auditoria seguem no próximo lote.
+
 ## [1.18] — 2026-07-30 — publicada
 
 ### Entregue

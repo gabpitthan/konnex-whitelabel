@@ -5,6 +5,7 @@ import Whatsapp from "../../models/Whatsapp";
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
+import GenerateApiTokenService from "../ApiServices/GenerateApiTokenService";
 
 interface Request {
   name: string;
@@ -55,6 +56,7 @@ interface Request {
 interface Response {
   whatsapp: Whatsapp;
   oldDefaultWhatsapp: Whatsapp | null;
+  apiToken?: string;
 }
 
 const CreateWhatsAppService = async ({
@@ -167,30 +169,8 @@ const CreateWhatsAppService = async ({
     throw new AppError("ERR_WAPP_GREETING_REQUIRED");
   }
 
-  if (token !== null && token !== "") {
-    const tokenSchema = Yup.object().shape({
-      token: Yup.string()
-        .required()
-        .min(24)
-        .test(
-          "Check-token",
-          "This whatsapp token is already used.",
-          async value => {
-            if (!value) return false;
-            const tokenExists = await Whatsapp.findOne({
-              where: { token: value }
-            });
-            return !tokenExists;
-          }
-        )
-    });
-
-    try {
-      await tokenSchema.validate({ token });
-    } catch (err: any) {
-      throw new AppError(err.message);
-    }
-  }
+  const apiToken =
+    channel === "whatsapp" ? GenerateApiTokenService() : token || undefined;
 
   const whatsapp = await Whatsapp.create(
     {
@@ -202,7 +182,7 @@ const CreateWhatsAppService = async ({
       ratingMessage,
       isDefault,
       companyId,
-      token,
+      token: apiToken,
       provider,
       channel,
       facebookUserId,
@@ -242,7 +222,7 @@ const CreateWhatsAppService = async ({
 
   await AssociateWhatsappQueue(whatsapp, queueIds);
 
-  return { whatsapp, oldDefaultWhatsapp };
+  return { whatsapp, oldDefaultWhatsapp, apiToken };
 };
 
 export default CreateWhatsAppService;

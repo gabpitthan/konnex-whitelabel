@@ -188,17 +188,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   const [integrations, setIntegrations] = useState([]);
 
   useEffect(() => {
-    if (!whatsAppId && !whatsApp.token) {
-      setAutoToken(generateRandomCode(30));
-    } else if (whatsAppId && !whatsApp.token) {
-      setAutoToken(generateRandomCode(30));
-    } else {
-      setAutoToken(whatsApp.token);
-    }
-  }, [whatsAppId, whatsApp.token]);
-
-
-  useEffect(() => {
     async function fetchData() {
       const companyId = user.companyId;
       const planConfigs = await getPlanCompany(undefined, companyId);
@@ -262,7 +251,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
         }
         setWhatsApp(data);
         setAttachmentName(data.greetingMediaAttachment);
-        setAutoToken(data.token);
+        setAutoToken("");
         setSelectedIntegration(data?.integrationId)
         data.promptId ? setSelectedPrompt(data.promptId) : setSelectedPrompt(null);
         const whatsQueueIds = data.queues?.map((queue) => queue.id);
@@ -346,10 +335,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   };
 
   const handleSaveWhatsApp = async (values) => {
-    if (!whatsAppId) setAutoToken(generateRandomCode(30));
-
-
-
     if (NPSEnabled) {
 
       if (isNil(values.ratingMessage)) {
@@ -381,11 +366,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
       importRecentMessages: enableImportMessage ? importRecentMessages : null,
       importOldMessagesGroups: importOldMessagesGroups ? importOldMessagesGroups : null,
       closedTicketsPostImported: closedTicketsPostImported ? closedTicketsPostImported : null,
-      token: autoToken ? autoToken : null, schedules,
+      schedules,
       promptId: selectedPrompt ? selectedPrompt : null
     };
-
-    console.dir(whatsappData)
 
     delete whatsappData["queues"];
     delete whatsappData["session"];
@@ -412,6 +395,18 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
         }
       } else {
         const { data } = await api.post("/whatsapp", whatsappData);
+        if (data.apiToken) {
+          setAutoToken(data.apiToken);
+          try {
+            await navigator.clipboard.writeText(data.apiToken);
+            toast.info("Token da API copiado. Ele não será exibido novamente.");
+          } catch {
+            window.prompt(
+              "Copie o token da API. Ele não será exibido novamente:",
+              data.apiToken
+            );
+          }
+        }
         if (attachment != null) {
           const formData = new FormData();
           formData.append("file", attachment);
@@ -427,19 +422,25 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 
   };
 
-  function generateRandomCode(length) {
-    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyvz0123456789";
-    let code = "";
-
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * charset.length);
-      code += charset.charAt(randomIndex);
+  const handleRefreshToken = async () => {
+    if (!whatsAppId) return;
+    try {
+      const { data } = await api.post(
+        `/whatsapp/${whatsAppId}/api-token/rotate`
+      );
+      setAutoToken(data.apiToken);
+      try {
+        await navigator.clipboard.writeText(data.apiToken);
+        toast.info("Novo token copiado. O token anterior foi revogado.");
+      } catch {
+        window.prompt(
+          "Copie o novo token. O token anterior foi revogado:",
+          data.apiToken
+        );
+      }
+    } catch (err) {
+      toastError(err);
     }
-    return code;
-  }
-
-  const handleRefreshToken = () => {
-    setAutoToken(generateRandomCode(30));
   }
 
   const handleCopyToken = () => {
@@ -804,7 +805,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           type="token"
                           fullWidth
                           // name="token"
-                          value={autoToken}
+                          value={autoToken || (whatsAppId ? "••••••••••••" : "")}
                           variant="outlined"
                           margin="dense"
                           disabled
@@ -812,13 +813,14 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                       </Grid>
                       <Button
                         onClick={handleRefreshToken}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !whatsAppId}
                         className={classes.tokenRefresh}
                         variant="text"
                         startIcon={<Autorenew style={{ marginLeft: 5, color: "green" }} />}
                       />
                       <Button
                         onClick={handleCopyToken}
+                        disabled={!autoToken}
                         className={classes.tokenRefresh}
                         variant="text"
                         startIcon={<FileCopy style={{ color: copied ? "blue" : "inherit" }} />}

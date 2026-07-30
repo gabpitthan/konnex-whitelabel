@@ -21,6 +21,8 @@ import UpdateWhatsAppServiceAdmin from "../services/WhatsappService/UpdateWhatsA
 import ListAllWhatsAppsService from "../services/WhatsappService/ListAllWhatsAppService";
 import ListFilterWhatsAppsService from "../services/WhatsappService/ListFilterWhatsAppsService";
 import User from "../models/User";
+import RotateApiTokenService from "../services/ApiServices/RotateApiTokenService";
+import SerializeApiWhatsappService from "../services/ApiServices/SerializeApiWhatsappService";
 
 interface WhatsappData {
   name: string;
@@ -31,7 +33,6 @@ interface WhatsappData {
   outOfHoursMessage?: string;
   status?: string;
   isDefault?: boolean;
-  token?: string;
   maxUseBotQueues?: string;
   timeUseBotQueues?: string;
   expiresTicket?: number;
@@ -92,7 +93,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     complationMessage,
     outOfHoursMessage,
     queueIds,
-    token,
     maxUseBotQueues,
     timeUseBotQueues,
     expiresTicket,
@@ -132,7 +132,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     });
   }
 
-  const { whatsapp, oldDefaultWhatsapp } = await CreateWhatsAppService({
+  const { whatsapp, oldDefaultWhatsapp, apiToken } = await CreateWhatsAppService({
     name,
     status,
     isDefault,
@@ -141,7 +141,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     outOfHoursMessage,
     queueIds,
     companyId,
-    token,
     maxUseBotQueues,
     timeUseBotQueues,
     expiresTicket,
@@ -177,18 +176,21 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   io.of(String(companyId))
     .emit(`company-${companyId}-whatsapp`, {
       action: "update",
-      whatsapp
+      whatsapp: SerializeApiWhatsappService(whatsapp)
     });
 
   if (oldDefaultWhatsapp) {
     io.of(String(companyId))
       .emit(`company-${companyId}-whatsapp`, {
         action: "update",
-        whatsapp: oldDefaultWhatsapp
+        whatsapp: SerializeApiWhatsappService(oldDefaultWhatsapp)
       });
   }
 
-  return res.status(200).json(whatsapp);
+  return res.status(200).json({
+    ...SerializeApiWhatsappService(whatsapp),
+    apiToken
+  });
 
 };
 
@@ -335,7 +337,19 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   const whatsapp = await ShowWhatsAppService(whatsappId, companyId, session);
 
 
-  return res.status(200).json(whatsapp);
+  return res.status(200).json(SerializeApiWhatsappService(whatsapp));
+};
+
+export const rotateApiToken = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { whatsappId } = req.params;
+  const { companyId, profile } = req.user;
+  if (profile !== "admin") throw new AppError("ERR_NO_PERMISSION", 403);
+
+  const apiToken = await RotateApiTokenService(whatsappId, companyId);
+  return res.status(200).json({ apiToken });
 };
 
 export const update = async (
@@ -356,18 +370,18 @@ export const update = async (
   io.of(String(companyId))
     .emit(`company-${companyId}-whatsapp`, {
       action: "update",
-      whatsapp
+      whatsapp: SerializeApiWhatsappService(whatsapp)
     });
 
   if (oldDefaultWhatsapp) {
     io.of(String(companyId))
       .emit(`company-${companyId}-whatsapp`, {
         action: "update",
-        whatsapp: oldDefaultWhatsapp
+        whatsapp: SerializeApiWhatsappService(oldDefaultWhatsapp)
       });
   }
 
-  return res.status(200).json(whatsapp);
+  return res.status(200).json(SerializeApiWhatsappService(whatsapp));
 
 };
 
@@ -458,7 +472,7 @@ export const restart = async (
 export const listAll = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const { session } = req.query as QueryParams;
-  const whatsapps = await ListAllWhatsAppsService({ session });
+  const whatsapps = await ListAllWhatsAppsService({ session, companyId });
   return res.status(200).json(whatsapps);
 };
 
@@ -480,18 +494,18 @@ export const updateAdmin = async (
   io.of(String(companyId))
     .emit(`admin-whatsapp`, {
       action: "update",
-      whatsapp
+      whatsapp: SerializeApiWhatsappService(whatsapp)
     });
 
   if (oldDefaultWhatsapp) {
     io.of(String(companyId))
       .emit(`admin-whatsapp`, {
         action: "update",
-        whatsapp: oldDefaultWhatsapp
+        whatsapp: SerializeApiWhatsappService(oldDefaultWhatsapp)
       });
   }
 
-  return res.status(200).json(whatsapp);
+  return res.status(200).json(SerializeApiWhatsappService(whatsapp));
 };
 
 export const removeAdmin = async (
@@ -555,5 +569,5 @@ export const showAdmin = async (req: Request, res: Response): Promise<Response> 
   const whatsapp = await ShowWhatsAppServiceAdmin(whatsappId, companyId);
 
 
-  return res.status(200).json(whatsapp);
+  return res.status(200).json(SerializeApiWhatsappService(whatsapp));
 };

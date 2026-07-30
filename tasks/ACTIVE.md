@@ -2,7 +2,7 @@
 
 ## Próxima versão — ciclo de vida das credenciais da API
 
-Estado: pesquisa e desenho
+Estado: fase expand 1.19 publicada; digest em planejamento
 
 ### Baseline confirmado
 
@@ -22,6 +22,15 @@ Estado: pesquisa e desenho
 - fazer upload usar somente `req.apiConnection`;
 - remover caminhos mortos/duplicados antes de eliminar a coluna plaintext;
 - provar compatibilidade do cliente atual e rollback antes da migration.
+
+### Resultado da fase expand
+
+- geração CSPRNG migrou para o backend;
+- segredo sai somente em create/rotate;
+- GET/list/socket/update/upload não expõem nem relêem token;
+- `/whatsapp/all` passou a filtrar tenant;
+- 26 suítes/90 testes, builds, runtime autenticado e restart aprovados;
+- próximo lote: credencial com digest/pepper, rotação dual e auditoria.
 
 ## Versão 1.18 — rate limiting distribuído da API
 

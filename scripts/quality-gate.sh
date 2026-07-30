@@ -23,6 +23,9 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/middleware/__tests__/apiRateLimit.spec.ts \
   src/middleware/__tests__/tokenAuth.spec.ts \
   src/services/ApiServices/__tests__/RecordApiUsageService.spec.ts \
+  src/services/ApiServices/__tests__/GenerateApiTokenService.spec.ts \
+  src/services/ApiServices/__tests__/RotateApiTokenService.spec.ts \
+  src/services/ApiServices/__tests__/SerializeApiWhatsappService.spec.ts \
   src/services/ContactServices/__tests__/UpsertWhatsappContactService.spec.ts \
   src/services/HealthServices/__tests__/GetReadinessService.spec.ts \
   src/services/MessageServices/__tests__/GetMessageRangeService.spec.ts \
@@ -32,6 +35,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/services/SocketServices/__tests__/AuthorizeTicketRoomService.spec.ts \
   src/services/TicketServices/__tests__/FindOrCreateTicketService.spec.ts \
   src/services/WbotServices/__tests__/FindOrCreateFencedWhatsappContextService.spec.ts \
+  src/services/WhatsappService/__tests__/ListAllWhatsAppService.spec.ts \
   --runInBand --coverage=false
 
 echo "Compilando backend e frontend em imagens reproduzíveis..."
