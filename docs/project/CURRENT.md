@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-30
-Versão ativa: 1.19
+Versão ativa: 1.20
 
 ## Em foco
 
-Programa P0 de integridade e escala. A 1.19 publicou a fase expand da migração
-de credenciais, removendo exposição e geração client-side.
+Programa P0 de integridade e escala. A 1.20 publicou credenciais por digest,
+rotação dual transacional, revogação e trilha de auditoria.
 
 ## Estado operacional
 
@@ -71,11 +71,23 @@ de credenciais, removendo exposição e geração client-side.
 - Listas, detalhe, updates, sockets e upload não dependem de expor/reler token.
 - `/whatsapp/all` foi corrigido para o tenant autenticado.
 - 26 suítes/90 testes, builds e runtime 1.19 passaram; shutdown em 1 ms.
+- Tokens novos são armazenados somente como HMAC-SHA-256 com pepper externo ou
+  subchave HKDF domain-separated do master existente.
+- Lookup por prefixo reduz candidatos; comparação usa `timingSafeEqual`.
+- Rotate/revoke usam transação e row lock; o anterior permanece em `grace` por
+  15 minutos e pode ser revogado atomicamente.
+- Backup pré-1.20 foi restaurado e a migration passou em up/down/up.
+- Produção criou tabela, coluna e quatro índices em 216 ms.
+- 30 suítes/101 testes, builds, API 1.20, compatibilidade legada e negativa 401
+  foram aprovados.
+- Smoke encontrou e corrigiu `checkNumber` sem número: entrada agora é
+  normalizada/validada e retorna 400; sete casos adicionais passaram.
 
 ## Próximo passo
 
-Adicionar digest com pepper, fallback legado medido, rotação dual e revogação
-auditável. Em seguida habilitar medição de queries e validar conta canário.
+Medir uso de credencial legada sem registrar segredo, migrar o cliente real por
+rotação controlada e depois remover a coluna plaintext. Em paralelo, planejar
+medição de queries/locks e a atualização controlada de dependências antigas.
 
 ## Fontes
 

@@ -431,10 +431,10 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
       setAutoToken(data.apiToken);
       try {
         await navigator.clipboard.writeText(data.apiToken);
-        toast.info("Novo token copiado. O token anterior foi revogado.");
+        toast.info("Novo token copiado. O anterior expira em 15 minutos.");
       } catch {
         window.prompt(
-          "Copie o novo token. O token anterior foi revogado:",
+          "Copie o novo token. O anterior expira em 15 minutos:",
           data.apiToken
         );
       }

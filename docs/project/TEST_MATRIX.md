@@ -24,7 +24,7 @@
 | Lookup Message por wid | sim | unitário+runtime | n/a | companyId obrigatório | aprovado |
 | Commit fenced Message/Ticket | sim | unitário+runtime | mesma transaction | owner+fence+tenant | parcial, canário pendente |
 | Contexto Contact/Ticket | sim | migration+unitário+runtime | unique+increment | owner+fence+tenant | parcial, canário pendente |
-| API externa | sim | 401+runtime+Redis 7 | token/uso unique+rate TTL | contexto pelo Bearer | aprovado, canário positivo pendente |
-| Ciclo de token API | sim | GET/list sem segredo | plaintext legado | rotate tenant/admin | parcial, digest pendente |
+| API externa | sim | 401+legado+Redis 7 | uso unique+rate TTL | contexto pelo Bearer | aprovado, canário de envio pendente |
+| Ciclo de token API | sim | 21 focados+runtime legado | digest HMAC+legado | rotate/revoke tenant/admin | parcial, migração do cliente pendente |
 
 Cada tarefa deve atualizar as linhas afetadas e registrar evidência no README da subversão.

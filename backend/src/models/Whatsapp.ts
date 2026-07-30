@@ -118,6 +118,10 @@ class Whatsapp extends Model<Whatsapp> {
   @Column
   token: string;
 
+  @AllowNull
+  @Column(DataType.DATE)
+  apiTokenLegacyExpiresAt: Date;
+
   @Column(DataType.TEXT)
   facebookUserId: string;
 

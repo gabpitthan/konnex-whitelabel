@@ -323,3 +323,70 @@ O digest deverá ser HMAC-SHA-256 com pepper externo ao banco, porque os tokens
 legados têm entropia incerta. A alteração exige provisionar e ensaiar o pepper;
 reutilizar segredo genérico ou publicar um placeholder funcional seria uma
 falsa proteção.
+
+## Decisão executada na 1.20 — digest, rotação dual e revogação
+
+A pesquisa confirmou quatro propriedades necessárias. O OWASP Secrets
+Management recomenda ciclo de vida explícito, rotação, revogação e auditoria
+sem registrar o segredo. O Node fornece `randomBytes`, HMAC e
+`timingSafeEqual`; portanto não há justificativa para geração no navegador nem
+comparação comum de strings. O RFC 5869 permite derivar uma subchave
+domain-separated quando um pepper dedicado ainda não foi provisionado. O
+PostgreSQL documenta que `SELECT ... FOR UPDATE` bloqueia escritores
+concorrentes na mesma linha; combinado a uma transação gerenciada do Sequelize,
+isso serializa rotate/revoke e faz rollback integral em exceção.
+
+Fontes primárias:
+
+- OWASP Secrets Management:
+  https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+- Node.js Crypto:
+  https://nodejs.org/api/crypto.html
+- RFC 5869:
+  https://www.rfc-editor.org/rfc/rfc5869
+- PostgreSQL explicit locking:
+  https://www.postgresql.org/docs/17/explicit-locking.html
+- Sequelize transactions:
+  https://sequelize.org/docs/v6/other-topics/transactions/
+
+O token novo contém prefixo aleatório de 64 bits e segredo de 256 bits. O banco
+guarda somente prefixo e HMAC-SHA-256. O prefixo indexado reduz a consulta a um
+conjunto mínimo; o HMAC é comparado com `timingSafeEqual`. O pepper preferencial
+é `API_TOKEN_PEPPER` com no mínimo 32 bytes. Na instalação existente, a
+configuração medida possui `MASTER_KEY` suficiente e não possui pepper
+dedicado; a transição usa HKDF-SHA-256 com salt e info fixos do domínio
+`api-token-pepper-v1`, sem mostrar nem duplicar o master. Se nenhum material
+adequado existir, autenticação de formato novo falha fechada com 503.
+
+Uma constraint parcial garante apenas um registro `active` sem expiração por
+conexão. Rotate bloqueia a linha `Whatsapps`, transforma o atual em `grace`,
+define expiração de 15 minutos e emite o novo na mesma transação. Na primeira
+rotação, o token legado recebe a mesma expiração. Revoke, sob o mesmo lock,
+revoga `active/grace` e invalida o legado atomicamente. O ator é persistido,
+mas o segredo nunca entra na auditoria.
+
+Gravar `lastUsedAt` sincronicamente foi recusado: converteria cada autenticação,
+hoje read-only, em write, aumentando WAL, contenção, IOPS e pressão do pool.
+Medição de legado deve usar contador agregado e sem token em lote posterior.
+Também não foi criado cache de autenticação: lookup indexado e local é simples,
+enquanto cache introduziria invalidação difícil e risco de aceitar token
+revogado. Essa escolha privilegia integridade e revogação imediata.
+
+O ensaio restaurou backup real e passou em `up → down → up`. Em produção, a
+migration aditiva levou 216 ms, criou tabela, coluna e quatro índices; 30
+suítes/101 testes e os dois builds passaram. A credencial legada atravessou o
+middleware, e uma inválida retornou 401. Nenhum token real foi impresso,
+rotacionado ou revogado.
+
+O primeiro smoke autenticado com corpo vazio revelou que `checkNumber` usava
+`.replace` antes de validar `number`, convertendo erro do cliente em TypeError
+500. A borda agora aceita somente string que, após remover espaços/hífens, seja
+numérica e não vazia. Sete casos automatizados passaram; em produção, o mesmo
+corpo retorna 400 e token inválido retorna 401.
+
+Contrato restante: medir uso legado sem guardar identificador sensível,
+rotacionar o cliente em janela controlada e, após ausência comprovada de uso,
+remover o fallback e a coluna plaintext. As 77 vulnerabilidades reportadas no
+runtime backend, 105 no frontend e o bundle gzip de 1,68 MB permanecem riscos
+reais, mas exigem inventário de caminhos alcançáveis, upgrades segmentados e
+rollback próprio; `npm audit fix --force` não é uma correção segura.

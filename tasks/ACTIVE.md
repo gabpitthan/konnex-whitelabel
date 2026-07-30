@@ -1,6 +1,33 @@
 # Tarefa ativa
 
-## Próxima versão — ciclo de vida das credenciais da API
+## Versão 1.20 — digest, rotação dual e revogação
+
+Estado: publicada
+
+### Critérios
+
+- novos segredos nunca persistem plaintext;
+- autenticação digest e legado coexistem;
+- lookup usa prefixo e HMAC com comparação constante;
+- um único atual por conexão;
+- rotação serializada mantém anterior por janela curta;
+- revogação invalida todos os formatos atomicamente;
+- owner, status, expiração e atores ficam auditáveis;
+- migration é aditiva e passa backup/restore/up/down/up;
+- nenhum valor secreto aparece em log, teste ou documentação.
+
+### Resultado
+
+- schema/model, crypto, autenticação dual, rotate e revoke implementados;
+- HKDF permite subkey independente do master existente;
+- testes focados de migration/crypto/auth/rotate/revoke aprovados.
+- backup/restore e migration up/down/up aprovados;
+- 30 suítes/101 testes e builds aprovados;
+- produção 1.20 saudável, migration em 216 ms;
+- credencial legada atravessa auth e credencial inválida retorna 401.
+- número ausente/inválido em `checkNumber` retorna 400; sete testes aprovados.
+
+## Histórico — ciclo de vida das credenciais da API
 
 Estado: fase expand 1.19 publicada; digest em planejamento
 

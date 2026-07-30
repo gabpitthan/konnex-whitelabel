@@ -25,6 +25,7 @@ import FindOrCreateATicketTrakingService from "../services/TicketServices/FindOr
 import RecordApiUsageService, {
   ApiUsageIncrements
 } from "../services/ApiServices/RecordApiUsageService";
+import NormalizeApiContactNumberService from "../services/ApiServices/NormalizeApiContactNumberService";
 
 export class OnWhatsAppDto {
   constructor(public readonly jid: string, public readonly exists: boolean) { }
@@ -379,7 +380,7 @@ export const checkNumber = async (req: Request, res: Response): Promise<Response
   const whatsapp = await getAuthenticatedWhatsapp(req);
   const companyId = whatsapp.companyId;
 
-  const number = newContact.number.replace("-", "").replace(" ", "");
+  const number = NormalizeApiContactNumberService(newContact.number);
 
   const wbot = getWbot(whatsapp.id);
   const jid = createJid(number);

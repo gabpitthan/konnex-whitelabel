@@ -23,6 +23,7 @@ import ListFilterWhatsAppsService from "../services/WhatsappService/ListFilterWh
 import User from "../models/User";
 import RotateApiTokenService from "../services/ApiServices/RotateApiTokenService";
 import SerializeApiWhatsappService from "../services/ApiServices/SerializeApiWhatsappService";
+import RevokeApiTokenService from "../services/ApiServices/RevokeApiTokenService";
 
 interface WhatsappData {
   name: string;
@@ -121,7 +122,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     flowIdNotPhrase,
     flowIdWelcome
   }: WhatsappData = req.body;
-  const { companyId } = req.user;
+  const { companyId, id: userId } = req.user;
 
   const company = await ShowCompanyService(companyId)
   const plan = await ShowPlanService(company.planId);
@@ -167,7 +168,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     collectiveVacationStart,
     queueIdImportMessages,
     flowIdNotPhrase,
-    flowIdWelcome
+    flowIdWelcome,
+    createdBy: Number(userId)
   });
 
   await StartWhatsAppSession(whatsapp, companyId);
@@ -348,8 +350,28 @@ export const rotateApiToken = async (
   const { companyId, profile } = req.user;
   if (profile !== "admin") throw new AppError("ERR_NO_PERMISSION", 403);
 
-  const apiToken = await RotateApiTokenService(whatsappId, companyId);
+  const apiToken = await RotateApiTokenService(
+    whatsappId,
+    companyId,
+    Number(req.user.id)
+  );
   return res.status(200).json({ apiToken });
+};
+
+export const revokeApiToken = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { whatsappId } = req.params;
+  const { companyId, profile } = req.user;
+  if (profile !== "admin") throw new AppError("ERR_NO_PERMISSION", 403);
+
+  await RevokeApiTokenService(
+    whatsappId,
+    companyId,
+    Number(req.user.id)
+  );
+  return res.status(204).send();
 };
 
 export const update = async (

@@ -2,6 +2,33 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.20] — 2026-07-30 — publicada
+
+### Entregue
+
+- tokens novos persistidos somente como HMAC-SHA-256 com pepper;
+- pepper dedicado ou subchave HKDF separada do `MASTER_KEY`;
+- lookup indexado por prefixo e comparação com `timingSafeEqual`;
+- rotação transacional com credencial anterior em `grace` por 15 minutos;
+- revogação atômica de credenciais novas e legadas;
+- metadados de owner, estado, expiração e atores de emissão/revogação;
+- compatibilidade temporária com credencial plaintext existente;
+- `/checkNumber` rejeita número ausente/inválido com 400, sem `TypeError`.
+
+### Evidência
+
+- backup `0600` com SHA-256 e restore real;
+- migration aditiva passou em `up → down → up`;
+- gate de 30 suítes/101 testes, mais 7 testes da correção de borda;
+- migration aplicada em produção em 216 ms;
+- API 1.20, schema/índices, compatibilidade legada, 400 e negativa 401 aprovados.
+
+### Limitações
+
+- token legado permanece válido até sua primeira rotação;
+- uso legado ainda precisa ser medido antes de remover a coluna plaintext;
+- rotação/revogação real não foi acionada em produção para não afetar cliente.
+
 ## [1.19] — 2026-07-30 — publicada
 
 ### Entregue

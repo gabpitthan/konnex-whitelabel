@@ -5,7 +5,8 @@ import Whatsapp from "../../models/Whatsapp";
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
-import GenerateApiTokenService from "../ApiServices/GenerateApiTokenService";
+import sequelize from "../../database";
+import IssueApiCredentialService from "../ApiServices/IssueApiCredentialService";
 
 interface Request {
   name: string;
@@ -51,6 +52,7 @@ interface Request {
   queueIdImportMessages?: number;
   flowIdNotPhrase?: number;
   flowIdWelcome?: number;
+  createdBy?: number;
 }
 
 interface Response {
@@ -102,7 +104,8 @@ const CreateWhatsAppService = async ({
   collectiveVacationStart,
   queueIdImportMessages,
   flowIdNotPhrase,
-  flowIdWelcome
+  flowIdWelcome,
+  createdBy
 }: Request): Promise<Response> => {
   const company = await Company.findOne({
     where: {
@@ -169,11 +172,7 @@ const CreateWhatsAppService = async ({
     throw new AppError("ERR_WAPP_GREETING_REQUIRED");
   }
 
-  const apiToken =
-    channel === "whatsapp" ? GenerateApiTokenService() : token || undefined;
-
-  const whatsapp = await Whatsapp.create(
-    {
+  const whatsappData = {
       name,
       status,
       greetingMessage,
@@ -182,7 +181,7 @@ const CreateWhatsAppService = async ({
       ratingMessage,
       isDefault,
       companyId,
-      token: apiToken,
+      token: channel === "whatsapp" ? "" : token || "",
       provider,
       channel,
       facebookUserId,
@@ -216,9 +215,25 @@ const CreateWhatsAppService = async ({
       queueIdImportMessages,
       flowIdNotPhrase,
       flowIdWelcome
-    },
-    { include: ["queues"] }
-  );
+  };
+
+  let apiToken: string | undefined;
+  const whatsapp =
+    channel === "whatsapp"
+      ? await sequelize.transaction(async transaction => {
+          const created = await Whatsapp.create(whatsappData, {
+            include: ["queues"],
+            transaction
+          });
+          apiToken = await IssueApiCredentialService({
+            companyId,
+            whatsappId: created.id,
+            createdBy,
+            transaction
+          });
+          return created;
+        })
+      : await Whatsapp.create(whatsappData, { include: ["queues"] });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);
 

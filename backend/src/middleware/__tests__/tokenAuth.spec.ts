@@ -1,12 +1,17 @@
 import AppError from "../../errors/AppError";
 import Whatsapp from "../../models/Whatsapp";
 import tokenAuth from "../tokenAuth";
+import ResolveApiCredentialService from "../../services/ApiServices/ResolveApiCredentialService";
 
 jest.mock("../../models/Whatsapp", () => ({
   findOne: jest.fn()
 }));
+jest.mock("../../services/ApiServices/ResolveApiCredentialService", () =>
+  jest.fn()
+);
 
 const findOne = Whatsapp.findOne as jest.Mock;
+const resolveCredential = ResolveApiCredentialService as jest.Mock;
 
 const request = (authorization?: string): any => ({
   headers: authorization === undefined ? {} : { authorization }
@@ -45,7 +50,10 @@ describe("tokenAuth", () => {
     await tokenAuth(req, {} as any, next);
 
     expect(findOne).toHaveBeenCalledWith({
-      where: { token: "valid-token-value-12345678", channel: "whatsapp" },
+      where: expect.objectContaining({
+        token: "valid-token-value-12345678",
+        channel: "whatsapp"
+      }),
       attributes: ["id", "companyId", "channel"]
     });
     expect(req.apiConnection).toEqual({
@@ -54,6 +62,24 @@ describe("tokenAuth", () => {
       channel: "whatsapp"
     });
     expect(next).toHaveBeenCalledTimes(1);
+  });
+
+  it("resolves digest credentials without querying the plaintext column", async () => {
+    resolveCredential.mockResolvedValue({ whatsappId: 8, companyId: 12 });
+    const req = request(
+      `Bearer wk_0123456789abcdef_${"A".repeat(43)}`
+    );
+    const next = jest.fn();
+
+    await tokenAuth(req, {} as any, next);
+
+    expect(resolveCredential).toHaveBeenCalledTimes(1);
+    expect(findOne).not.toHaveBeenCalled();
+    expect(req.apiConnection).toEqual({
+      whatsappId: 8,
+      companyId: 12,
+      channel: "whatsapp"
+    });
   });
 
   it("propagates database failures to centralized error handling", async () => {

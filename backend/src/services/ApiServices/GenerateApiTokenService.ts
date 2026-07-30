@@ -1,6 +1,5 @@
-import { randomBytes } from "crypto";
+import { createApiTokenMaterial } from "./ApiTokenCryptoService";
 
-const GenerateApiTokenService = (): string =>
-  randomBytes(32).toString("base64url");
+const GenerateApiTokenService = (): string => createApiTokenMaterial().token;
 
 export default GenerateApiTokenService;

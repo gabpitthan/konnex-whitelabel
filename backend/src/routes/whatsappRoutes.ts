@@ -26,6 +26,11 @@ whatsappRoutes.post(
   isAuth,
   WhatsAppController.rotateApiToken
 );
+whatsappRoutes.delete(
+  "/whatsapp/:whatsappId/api-token",
+  isAuth,
+  WhatsAppController.revokeApiToken
+);
 whatsappRoutes.delete("/whatsapp/:whatsappId", isAuth, WhatsAppController.remove);
 whatsappRoutes.post("/closedimported/:whatsappId", isAuth, WhatsAppController.closedTickets);
 
