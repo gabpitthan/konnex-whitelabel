@@ -1,5 +1,28 @@
 # Tarefa ativa
 
+## Próxima versão — ciclo de vida das credenciais da API
+
+Estado: pesquisa e desenho
+
+### Baseline confirmado
+
+- os dois modais geram 30 caracteres no navegador com `Math.random`;
+- leitura da conexão devolve e reexibe o token completo;
+- refresh substitui imediatamente o único token, sem período dual;
+- upload externo ainda relê Authorization e consulta token fora do middleware;
+- um método legado inativo no controller também contém autenticação duplicada.
+
+### Escopo obrigatório
+
+- gerar ao menos 256 bits por CSPRNG exclusivamente no backend;
+- armazenar identificador/prefixo e digest com pepper fora do banco;
+- revelar o segredo somente na criação/rotação;
+- aceitar credencial anterior por janela explícita e curta;
+- revogar imediatamente e auditar emissão/rotação/revogação sem gravar segredo;
+- fazer upload usar somente `req.apiConnection`;
+- remover caminhos mortos/duplicados antes de eliminar a coluna plaintext;
+- provar compatibilidade do cliente atual e rollback antes da migration.
+
 ## Versão 1.18 — rate limiting distribuído da API
 
 Estado: publicada

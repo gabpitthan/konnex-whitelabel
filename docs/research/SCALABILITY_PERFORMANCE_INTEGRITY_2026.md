@@ -295,3 +295,31 @@ Esta é uma medida necessária, mas não substitui digest, rotação e revogaç�
 Também não justifica tratar o Redis compartilhado como cache descartável:
 chaves expiram e a cardinalidade é limitada a conexões ativas, enquanto a
 separação entre auth/lease e dados efêmeros continua no backlog.
+
+## Baseline para rotação/digest após 1.18
+
+A inspeção do fluxo real impediu uma substituição direta da coluna `token`.
+`WhatsAppModal` e sua variante admin geram 30 caracteres com `Math.random` no
+navegador, recebem novamente o token completo ao abrir a conexão e permitem
+copiá-lo. Refresh troca o único valor; não existe estado `current/previous`,
+expiração, revogação ou evento de auditoria.
+
+O storage Multer também relê `Authorization` e consulta `Whatsapp.token` para
+descobrir empresa. Embora o índice global da 1.17 impeça colisão atual, esse
+caminho duplica autenticação e quebraria quando a coluna plaintext fosse
+removida. Ele deve consumir `req.apiConnection.companyId`, já estabelecido
+antes do upload.
+
+A migração segura será expand-and-contract:
+
+1. adicionar credencial separada com prefixo, digest, estado e timestamps;
+2. gerar segredo por `crypto.randomBytes` no backend e revelar uma vez;
+3. autenticar digest novo e, temporariamente, token legado;
+4. oferecer rotação dual com expiração/revogação explícita;
+5. migrar clientes e medir uso do legado sem registrar o token;
+6. somente depois remover exposição no GET e coluna plaintext.
+
+O digest deverá ser HMAC-SHA-256 com pepper externo ao banco, porque os tokens
+legados têm entropia incerta. A alteração exige provisionar e ensaiar o pepper;
+reutilizar segredo genérico ou publicar um placeholder funcional seria uma
+falsa proteção.
