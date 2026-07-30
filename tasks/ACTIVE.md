@@ -1,5 +1,44 @@
 # Tarefa ativa
 
+## Versão 1.17 — contexto autenticado e uso atômico da API
+
+Estado: publicada
+
+### Objetivo
+
+Fazer o token Bearer determinar de forma única e imutável a conexão e o tenant
+de cada request `/api/messages`, rejeitando IDs conflitantes do payload e
+registrando consumo sem perda concorrente.
+
+### Critérios de aceite
+
+- middleware aceita somente `Authorization: Bearer <token>` válido;
+- conexão autenticada é única no banco e anexada ao request sem o token;
+- controllers não relêem Authorization nem procuram novamente pelo token;
+- `companyId` nunca vem do payload e `whatsappId` divergente é rejeitado;
+- toda busca de conexão inclui `id + companyId`;
+- token vazio não participa da constraint;
+- ApiUsages é único por empresa/data e recebe incremento atômico;
+- nenhum `setTimeout` esconde falhas de contabilização;
+- testes positivos/negativos tenant A/B, migration, build e runtime aprovados.
+
+### Limites
+
+- hash/rotação de tokens existentes exige migração de credencial compatível e
+  permanece em lote posterior;
+- rate limiting por credencial permanece próximo P0/P1.
+
+### Resultado
+
+- middleware Bearer passou a carregar o contexto autenticado;
+- controllers rejeitam troca de conexão e não confiam em tenant do payload;
+- índices únicos protegem token e uso diário;
+- consumo é incrementado atomicamente e aguardado;
+- restore/migration up-down-up, 21 suítes/81 testes, builds, deploy, negativa
+  401 e restart foram aprovados;
+- próximo: desenhar rotação dual/digest e rate limit por credencial, em seguida
+  habilitar observabilidade SQL numa mudança operacional planejada.
+
 ## Versão 1.16 — contexto inicial WhatsApp fenced e idempotente
 
 Estado: publicada

@@ -171,14 +171,14 @@ const CreateWhatsAppService = async ({
     const tokenSchema = Yup.object().shape({
       token: Yup.string()
         .required()
-        .min(2)
+        .min(24)
         .test(
           "Check-token",
           "This whatsapp token is already used.",
           async value => {
             if (!value) return false;
             const tokenExists = await Whatsapp.findOne({
-              where: { token: value, channel: channel }
+              where: { token: value }
             });
             return !tokenExists;
           }

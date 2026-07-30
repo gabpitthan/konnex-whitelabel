@@ -24,5 +24,6 @@
 | Lookup Message por wid | sim | unitário+runtime | n/a | companyId obrigatório | aprovado |
 | Commit fenced Message/Ticket | sim | unitário+runtime | mesma transaction | owner+fence+tenant | parcial, canário pendente |
 | Contexto Contact/Ticket | sim | migration+unitário+runtime | unique+increment | owner+fence+tenant | parcial, canário pendente |
+| API externa | sim | 401+runtime | token/uso unique | contexto pelo Bearer | aprovado, canário positivo pendente |
 
 Cada tarefa deve atualizar as linhas afetadas e registrar evidência no README da subversão.

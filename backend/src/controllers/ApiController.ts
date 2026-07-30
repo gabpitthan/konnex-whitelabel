@@ -2,23 +2,18 @@ import { Request, Response } from "express";
 import * as Yup from "yup";
 import fs from "fs";
 import AppError from "../errors/AppError";
-import GetDefaultWhatsApp from "../helpers/GetDefaultWhatsApp";
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
 import Message from "../models/Message";
 import Whatsapp from "../models/Whatsapp";
 import CreateOrUpdateContactService from "../services/ContactServices/CreateOrUpdateContactService";
 import FindOrCreateTicketService from "../services/TicketServices/FindOrCreateTicketService";
-import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import SendWhatsAppMedia, { getMessageOptions } from "../services/WbotServices/SendWhatsAppMedia";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import { getWbot } from "../libs/wbot";
-import SendWhatsAppMessageLink from "../services/WbotServices/SendWhatsAppMessageLink";
 import SendWhatsAppMessageAPI from "../services/WbotServices/SendWhatsAppMessageAPI";
 import SendWhatsAppMediaImage from "../services/WbotServices/SendWhatsappMediaImage";
-import ApiUsages from "../models/ApiUsages";
 import { useDate } from "../utils/useDate";
-import moment from "moment";
 import CompaniesSettings from "../models/CompaniesSettings";
 import ShowUserService from "../services/UserServices/ShowUserService";
 import { isNil } from "lodash";
@@ -27,11 +22,9 @@ import ShowQueueService from "../services/QueueService/ShowQueueService";
 import path from "path";
 import Contact from "../models/Contact";
 import FindOrCreateATicketTrakingService from "../services/TicketServices/FindOrCreateATicketTrakingService";
-import { Mutex } from "async-mutex";
-
-type WhatsappData = {
-  whatsappId: number;
-};
+import RecordApiUsageService, {
+  ApiUsageIncrements
+} from "../services/ApiServices/RecordApiUsageService";
 
 export class OnWhatsAppDto {
   constructor(public readonly jid: string, public readonly exists: boolean) { }
@@ -57,15 +50,14 @@ interface ContactData {
 }
 
 const createContact = async (
-  whatsappId: number | undefined,
-  companyId: number | undefined,
+  whatsapp: Whatsapp,
   newContact: string,
   userId?: number | 0,
   queueId?: number | 0,
   wbot?: any
 ) => {
   try {
-    // await CheckIsValidContact(newContact, companyId);
+    const { id: whatsappId, companyId } = whatsapp;
     const validNumber: any = await CheckContactNumber(newContact, companyId, newContact.length > 17);
 
     const contactData = {
@@ -86,38 +78,21 @@ const createContact = async (
     }
     )    // return contact;
 
-    let whatsapp: Whatsapp | null;
-
-    if (whatsappId === undefined) {
-      whatsapp = await GetDefaultWhatsApp(whatsappId, companyId);
-    } else {
-      whatsapp = await Whatsapp.findByPk(whatsappId);
-
-      if (whatsapp === null) {
-        throw new AppError(`whatsapp #${whatsappId} not found`);
-      }
-    }
-
-    const mutex = new Mutex();
-    // Inclui a busca de ticket aqui, se realmente não achar um ticket, então vai para o findorcreate
-    const createTicket = await mutex.runExclusive(async () => {
-      const ticket = await FindOrCreateTicketService(
-        contact,
-        whatsapp,
-        0,
-        companyId,
-        queueId,
-        userId,
-        null,
-        whatsapp.channel,
-        null,
-        false,
-        settings,
-        false,
-        false
-      );
-      return ticket;
-    });
+    const createTicket = await FindOrCreateTicketService(
+      contact,
+      whatsapp,
+      0,
+      companyId,
+      queueId,
+      userId,
+      null,
+      whatsapp.channel,
+      null,
+      false,
+      settings,
+      false,
+      false
+    );
 
     if (createTicket && createTicket.channel === "whatsapp") {
       SetTicketMessagesAsRead(createTicket);
@@ -130,6 +105,47 @@ const createContact = async (
   } catch (error) {
     throw new AppError(error.message);
   }
+};
+
+const getAuthenticatedWhatsapp = async (req: Request): Promise<Whatsapp> => {
+  const context = req.apiConnection;
+  if (!context) throw new AppError("ERR_SESSION_EXPIRED", 401);
+
+  const requestedWhatsappId = req.body?.whatsappId;
+  if (
+    requestedWhatsappId !== undefined &&
+    Number(requestedWhatsappId) !== context.whatsappId
+  ) {
+    throw new AppError("ERR_API_CONNECTION_SCOPE", 403);
+  }
+
+  const whatsapp = await Whatsapp.findOne({
+    where: {
+      id: context.whatsappId,
+      companyId: context.companyId,
+      channel: context.channel
+    }
+  });
+  if (!whatsapp) throw new AppError("ERR_SESSION_EXPIRED", 401);
+  return whatsapp;
+};
+
+const usageForMedia = (
+  medias: Express.Multer.File[] | undefined
+): ApiUsageIncrements => {
+  if (!medias?.length) return { usedText: 1 };
+
+  return medias.reduce<ApiUsageIncrements>((increments, media) => {
+    const field = media.mimetype.includes("pdf")
+      ? "usedPDF"
+      : media.mimetype.includes("image")
+      ? "usedImage"
+      : media.mimetype.includes("video")
+      ? "usedVideo"
+      : "usedOther";
+    increments[field] = (increments[field] || 0) + 1;
+    return increments;
+  }, {});
 };
 
 function formatBRNumber(jid: string) {
@@ -158,80 +174,9 @@ function createJid(number: string) {
     : `${formatBRNumber(number)}@s.whatsapp.net`;
 }
 
-// export const indexLink = async (req: Request, res: Response): Promise<Response> => {
-//   const newContact: ContactData = req.body;
-//   const { whatsappId }: WhatsappData = req.body;
-//   const { msdelay }: any = req.body;
-//   const url = req.body.url;
-//   const caption = req.body.caption;
-
-//   const authHeader = req.headers.authorization;
-//   const [, token] = authHeader.split(" ");
-//   const whatsapp = await Whatsapp.findOne({ where: { token } });
-//   const companyId = whatsapp.companyId;
-
-//   newContact.number = newContact.number.replace("-", "").replace(" ", "");
-
-//   const schema = Yup.object().shape({
-//     number: Yup.string()
-//       .required()
-//       .matches(/^\d+$/, "Invalid number format. Only numbers is allowed.")
-//   });
-
-//   try {
-//     await schema.validate(newContact);
-//   } catch (err: any) {
-//     throw new AppError(err.message);
-//   }
-
-//   const contactAndTicket = await createContact(whatsappId, companyId, newContact.number);
-
-//   if (!contactAndTicket) {
-//     throw new AppError("Cliente em outro atendimento")
-//   }
-//   await SendWhatsAppMessageLink({ whatsappId, contact: contactAndTicket.contact, url, caption, msdelay });
-
-//   setTimeout(async () => {
-//     const { dateToClient } = useDate();
-
-//     const hoje: string = dateToClient(new Date())
-//     const timestamp = moment().format();
-
-//     const exist = await ApiUsages.findOne({
-//       where: {
-//         dateUsed: hoje,
-//         companyId: companyId
-//       }
-//     });
-
-//     if (exist) {
-//       await exist.update({
-//         usedPDF: exist.dataValues["usedPDF"] + 1,
-//         UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-//         updatedAt: timestamp
-//       });
-//     } else {
-//       const usage = await ApiUsages.create({
-//         companyId: companyId,
-//         dateUsed: hoje,
-//       });
-
-//       await usage.update({
-//         usedPDF: usage.dataValues["usedPDF"] + 1,
-//         UsedOnDay: usage.dataValues["UsedOnDay"] + 1,
-//         updatedAt: timestamp
-//       });
-//     }
-
-//   }, 100);
-
-//   return res.send({ status: "SUCCESS" });
-// };
-
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const newContact: ContactData = req.body;
 
-  const { whatsappId }: WhatsappData = req.body;
   const { msdelay }: any = req.body;
   const {
     number,
@@ -245,9 +190,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   }: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
 
-  const authHeader = req.headers.authorization;
-  const [, token] = authHeader.split(" ");
-  const whatsapp = await Whatsapp.findOne({ where: { token } });
+  const whatsapp = await getAuthenticatedWhatsapp(req);
   const companyId = whatsapp.companyId;
 
   newContact.number = newContact.number.replace(" ", "");
@@ -286,7 +229,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   }
 
   if (noRegister) {
-    if (medias) {
+    if (medias?.length) {
       try {
         // console.log(medias)
         await Promise.all(
@@ -318,11 +261,17 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
         })
     }
   } else {
-    const contactAndTicket = await createContact(whatsapp.id, companyId, newContact.number, userId, queueId, wbot);
+    const contactAndTicket = await createContact(
+      whatsapp,
+      newContact.number,
+      userId,
+      queueId,
+      wbot
+    );
 
     let sentMessage
 
-    if (medias) {
+    if (medias?.length) {
       try {
         await Promise.all(
           medias.map(async (media: Express.Multer.File) => {
@@ -366,123 +315,23 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     }
   }
 
-  setTimeout(async () => {
-    const { dateToClient } = useDate();
-
-    const hoje: string = dateToClient(new Date())
-    const timestamp = moment().format();
-
-    let exist = await ApiUsages.findOne({
-      where: {
-        dateUsed: hoje,
-        companyId: companyId
-      }
-    });
-
-    if (exist) {
-      if (medias) {
-        await Promise.all(
-          medias.map(async (media: Express.Multer.File) => {
-            // const type = path.extname(media.originalname.replace('/','-'))
-
-            if (media.mimetype.includes("pdf")) {
-              await exist.update({
-                usedPDF: exist.dataValues["usedPDF"] + 1,
-                UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-                updatedAt: timestamp
-              });
-            } else if (media.mimetype.includes("image")) {
-              await exist.update({
-                usedImage: exist.dataValues["usedImage"] + 1,
-                UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-                updatedAt: timestamp
-              });
-            } else if (media.mimetype.includes("video")) {
-              await exist.update({
-                usedVideo: exist.dataValues["usedVideo"] + 1,
-                UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-                updatedAt: timestamp
-              });
-            } else {
-              await exist.update({
-                usedOther: exist.dataValues["usedOther"] + 1,
-                UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-                updatedAt: timestamp
-              });
-            }
-
-          })
-        )
-      } else {
-        await exist.update({
-          usedText: exist.dataValues["usedText"] + 1,
-          UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-          updatedAt: timestamp
-        });
-      }
-    } else {
-      exist = await ApiUsages.create({
-        companyId: companyId,
-        dateUsed: hoje,
-      });
-
-      if (medias) {
-        await Promise.all(
-          medias.map(async (media: Express.Multer.File) => {
-            // const type = path.extname(media.originalname.replace('/','-'))
-
-            if (media.mimetype.includes("pdf")) {
-              await exist.update({
-                usedPDF: exist.dataValues["usedPDF"] + 1,
-                UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-                updatedAt: timestamp
-              });
-            } else if (media.mimetype.includes("image")) {
-              await exist.update({
-                usedImage: exist.dataValues["usedImage"] + 1,
-                UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-                updatedAt: timestamp
-              });
-            } else if (media.mimetype.includes("video")) {
-              await exist.update({
-                usedVideo: exist.dataValues["usedVideo"] + 1,
-                UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-                updatedAt: timestamp
-              });
-            } else {
-              await exist.update({
-                usedOther: exist.dataValues["usedOther"] + 1,
-                UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-                updatedAt: timestamp
-              });
-            }
-
-          })
-        )
-      } else {
-        await exist.update({
-          usedText: exist.dataValues["usedText"] + 1,
-          UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-          updatedAt: timestamp
-        });
-      }
-    }
-
-  }, 100);
+  const { dateToClient } = useDate();
+  await RecordApiUsageService(
+    companyId,
+    dateToClient(new Date()),
+    usageForMedia(medias)
+  );
 
   return res.send({ status: "SUCCESS" });
 };
 
 export const indexImage = async (req: Request, res: Response): Promise<Response> => {
   const newContact: ContactData = req.body;
-  const { whatsappId }: WhatsappData = req.body;
   const { msdelay }: any = req.body;
   const url = req.body.url;
   const caption = req.body.caption;
 
-  const authHeader = req.headers.authorization;
-  const [, token] = authHeader.split(" ");
-  const whatsapp = await Whatsapp.findOne({ where: { token } });
+  const whatsapp = await getAuthenticatedWhatsapp(req);
   const companyId = whatsapp.companyId;
 
   newContact.number = newContact.number.replace("-", "").replace(" ", "");
@@ -499,7 +348,10 @@ export const indexImage = async (req: Request, res: Response): Promise<Response>
     throw new AppError(err.message);
   }
 
-  const contactAndTicket = await createContact(whatsappId, companyId, newContact.number);
+  const contactAndTicket = await createContact(
+    whatsapp,
+    newContact.number
+  );
 
   if (url) {
     await SendWhatsAppMediaImage({ ticket: contactAndTicket, url, caption, msdelay });
@@ -513,39 +365,10 @@ export const indexImage = async (req: Request, res: Response): Promise<Response>
     });
   }, 100);
 
-  setTimeout(async () => {
-    const { dateToClient } = useDate();
-
-    const hoje: string = dateToClient(new Date())
-    const timestamp = moment().format();
-
-    const exist = await ApiUsages.findOne({
-      where: {
-        dateUsed: hoje,
-        companyId: companyId
-      }
-    });
-
-    if (exist) {
-      await exist.update({
-        usedImage: exist.dataValues["usedImage"] + 1,
-        UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-        updatedAt: timestamp
-      });
-    } else {
-      const usage = await ApiUsages.create({
-        companyId: companyId,
-        dateUsed: hoje,
-      });
-
-      await usage.update({
-        usedImage: usage.dataValues["usedImage"] + 1,
-        UsedOnDay: usage.dataValues["UsedOnDay"] + 1,
-        updatedAt: timestamp
-      });
-    }
-
-  }, 100);
+  const { dateToClient } = useDate();
+  await RecordApiUsageService(companyId, dateToClient(new Date()), {
+    usedImage: 1
+  });
 
   return res.send({ status: "SUCCESS" });
 };
@@ -553,15 +376,12 @@ export const indexImage = async (req: Request, res: Response): Promise<Response>
 export const checkNumber = async (req: Request, res: Response): Promise<Response> => {
   const newContact: ContactData = req.body;
 
-  const authHeader = req.headers.authorization;
-  const [, token] = authHeader.split(" ");
-  const whatsapp = await Whatsapp.findOne({ where: { token } });
+  const whatsapp = await getAuthenticatedWhatsapp(req);
   const companyId = whatsapp.companyId;
 
   const number = newContact.number.replace("-", "").replace(" ", "");
 
-  const whatsappDefault = await GetDefaultWhatsApp(whatsapp.id, companyId);
-  const wbot = getWbot(whatsappDefault.id);
+  const wbot = getWbot(whatsapp.id);
   const jid = createJid(number);
 
   try {
@@ -572,39 +392,10 @@ export const checkNumber = async (req: Request, res: Response): Promise<Response
 
     if (result.exists) {
 
-      setTimeout(async () => {
-        const { dateToClient } = useDate();
-
-        const hoje: string = dateToClient(new Date())
-        const timestamp = moment().format();
-
-        const exist = await ApiUsages.findOne({
-          where: {
-            dateUsed: hoje,
-            companyId: companyId
-          }
-        });
-
-        if (exist) {
-          await exist.update({
-            usedCheckNumber: exist.dataValues["usedCheckNumber"] + 1,
-            UsedOnDay: exist.dataValues["UsedOnDay"] + 1,
-            updatedAt: timestamp
-          });
-        } else {
-          const usage = await ApiUsages.create({
-            companyId: companyId,
-            dateUsed: hoje,
-          });
-
-          await usage.update({
-            usedCheckNumber: usage.dataValues["usedCheckNumber"] + 1,
-            UsedOnDay: usage.dataValues["UsedOnDay"] + 1,
-            updatedAt: timestamp
-          });
-        }
-
-      }, 100);
+      const { dateToClient } = useDate();
+      await RecordApiUsageService(companyId, dateToClient(new Date()), {
+        usedCheckNumber: 1
+      });
 
       return res.status(200).json({ existsInWhatsapp: true, number: number, numberFormatted: result.jid });
     }

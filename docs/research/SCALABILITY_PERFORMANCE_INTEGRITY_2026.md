@@ -234,6 +234,33 @@ e insert. Contact declara no modelo a mesma composição do banco. O fence da
 linha Whatsapp serializa os commits de uma conexão entre owners, enquanto os
 índices protegem invariantes contra outros caminhos da aplicação.
 
+## Decisão para 1.17 — identidade da API e contabilização
+
+OWASP API1 exige autorização em cada função que recebe um identificador de
+objeto; comparar apenas um ID informado pelo cliente não basta. OWASP REST
+recomenda controle em todos os endpoints, HTTPS, revogação e rate limiting de
+API keys. RFC 6750 define o esquema `Authorization: Bearer`.
+
+O middleware atual valida o token, mas descarta a identidade. Cada controller
+repete a consulta e um deles aceita `whatsappId` do corpo, chegando a
+`findByPk` sem `companyId`. A decisão é transformar o middleware na fonte única
+do contexto `{whatsappId, companyId, channel}`, negar por padrão e proibir
+override pelo payload.
+
+Há uma credencial não vazia em produção, com 30 caracteres e formato compatível
+com Bearer; não há duplicidade. Será criado índice único parcial para tokens não
+vazios, fechando a corrida que a validação Yup não cobre. O valor não foi lido
+nem registrado.
+
+`ApiUsages` também não possui unicidade e faz read-modify-write dentro de
+`setTimeout`. Será adotado `INSERT ... ON CONFLICT DO UPDATE`, com índice único
+parcial em `companyId + dateUsed`, agregando incrementos em uma query aguardada.
+
+Armazenamento em hash é desejável porque API keys são credenciais, mas alterar
+o token existente sem mecanismo de rotação quebraria clientes. Esta etapa
+preserva compatibilidade e fecha BOLA/concorrência; digest + prefixo + rotação
+dual será projetado separadamente.
+
 ## Como o sistema ainda pode falhar
 
 - pool correto não resolve queries lentas nem transações longas;

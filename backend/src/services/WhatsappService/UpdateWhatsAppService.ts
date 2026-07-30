@@ -120,6 +120,33 @@ const UpdateWhatsAppService = async ({
     throw new AppError("ERR_WAPP_GREETING_REQUIRED");
   }
 
+  if (token !== undefined && token !== null && token !== "") {
+    const tokenSchema = Yup.object().shape({
+      token: Yup.string()
+        .required()
+        .min(24)
+        .test(
+          "Check-token",
+          "This whatsapp token is already used.",
+          async value => {
+            if (!value) return false;
+            const tokenExists = await Whatsapp.findOne({
+              where: {
+                token: value,
+                id: { [Op.ne]: whatsappId }
+              }
+            });
+            return !tokenExists;
+          }
+        )
+    });
+    try {
+      await tokenSchema.validate({ token });
+    } catch (err: any) {
+      throw new AppError(err.message);
+    }
+  }
+
   let oldDefaultWhatsapp: Whatsapp | null = null;
 
   if (isDefault) {

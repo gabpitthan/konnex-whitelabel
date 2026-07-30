@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-29
-Versão ativa: 1.16
+Versão ativa: 1.17
 
 ## Em foco
 
-Programa P0 de integridade e escala. A 1.16 foi publicada com contexto inicial
-Contact/Ticket fenced, Ticket ativo único e não lidas autoritativas no banco.
+Programa P0 de integridade e escala. A 1.17 foi publicada com identidade
+autenticada da API e contabilização concorrente atômica.
 
 ## Estado operacional
 
@@ -59,12 +59,17 @@ Contact/Ticket fenced, Ticket ativo único e não lidas autoritativas no banco.
 - Backup foi restaurado com 57 tabelas e a migration passou em up/down/up.
 - Produção aplicou o índice em 77 ms; 18 suítes/62 testes, builds, smoke e
   restart passaram; shutdown fechou recursos em 1 ms.
+- Bearer determina conexão, tenant e canal sem confiar em `companyId` externo.
+- Token e uso diário possuem índices únicos parciais; contabilização usa UPSERT.
+- Backup 1.17 restaurou 57 tabelas e migration passou em up/down/up.
+- Produção aplicou os índices em 113 ms; 21 suítes/81 testes e builds passaram.
+- API 1.17, negativa 401 e restart passaram; shutdown fechou recursos em 2 ms.
 
 ## Próximo passo
 
-Vincular os tokens dos endpoints `/api` ao tenant, removendo `companyId`
-confiado do cliente. Em seguida habilitar medição de queries e validar WhatsApp
-em conta canário.
+Projetar digest e rotação dual dos tokens, revogação e rate limiting por
+credencial. Em seguida habilitar medição de queries e validar WhatsApp em conta
+canário.
 
 ## Fontes
 

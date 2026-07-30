@@ -2,6 +2,30 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.17] — 2026-07-29 — publicada
+
+### Entregue
+
+- contexto de conexão/tenant derivado exclusivamente do Bearer token;
+- rejeição de `whatsappId` conflitante no payload;
+- conexão sempre consultada por tenant e canal;
+- tokens não vazios globalmente únicos;
+- consumo diário único e incrementado por UPSERT atômico;
+- validação de token aplicada em criação e atualização.
+
+### Evidência
+
+- backup e restore real com 57 tabelas;
+- migration up/down/up aprovada e aplicada em produção em 113 ms;
+- 21 suítes/81 testes e builds aprovados;
+- API 1.17, negativa 401 e restart limpo aprovados.
+
+### Limitações
+
+- token ainda não usa digest/rotação dual;
+- rate limit individual e conta canário permanecem pendentes;
+- dívidas npm e bundle não mudaram.
+
 ## [1.16] — 2026-07-29 — publicada
 
 ### Entregue
