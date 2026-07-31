@@ -384,6 +384,37 @@ O primeiro smoke autenticado com corpo vazio revelou que `checkNumber` usava
 numérica e não vazia. Sete casos automatizados passaram; em produção, o mesmo
 corpo retorna 400 e token inválido retorna 401.
 
+## Decisão executada na 1.21 — medir migração sem segredo/write extra
+
+OWASP Logging declara access tokens como dado que normalmente não deve ser
+registrado. Prometheus recomenda evitar labels de alta cardinalidade e começar
+com poucas dimensões. A decisão foi transportar somente o enum
+`credentialKind=legacy|digest`, nunca token, prefixo, digest ou usuário.
+
+Criar uma escrita de telemetria no middleware duplicaria I/O e contabilizaria
+tentativas que não concluíram operação. `ApiUsages` já realiza um UPSERT
+atômico por request bem-sucedido; os dois contadores foram incorporados à mesma
+query. Eles não entram em `UsedOnDay`, preservando o significado financeiro e
+evitando dupla contagem quando uma mensagem possui várias mídias.
+
+O relatório admin agrega por tenant e últimos 30 dias. `readyToRemoveLegacy`
+somente pode ser verdadeiro quando a observação começou há pelo menos 30 dias,
+houve uso digest no período, não houve uso legado e não existe token legado
+ainda ativo. Essa última condição protege consumidores dormentes após rotação,
+e torna o resultado atual corretamente falso.
+
+O PostgreSQL documenta que, desde a versão 11, `ADD COLUMN` com default
+constante usa metadados e não reescreve a tabela. A relação real possuía zero
+linhas, zero datas inválidas e 24 KiB. Mesmo assim, backup/restore e
+`up → down → up` foram executados; a migration levou 31–42 ms no restore e
+92 ms em produção.
+
+O gate passou em 33 suítes/113 testes. O endpoint autenticado retornou 200,
+uma credencial legada ativa e readiness falso; nenhum segredo foi exibido. A
+rotação precisa ser coordenada com o consumidor porque o novo segredo é
+revelado apenas uma vez. Até isso ocorrer e a janela terminar, remover
+plaintext seria incorreto.
+
 Contrato restante: medir uso legado sem guardar identificador sensível,
 rotacionar o cliente em janela controlada e, após ausência comprovada de uso,
 remover o fallback e a coluna plaintext. As 77 vulnerabilidades reportadas no

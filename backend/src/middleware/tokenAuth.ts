@@ -26,7 +26,8 @@ const isAuthApi = async (
     req.apiConnection = {
       whatsappId: credential.whatsappId,
       companyId: credential.companyId,
-      channel: "whatsapp"
+      channel: "whatsapp",
+      credentialKind: "digest"
     };
     return next();
   }
@@ -53,7 +54,8 @@ const isAuthApi = async (
   req.apiConnection = {
     whatsappId: whatsapp.id,
     companyId: whatsapp.companyId,
-    channel: whatsapp.channel
+    channel: whatsapp.channel,
+    credentialKind: "legacy"
   };
 
   return next();

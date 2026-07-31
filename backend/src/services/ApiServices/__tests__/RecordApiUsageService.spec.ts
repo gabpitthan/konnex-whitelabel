@@ -15,11 +15,14 @@ describe("RecordApiUsageService", () => {
     await RecordApiUsageService(9, "29/07/2026", {
       usedText: 2,
       usedImage: 3
-    });
+    }, "legacy");
 
     const [sql, options] = query.mock.calls[0];
     expect(sql).toContain('ON CONFLICT ("companyId", "dateUsed")');
     expect(sql).toContain('"ApiUsages"."usedImage" + EXCLUDED."usedImage"');
+    expect(sql).toContain(
+      '"ApiUsages"."legacyAuthCount" + EXCLUDED."legacyAuthCount"'
+    );
     expect(options.replacements).toMatchObject({
       companyId: 9,
       dateUsed: "29/07/2026",
@@ -29,7 +32,24 @@ describe("RecordApiUsageService", () => {
       usedPDF: 0,
       usedVideo: 0,
       usedOther: 0,
-      usedCheckNumber: 0
+      usedCheckNumber: 0,
+      legacyAuthCount: 1,
+      digestAuthCount: 0
+    });
+  });
+
+  it("counts digest authentication without inflating billable usage", async () => {
+    query.mockResolvedValue([1, 1]);
+    await RecordApiUsageService(
+      9,
+      "29/07/2026",
+      { usedCheckNumber: 1 },
+      "digest"
+    );
+    expect(query.mock.calls[0][1].replacements).toMatchObject({
+      usedOnDay: 1,
+      legacyAuthCount: 0,
+      digestAuthCount: 1
     });
   });
 

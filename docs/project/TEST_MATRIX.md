@@ -25,6 +25,6 @@
 | Commit fenced Message/Ticket | sim | unitário+runtime | mesma transaction | owner+fence+tenant | parcial, canário pendente |
 | Contexto Contact/Ticket | sim | migration+unitário+runtime | unique+increment | owner+fence+tenant | parcial, canário pendente |
 | API externa | sim | 401+legado+Redis 7 | uso unique+rate TTL | contexto pelo Bearer | aprovado, canário de envio pendente |
-| Ciclo de token API | sim | 21 focados+runtime legado | digest HMAC+legado | rotate/revoke tenant/admin | parcial, migração do cliente pendente |
+| Ciclo de token API | sim | 28 focados+relatório runtime | digest+telemetria dual | rotate/revoke/status tenant/admin | parcial, rotação/30 dias pendentes |
 
 Cada tarefa deve atualizar as linhas afetadas e registrar evidência no README da subversão.

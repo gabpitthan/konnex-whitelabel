@@ -5,6 +5,7 @@ declare namespace Express {
       whatsappId: number;
       companyId: number;
       channel: string;
+      credentialKind: "legacy" | "digest";
     };
   }
 }

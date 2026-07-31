@@ -12,6 +12,8 @@ export interface ApiUsageIncrements {
   usedCheckNumber?: number;
 }
 
+export type ApiCredentialKind = "legacy" | "digest";
+
 const usageFields: Array<keyof ApiUsageIncrements> = [
   "usedText",
   "usedPDF",
@@ -24,7 +26,8 @@ const usageFields: Array<keyof ApiUsageIncrements> = [
 const RecordApiUsageService = async (
   companyId: number,
   dateUsed: string,
-  increments: ApiUsageIncrements
+  increments: ApiUsageIncrements,
+  credentialKind?: ApiCredentialKind
 ): Promise<void> => {
   const normalized = usageFields.reduce<Record<string, number>>(
     (result, field) => {
@@ -41,6 +44,8 @@ const RecordApiUsageService = async (
     (total, value) => total + value,
     0
   );
+  const legacyAuthCount = credentialKind === "legacy" ? 1 : 0;
+  const digestAuthCount = credentialKind === "digest" ? 1 : 0;
 
   if (
     !Number.isInteger(companyId) ||
@@ -56,12 +61,13 @@ const RecordApiUsageService = async (
       INSERT INTO "ApiUsages" (
         "companyId", "dateUsed", "UsedOnDay",
         "usedText", "usedPDF", "usedImage", "usedVideo", "usedOther",
-        "usedCheckNumber", "createdAt", "updatedAt"
+        "usedCheckNumber", "legacyAuthCount", "digestAuthCount",
+        "createdAt", "updatedAt"
       )
       VALUES (
         :companyId, :dateUsed, :usedOnDay,
         :usedText, :usedPDF, :usedImage, :usedVideo, :usedOther,
-        :usedCheckNumber, NOW(), NOW()
+        :usedCheckNumber, :legacyAuthCount, :digestAuthCount, NOW(), NOW()
       )
       ON CONFLICT ("companyId", "dateUsed")
         WHERE "dateUsed" IS NOT NULL
@@ -74,6 +80,10 @@ const RecordApiUsageService = async (
         "usedOther" = "ApiUsages"."usedOther" + EXCLUDED."usedOther",
         "usedCheckNumber" =
           "ApiUsages"."usedCheckNumber" + EXCLUDED."usedCheckNumber",
+        "legacyAuthCount" =
+          "ApiUsages"."legacyAuthCount" + EXCLUDED."legacyAuthCount",
+        "digestAuthCount" =
+          "ApiUsages"."digestAuthCount" + EXCLUDED."digestAuthCount",
         "updatedAt" = NOW()
     `,
     {
@@ -81,6 +91,8 @@ const RecordApiUsageService = async (
         companyId,
         dateUsed,
         usedOnDay,
+        legacyAuthCount,
+        digestAuthCount,
         ...normalized
       },
       type: QueryTypes.INSERT

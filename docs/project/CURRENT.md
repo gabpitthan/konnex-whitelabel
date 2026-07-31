@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
-Atualizado em: 2026-07-30
-Versão ativa: 1.20
+Atualizado em: 2026-07-31
+Versão ativa: 1.21
 
 ## Em foco
 
-Programa P0 de integridade e escala. A 1.20 publicou credenciais por digest,
-rotação dual transacional, revogação e trilha de auditoria.
+Programa P0 de integridade e escala. A 1.21 iniciou medição segura da migração
+legado→digest sem segredo e sem write extra por request.
 
 ## Estado operacional
 
@@ -82,12 +82,20 @@ rotação dual transacional, revogação e trilha de auditoria.
   foram aprovados.
 - Smoke encontrou e corrigiu `checkNumber` sem número: entrada agora é
   normalizada/validada e retorna 400; sete casos adicionais passaram.
+- Contexto autenticado distingue somente `legacy|digest`, sem token/prefixo.
+- Os contadores entram no mesmo UPSERT diário e não alteram `UsedOnDay`.
+- Relatório admin é tenant-aware e bloqueia contract antes de 30 dias, uso
+  digest e ausência total de legado ativo/usado.
+- Backup pré-1.21 foi restaurado e migration passou em up/down/up em 31–42 ms.
+- 33 suítes/113 testes e builds passaram; produção aplicou migration em 92 ms.
+- Runtime mostrou uma credencial legada ativa e readiness falso, como esperado.
+- API 1.21, frontend 200 e restart em 2 ms foram aprovados.
 
 ## Próximo passo
 
-Medir uso de credencial legada sem registrar segredo, migrar o cliente real por
-rotação controlada e depois remover a coluna plaintext. Em paralelo, planejar
-medição de queries/locks e a atualização controlada de dependências antigas.
+Coordenar a rotação do cliente real sem expor o token e observar a janela de
+30 dias antes do contract. Em paralelo, habilitar `pg_stat_statements` de forma
+ensaiada e medir queries/locks antes de qualquer novo índice.
 
 ## Fontes
 

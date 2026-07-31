@@ -59,7 +59,8 @@ describe("tokenAuth", () => {
     expect(req.apiConnection).toEqual({
       whatsappId: 7,
       companyId: 11,
-      channel: "whatsapp"
+      channel: "whatsapp",
+      credentialKind: "legacy"
     });
     expect(next).toHaveBeenCalledTimes(1);
   });
@@ -78,7 +79,8 @@ describe("tokenAuth", () => {
     expect(req.apiConnection).toEqual({
       whatsappId: 8,
       companyId: 12,
-      channel: "whatsapp"
+      channel: "whatsapp",
+      credentialKind: "digest"
     });
   });
 

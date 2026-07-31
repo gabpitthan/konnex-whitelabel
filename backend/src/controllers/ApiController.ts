@@ -194,7 +194,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const whatsapp = await getAuthenticatedWhatsapp(req);
   const companyId = whatsapp.companyId;
 
-  newContact.number = newContact.number.replace(" ", "");
+  newContact.number = NormalizeApiContactNumberService(newContact.number);
 
   const schema = Yup.object().shape({
     number: Yup.string()
@@ -320,7 +320,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   await RecordApiUsageService(
     companyId,
     dateToClient(new Date()),
-    usageForMedia(medias)
+    usageForMedia(medias),
+    req.apiConnection.credentialKind
   );
 
   return res.send({ status: "SUCCESS" });
@@ -335,7 +336,7 @@ export const indexImage = async (req: Request, res: Response): Promise<Response>
   const whatsapp = await getAuthenticatedWhatsapp(req);
   const companyId = whatsapp.companyId;
 
-  newContact.number = newContact.number.replace("-", "").replace(" ", "");
+  newContact.number = NormalizeApiContactNumberService(newContact.number);
 
   const schema = Yup.object().shape({
     number: Yup.string()
@@ -369,7 +370,7 @@ export const indexImage = async (req: Request, res: Response): Promise<Response>
   const { dateToClient } = useDate();
   await RecordApiUsageService(companyId, dateToClient(new Date()), {
     usedImage: 1
-  });
+  }, req.apiConnection.credentialKind);
 
   return res.send({ status: "SUCCESS" });
 };
@@ -396,7 +397,7 @@ export const checkNumber = async (req: Request, res: Response): Promise<Response
       const { dateToClient } = useDate();
       await RecordApiUsageService(companyId, dateToClient(new Date()), {
         usedCheckNumber: 1
-      });
+      }, req.apiConnection.credentialKind);
 
       return res.status(200).json({ existsInWhatsapp: true, number: number, numberFormatted: result.jid });
     }

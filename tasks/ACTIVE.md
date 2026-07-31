@@ -1,5 +1,31 @@
 # Tarefa ativa
 
+## Versão 1.21 — evidência para remover credencial legada
+
+Estado: publicada
+
+### Critérios
+
+- distinguir legado/digest sem registrar segredo ou identificador cardinal;
+- reaproveitar o UPSERT de uso, sem write adicional por request;
+- preservar `UsedOnDay`;
+- relatório admin escopado ao tenant;
+- readiness exige 30 dias, digest ativo e nenhum legado ativo/usado;
+- migration constante, aditiva, reversível e ensaiada em restore;
+- corrigir `.replace` pré-validação nos demais endpoints externos;
+- testes, builds, runtime, restart e memória persistente aprovados.
+
+### Resultado
+
+- desenho pesquisado em OWASP, Prometheus e PostgreSQL;
+- base real: zero linhas/zero datas inválidas em `ApiUsages`, 24 KiB;
+- implementação e 28 testes focados aprovados.
+- backup/restore e migration up/down/up aprovados em 31–42 ms;
+- gate completo: 33 suítes/113 testes e ambos os builds;
+- migration em produção em 92 ms;
+- relatório admin 200: um legado ativo e readiness falso;
+- API 1.21, frontend 200 e restart em 2 ms aprovados.
+
 ## Versão 1.20 — digest, rotação dual e revogação
 
 Estado: publicada

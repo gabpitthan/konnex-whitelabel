@@ -52,6 +52,14 @@ class ApiUsages extends Model<ApiUsages> {
     @Column
     usedCheckNumber: number;
 
+    @Default(0)
+    @Column
+    legacyAuthCount: number;
+
+    @Default(0)
+    @Column
+    digestAuthCount: number;
+
     @CreatedAt
     createdAt: Date;
 

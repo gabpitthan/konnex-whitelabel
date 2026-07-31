@@ -24,6 +24,7 @@ import User from "../models/User";
 import RotateApiTokenService from "../services/ApiServices/RotateApiTokenService";
 import SerializeApiWhatsappService from "../services/ApiServices/SerializeApiWhatsappService";
 import RevokeApiTokenService from "../services/ApiServices/RevokeApiTokenService";
+import GetApiCredentialMigrationStatusService from "../services/ApiServices/GetApiCredentialMigrationStatusService";
 
 interface WhatsappData {
   name: string;
@@ -340,6 +341,16 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
 
   return res.status(200).json(SerializeApiWhatsappService(whatsapp));
+};
+
+export const apiCredentialMigrationStatus = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { companyId, profile } = req.user;
+  if (profile !== "admin") throw new AppError("ERR_NO_PERMISSION", 403);
+  const status = await GetApiCredentialMigrationStatusService(companyId);
+  return res.status(200).json(status);
 };
 
 export const rotateApiToken = async (

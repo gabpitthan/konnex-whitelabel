@@ -2,6 +2,32 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.21] — 2026-07-31 — publicada
+
+### Entregue
+
+- telemetria diária `legacy/digest` sem armazenar segredo;
+- contadores incorporados ao UPSERT de uso existente, sem write adicional;
+- `UsedOnDay` preservado sem dupla contagem;
+- relatório admin tenant-aware de prontidão para remover legado;
+- contract bloqueado até 30 dias observados, digest usado e zero legado;
+- normalização segura reutilizada nos endpoints de envio comum e imagem.
+
+### Evidência
+
+- backup `0600` com SHA-256 e restore real;
+- migration passou em `up → down → up` em 31–42 ms no restore;
+- 33 suítes/113 testes e builds Docker aprovados;
+- migration em produção em 92 ms;
+- endpoint admin retornou uma credencial legada ativa e readiness falso;
+- API 1.21, frontend 200 e restart limpo em 2 ms.
+
+### Limitações
+
+- observação começa no primeiro request concluído após a publicação;
+- a credencial real ainda precisa de rotação coordenada;
+- contract da coluna plaintext permanece deliberadamente bloqueado.
+
 ## [1.20] — 2026-07-30 — publicada
 
 ### Entregue
