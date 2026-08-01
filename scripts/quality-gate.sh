@@ -14,6 +14,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/database/migrations/__tests__/enforceApiCredentialIntegrity.spec.ts \
   src/database/migrations/__tests__/createApiCredentials.spec.ts \
   src/database/migrations/__tests__/addApiCredentialUsageTelemetry.spec.ts \
+  src/database/migrations/__tests__/enablePgStatStatements.spec.ts \
   src/helpers/__tests__/useMultiFileAuthState.spec.ts \
   src/jobs/__tests__/handleMessageAckQueue.spec.ts \
   src/libs/__tests__/redisPattern.spec.ts \
@@ -43,9 +44,11 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/services/TicketServices/__tests__/FindOrCreateTicketService.spec.ts \
   src/services/WbotServices/__tests__/FindOrCreateFencedWhatsappContextService.spec.ts \
   src/services/WhatsappService/__tests__/ListAllWhatsAppService.spec.ts \
+  src/utils/__tests__/logger.spec.ts \
   --runInBand --coverage=false
 
 echo "Compilando backend e frontend em imagens reproduzíveis..."
+bash -n "$PROJECT_DIR/scripts/postgres-observability-report.sh"
 docker compose build backend frontend
 
 echo "Gate de compilação aprovado."

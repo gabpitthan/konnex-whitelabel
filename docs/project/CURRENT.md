@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-07-31
-Versão ativa: 1.21
+Versão ativa: 1.22
 
 ## Em foco
 
-Programa P0 de integridade e escala. A 1.21 iniciou medição segura da migração
-legado→digest sem segredo e sem write extra por request.
+Programa P0/P1 de integridade e escala. A 1.22 iniciou observação real de
+queries, I/O e locks PostgreSQL antes de qualquer otimização especulativa.
 
 ## Estado operacional
 
@@ -90,12 +90,22 @@ legado→digest sem segredo e sem write extra por request.
 - 33 suítes/113 testes e builds passaram; produção aplicou migration em 92 ms.
 - Runtime mostrou uma credencial legada ativa e readiness falso, como esperado.
 - API 1.21, frontend 200 e restart em 2 ms foram aprovados.
+- `pg_stat_statements` opera com 5.000 entradas, top-level, planning/utility off.
+- Relatório local retorna apenas agregados e query IDs, sem texto SQL/PII.
+- Laboratório PostgreSQL 16 e restore up/down/up aprovaram configuração/rollback.
+- Gate passou em 34 suítes/115 testes e ambos os builds; logger ganhou teste
+  ISO UTC adicional.
+- Produção aplicou extensão em 113 ms; API 1.22, frontend 200 e restart em 2 ms.
+- Primeiro snapshot: 2/100 conexões, cache 99,9936%, zero locks, idle
+  transaction, deadlocks e temp spill; pior máximo 14,322 ms.
+- Nenhum índice/cache/tuning foi aplicado por falta de evidência de gargalo.
+- Logger deixou timestamp local ambíguo e agora emite ISO-8601 UTC correto.
 
 ## Próximo passo
 
-Coordenar a rotação do cliente real sem expor o token e observar a janela de
-30 dias antes do contract. Em paralelo, habilitar `pg_stat_statements` de forma
-ensaiada e medir queries/locks antes de qualquer novo índice.
+Coletar uma janela representativa de `pg_stat_statements` e correlacionar os
+query IDs de maior custo sem expor texto/dados. Em paralelo, coordenar a rotação
+do cliente API e manter a janela de 30 dias antes do contract.
 
 ## Fontes
 

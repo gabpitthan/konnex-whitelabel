@@ -8,7 +8,7 @@
 | FE-001 | Alto | aberto | Frontend possui 105 vulnerabilidades npm reportadas no build. |
 | BE-001 | Alto | aberto | Backend reporta 77 vulnerabilidades npm (8 críticas) e dependências legadas; atualização exige lotes controlados. |
 | OPS-001 | Alto | mitigado | Backend/frontend possuem healthchecks; faltam monitor externo, SLO e alerta. |
-| OBS-001 | Médio | aberto | Logs sem correlação completa e observabilidade incompleta. |
+| OBS-001 | Médio | parcial | Timestamp ISO UTC e métricas PostgreSQL chegaram na 1.22; faltam request ID, SLO e alerta externo. |
 | FE-002 | Médio | aberto | Bundle principal grande e muitos avisos legados de lint. |
 | API-001 | Médio | investigar | Há indícios de montagem duplicada de rotas de mensagens/webhooks. |
 | WA-002 | Crítico | parcial | Auth state e lifecycle possuem lease/fencing; falta propagar o fence às transações de domínio e completar o registry de disposers. |
@@ -22,7 +22,7 @@
 | ENG-002 | Médio | aberto | Lint global voltou a executar e expõe 2.975 problemas legados; arquivos novos da 1.10 passam isoladamente. |
 | OPS-002 | Médio | parcial | Shutdown fecha WhatsApp e Socket.IO; Bull, Sequelize e clientes Redis ainda não têm encerramento explícito central. |
 | API-003 | Alto | parcial | Telemetria segura chegou na 1.21 e detecta um legado ativo; falta rotação coordenada, observar 30 dias e remover plaintext. |
-| DB-002 | Alto | parcial | Pool único e orçamento seguro entregues; faltam `pg_stat_statements`, timeouts por workload e métricas de espera. |
+| DB-002 | Alto | parcial | Pool e `pg_stat_statements` entregues; faltam janela representativa, timeouts por workload e alerta de espera. |
 | REDIS-002 | Alto | aberto | Auth/lease, cache e filas compartilham Redis; separar papéis antes de eviction ou escala horizontal. |
 | MSG-001 | Alto | parcial | Contact/Ticket e Message usam commits fenced separados; caminhos auxiliares e atomicidade integral da ingestão ainda requerem canário/outbox. |
 | OPS-003 | Alto | mitigado | Rollout 1.13 reiniciou por drop de constraint dependente; schema ficou intacto e a regra foi incorporada. |

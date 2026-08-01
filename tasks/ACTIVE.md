@@ -1,5 +1,32 @@
 # Tarefa ativa
 
+## Versão 1.22 — observabilidade PostgreSQL baseada em evidência
+
+Estado: publicada
+
+### Critérios
+
+- carregar `pg_stat_statements` com configuração conservadora;
+- não habilitar planning nem utility tracking;
+- relatório local sem texto SQL/segredo/PII;
+- medir conexões, cache, I/O, WAL, locks e top query IDs;
+- laboratório PostgreSQL 16 e rollback aprovados;
+- backup/restore da migration antes do restart de produção;
+- gates, runtime, restart e memória persistente aprovados;
+- nenhum índice novo sem janela de dados real.
+
+### Resultado
+
+- baseline de memória, conexões, cache, temp e locks coletado;
+- pesquisa primária PostgreSQL concluída;
+- laboratório create/coleta/drop e testes focados aprovados.
+- backup/restore e migration up/down/up aprovados;
+- 34 suítes/115 testes, logger adicional e builds aprovados;
+- migration em produção em 113 ms;
+- snapshot: cache 99,9936%, zero locks/temp/deadlocks, pior 14,322 ms;
+- logger corrigido para ISO UTC; API/frontend e restart em 2 ms aprovados;
+- nenhum índice/cache alterado sem evidência.
+
 ## Versão 1.21 — evidência para remover credencial legada
 
 Estado: publicada

@@ -19,6 +19,7 @@
 | Mídia WhatsApp | sim | não | não | não | pendente |
 | Liveness/readiness | sim | runtime | n/a | n/a | aprovado |
 | Pool PostgreSQL | sim | runtime | n/a | n/a | aprovado, 6→1 idle |
+| Observabilidade PostgreSQL | sim | laboratório+produção | pg_stat_statements save | sem texto SQL/PII | coleta inicial aprovada |
 | Range/contagem mensagens | sim | unitário | n/a | companyId | parcial, token global |
 | Idempotência Message | sim | migration+unitário | unique+transação | companyId+wid | aprovado |
 | Lookup Message por wid | sim | unitário+runtime | n/a | companyId obrigatório | aprovado |

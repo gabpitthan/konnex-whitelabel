@@ -1,22 +1,19 @@
-import pino from 'pino';
-import moment from 'moment-timezone';
+import pino from "pino";
 
-// Função para obter o timestamp com fuso horário
-const timezoned = () => {
-  return moment().tz('America/Sao_Paulo').format('DD-MM-YYYY HH:mm:ss');
-};
+export const LOG_TRANSLATE_TIME = "UTC:yyyy-mm-dd HH:MM:ss.l o";
+export const logTimestamp = pino.stdTimeFunctions.isoTime;
 
 const logger = pino({
   transport: {
-    target: 'pino-pretty',
+    target: "pino-pretty",
     options: {
       colorize: true,
       levelFirst: true,
-      translateTime: 'SYS:dd-mm-yyyy HH:MM:ss', // Use this para tradução de tempo
+      translateTime: LOG_TRANSLATE_TIME,
       ignore: "pid,hostname"
-    },
+    }
   },
-  timestamp: () => `,"time":"${timezoned()}"`, // Adiciona o timestamp formatado
+  timestamp: logTimestamp
 });
 
 export default logger;

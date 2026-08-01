@@ -2,6 +2,32 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.22] — 2026-07-31 — publicada
+
+### Entregue
+
+- `pg_stat_statements` carregado com limite de 5.000 statements;
+- coleta somente top-level, sem planning e sem utility statements;
+- relatório operacional local sem texto SQL, parâmetros ou PII;
+- métricas de pool, locks, cache, temp, WAL e top `queryid`;
+- timestamp do logger corrigido para ISO-8601 UTC não ambíguo.
+
+### Evidência
+
+- laboratório PostgreSQL 16 create/coleta/drop aprovado;
+- backup `0600`, restore e migration `up → down → up`;
+- 34 suítes/115 testes e builds Docker aprovados;
+- teste adicional do logger ISO UTC aprovado;
+- migration em produção em 113 ms;
+- primeiro snapshot: cache 99,9936%, 2/100 conexões, zero locks,
+  idle transaction, deadlocks e temp spill; pior máximo 14,322 ms;
+- API 1.22, frontend 200 e restart/shutdown em 2 ms.
+
+### Decisão
+
+Nenhum índice, cache ou aumento de memória foi aplicado: a primeira janela não
+mostra gargalo e otimizar agora seria especulativo. A coleta continuará.
+
 ## [1.21] — 2026-07-31 — publicada
 
 ### Entregue

@@ -415,6 +415,33 @@ rotação precisa ser coordenada com o consumidor porque o novo segredo é
 revelado apenas uma vez. Até isso ocorrer e a janela terminar, remover
 plaintext seria incorreto.
 
+## Decisão executada na 1.22 — medir PostgreSQL antes de otimizar
+
+A documentação PostgreSQL exige `shared_preload_libraries` e restart para
+`pg_stat_statements`. Ela também alerta que `track_planning` pode causar
+penalidade perceptível sob concorrência. A configuração adotada limita 5.000
+entradas, rastreia apenas top-level, desliga planning e utility, mantém save e
+habilita query IDs. O host medido tem 8,32 GB e 4,49 GB disponíveis; PostgreSQL
+usa `shared_buffers=128MB`, `work_mem=4MB` e 100 conexões máximas.
+
+O relatório não é exposto por HTTP porque as métricas são globais e um admin
+de tenant não deve observar outros workloads. O script local seleciona somente
+query ID e contadores: nunca texto SQL, bind, token, telefone ou mensagem.
+Laboratório PostgreSQL 16 comprovou create/coleta/drop com parâmetros
+`top|off|off|5000`; backup restaurado passou em up/down/up.
+
+O primeiro snapshot de produção mostrou 2/100 conexões, cache hit 99,9936%,
+zero lock waiters, idle transaction, deadlocks e temp spill. O maior tempo
+individual entre os top 20 foi 14,322 ms e não houve deallocation. Assim,
+índice, cache ou aumento de memória neste momento não seriam sustentados por
+evidência. A coleta deve abranger carga representativa antes de EXPLAIN ou DDL.
+
+Durante a correlação, os logs exibiram `08-01-2026` para um instante de 1º de
+agosto. A causa era dupla formatação: Moment gerava texto local ambíguo e
+`pino-pretty` tentava traduzi-lo. A documentação Pino recomenda timestamp
+ISO-8601 e processamento no transport. O logger agora usa `isoTime` em UTC e
+formato UTC explícito, comprovado por teste e runtime.
+
 Contrato restante: medir uso legado sem guardar identificador sensível,
 rotacionar o cliente em janela controlada e, após ausência comprovada de uso,
 remover o fallback e a coluna plaintext. As 77 vulnerabilidades reportadas no
