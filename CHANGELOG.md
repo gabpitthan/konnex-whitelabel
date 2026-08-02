@@ -2,6 +2,29 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.23] — 2026-08-01 — publicada
+
+### Entregue
+
+- removido o segundo mount idêntico de `messageRoutes`;
+- removido o alias social acidental montado em `/`;
+- preservado o único endpoint canônico `/webhook`;
+- contrato automatizado impede regressão dos mounts.
+
+### Evidência
+
+- inventário confirmou que frontend e rotas internas usam somente caminhos
+  canônicos e que não havia canal Facebook/Instagram ativo;
+- 36 suítes/118 testes e builds Docker aprovados;
+- API 1.23 e frontend 200 em produção;
+- raiz passou de 403 para 404, `/webhook` inválido permaneceu 403 e a rota de
+  mensagens permaneceu alcançável sob autenticação.
+
+### Decisão
+
+O alias raiz não era documentado nem consumido e ampliava a superfície pública.
+A remoção não altera o contrato canônico e não requer migration.
+
 ## [1.22] — 2026-07-31 — publicada
 
 ### Entregue

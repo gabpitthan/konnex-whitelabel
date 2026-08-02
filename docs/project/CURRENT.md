@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
-Atualizado em: 2026-07-31
-Versão ativa: 1.22
+Atualizado em: 2026-08-01
+Versão ativa: 1.23
 
 ## Em foco
 
-Programa P0/P1 de integridade e escala. A 1.22 iniciou observação real de
-queries, I/O e locks PostgreSQL antes de qualquer otimização especulativa.
+Programa P0/P1 de integridade e escala. A 1.23 eliminou mounts duplicados e
+restringiu o webhook social ao caminho canônico, com contrato de regressão.
 
 ## Estado operacional
 
@@ -100,12 +100,17 @@ queries, I/O e locks PostgreSQL antes de qualquer otimização especulativa.
   transaction, deadlocks e temp spill; pior máximo 14,322 ms.
 - Nenhum índice/cache/tuning foi aplicado por falta de evidência de gargalo.
 - Logger deixou timestamp local ambíguo e agora emite ISO-8601 UTC correto.
+- `messageRoutes` possui um único mount e o webhook social existe somente em
+  `/webhook`; a raiz voltou ao 404 normal.
+- Gate 1.23 passou em 36 suítes/118 testes e ambos os builds; API 1.23,
+  frontend 200 e containers saudáveis foram confirmados em produção.
 
 ## Próximo passo
 
 Coletar uma janela representativa de `pg_stat_statements` e correlacionar os
-query IDs de maior custo sem expor texto/dados. Em paralelo, coordenar a rotação
-do cliente API e manter a janela de 30 dias antes do contract.
+query IDs de maior custo sem expor texto/dados. Em paralelo, inventariar a
+alcançabilidade das vulnerabilidades npm em lotes compatíveis, coordenar a
+rotação do cliente API e manter a janela de 30 dias antes do contract.
 
 ## Fontes
 

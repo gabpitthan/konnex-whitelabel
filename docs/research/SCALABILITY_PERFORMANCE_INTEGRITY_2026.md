@@ -448,3 +448,31 @@ remover o fallback e a coluna plaintext. As 77 vulnerabilidades reportadas no
 runtime backend, 105 no frontend e o bundle gzip de 1,68 MB permanecem riscos
 reais, mas exigem inventário de caminhos alcançáveis, upgrades segmentados e
 rollback próprio; `npm audit fix --force` não é uma correção segura.
+
+## Decisão executada na 1.23 — composição única de rotas Express
+
+A documentação oficial do Express estabelece que middleware é executado na
+ordem de montagem e que `router.use()` sem path usa `/`. Assim, montar o mesmo
+router duas vezes mantém duas camadas sequenciais: respostas encerradas no
+primeiro handler mascaram a duplicata, enquanto caminhos sem correspondência
+atravessam ambas. A mesma semântica fazia `webHookRoutes`, cujo filho atende
+GET/POST `/`, transformar a raiz da API em callback social.
+
+O inventário encontrou uso interno somente de `/webhook` e dos caminhos
+canônicos de mensagens. A base tinha zero canais Facebook/Instagram e não
+mostrou evento social desde o deploy anterior. Em runtime, antes da correção,
+token inválido retornava 403 em `/` e `/webhook`; depois, a raiz retornou 404 e
+o canônico continuou 403. Isso prova a necessidade e a compatibilidade sem
+depender de hipótese de performance.
+
+Foi removido um mount duplicado de mensagens e o alias raiz, preservando
+`/webhook`. Um teste de contrato lê a composição central e exige exatamente um
+mount de cada caminho, evitando regressão silenciosa. O gate passou em 36
+suítes/118 testes e builds de produção. Não houve migration, cache ou tuning de
+banco: nenhum desses mecanismos participa da causa.
+
+Fontes primárias:
+
+- https://expressjs.com/en/guide/using-middleware.html
+- https://expressjs.com/en/4x/guide/writing-middleware/
+- https://expressjs.com/en/5x/api/router/

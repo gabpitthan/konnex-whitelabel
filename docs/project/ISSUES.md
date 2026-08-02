@@ -10,7 +10,6 @@
 | OPS-001 | Alto | mitigado | Backend/frontend possuem healthchecks; faltam monitor externo, SLO e alerta. |
 | OBS-001 | Médio | parcial | Timestamp ISO UTC e métricas PostgreSQL chegaram na 1.22; faltam request ID, SLO e alerta externo. |
 | FE-002 | Médio | aberto | Bundle principal grande e muitos avisos legados de lint. |
-| API-001 | Médio | investigar | Há indícios de montagem duplicada de rotas de mensagens/webhooks. |
 | WA-002 | Crítico | parcial | Auth state e lifecycle possuem lease/fencing; falta propagar o fence às transações de domínio e completar o registry de disposers. |
 | JOB-001 | Alto | confirmado | Jobs Bull não têm política uniforme de idempotência, stalled/dead-letter e telemetria. |
 | DB-001 | Alto | confirmado | Existem queries interpoladas e fluxos críticos sem garantia explícita de transação/afterCommit. |

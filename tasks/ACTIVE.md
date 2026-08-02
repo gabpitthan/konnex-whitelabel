@@ -1,5 +1,32 @@
 # Tarefa ativa
 
+## Versão 1.23 — contrato único de rotas e webhook canônico
+
+Estado: publicada
+
+### Critérios
+
+- cada router de mensagens montado uma única vez;
+- webhook social disponível somente em `/webhook`;
+- nenhum consumidor interno depende da raiz;
+- teste impede mount duplicado/alias raiz;
+- canonical webhook mantém comportamento;
+- raiz passa de callback 403 para 404;
+- builds, regressão, deploy, smoke e restart aprovados;
+- memória persistente e commit atualizados.
+
+### Resultado
+
+- pesquisa Express e inventário de consumidores concluídos;
+- baseline runtime provou alias raiz e caminho canônico;
+- zero canais sociais e nenhum evento observado;
+- implementação compilada e 2 testes de contrato aprovados.
+- gate completo passou em 36 suítes/118 testes e ambos os builds;
+- produção publicou API 1.23 e frontend 200;
+- runtime confirmou raiz 404, webhook canônico 403 com token inválido e rota de
+  mensagens presente/protegida com 403;
+- memória persistente e commit atualizados.
+
 ## Versão 1.22 — observabilidade PostgreSQL baseada em evidência
 
 Estado: publicada
