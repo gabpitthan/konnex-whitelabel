@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-08-02
-Versão ativa: `1.24`, publicada.
+Versão ativa: `1.25`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -56,6 +56,10 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 - A 1.24 fixou Axios backend 1.18.0 com tag/proveniência verificadas,
   centralizou integrações externas com budgets e redaction, passou em 37
   suítes/124 testes, builds, deploy e smoke da versão.
+- A 1.25 bloqueou SSRF e DNS rebinding em URLs não confiáveis, validando todos
+  os A/AAAA no Agent, fixando o IP aprovado ao socket e desativando redirects,
+  proxy e socket path. Passou em 38 suítes/157 testes, builds, deploy, smoke e
+  falha controlada sem dados sensíveis no log.
 
 ## Memória estruturada
 

@@ -1,5 +1,53 @@
 # Tarefa ativa
 
+## Versão 1.25 — egress HTTP contra SSRF e DNS rebinding
+
+Estado: publicada
+
+### Objetivo
+
+Impedir que URLs Typebot, perfil ou mídia alcancem loopback, rede privada,
+metadata cloud e endereços especiais, inclusive por notação alternativa, DNS
+com respostas mistas ou rebinding.
+
+### Baseline e pesquisa
+
+- Typebot recebe base URL persistida por tenant;
+- URLs de perfil e anexos vêm de provedores externos;
+- validação apenas sintática não impede resolução para IP privado;
+- OWASP exige validar todos os A/AAAA e recomenda desabilitar redirects;
+- Node permite lookup customizado no Agent, vinculando o IP validado ao socket;
+- Axios permite `proxy:false`, agents próprios e `maxRedirects: 0`.
+
+### Critérios
+
+- aceitar somente HTTP/HTTPS sem credenciais embutidas;
+- normalizar representações alternativas antes de classificar IP;
+- negar IPv4/IPv6 não globais, metadata, loopback, link-local e especiais;
+- validar todas as respostas DNS a cada conexão e falhar se qualquer uma negar;
+- usar exatamente o IP validado no socket, fechando TOCTOU/rebinding;
+- desabilitar proxy, socket path e redirects em URLs não confiáveis;
+- limitar sockets/free sockets por processo;
+- testar literal, IPv4 mapped, DNS misto, rebinding e URL pública;
+- gate, deploy, falha induzida, memória e rollback aprovados.
+
+### Fora do lote
+
+- egress firewall no host/rede;
+- allowlist fixa para Typebot de cada tenant;
+- validação real de contas Meta/Typebot/WhatsApp.
+
+### Resultado
+
+- política fail-closed cobre URL, todos os A/AAAA e o IP entregue ao socket;
+- proxy, redirects e socket path foram desabilitados no cliente restrito;
+- agents compartilhados limitam concorrência e sockets ociosos;
+- 38 suítes/157 testes e ambos os builds foram aprovados;
+- produção publicou API 1.25 e passou no smoke;
+- tentativa controlada à metadata retornou `ERR_SSRF_BLOCKED` e gerou somente
+  evento agregado, sem URL, IP, token ou tenant;
+- sem migration; rollback permanece a imagem 1.24.
+
 ## Versão 1.24 — cliente HTTP seguro e Axios verificado
 
 Estado: publicada

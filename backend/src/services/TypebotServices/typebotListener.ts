@@ -1,4 +1,4 @@
-import { externalJsonClient } from "../../libs/httpClients";
+import { externalRestrictedJsonClient } from "../../libs/httpClients";
 import Ticket from "../../models/Ticket";
 import QueueIntegrations from "../../models/QueueIntegrations";
 import { WASocket, delay, proto } from "@whiskeysockets/baileys";
@@ -70,7 +70,7 @@ const typebotListener = async ({
                 data: reqData
             };
 
-            const request = await externalJsonClient.request(config);
+            const request = await externalRestrictedJsonClient.request(config);
 
             return request.data;
 
@@ -140,7 +140,7 @@ const typebotListener = async ({
                     },
                     data: reqData
                 };
-                requestContinue = await externalJsonClient.request(config);
+                requestContinue = await externalRestrictedJsonClient.request(config);
                 messages = requestContinue.data?.messages;
                 input = requestContinue.data?.input;
                 clientSideActions = requestContinue.data?.clientSideActions;

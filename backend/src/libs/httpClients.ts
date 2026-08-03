@@ -1,4 +1,10 @@
 import axios, { AxiosRequestConfig, AxiosInstance } from "axios";
+import {
+  assertPublicHttpUrl,
+  restrictedHttpAgent,
+  restrictedHttpsAgent
+} from "./ssrfProtection";
+import logger from "../utils/logger";
 
 const MEBIBYTE = 1024 * 1024;
 
@@ -46,13 +52,58 @@ const createClient = (
     timeout: limits.timeout,
     maxContentLength: limits.maxContentLength,
     maxBodyLength: limits.maxBodyLength,
-    maxRedirects: HTTP_CLIENT_LIMITS.maxRedirects,
+    maxRedirects: config.maxRedirects ?? HTTP_CLIENT_LIMITS.maxRedirects,
     redact: [...HTTP_CLIENT_REDACT_KEYS]
   });
+
+const protectUntrustedClient = (client: AxiosInstance): AxiosInstance => {
+  client.interceptors.request.use(config => {
+    assertPublicHttpUrl(config.url || "", config.baseURL);
+    return config;
+  });
+  client.interceptors.response.use(undefined, error => {
+    logger.warn(
+      {
+        event: "external_http_request_failed",
+        code: typeof error?.code === "string" ? error.code : "UNKNOWN",
+        status:
+          typeof error?.response?.status === "number"
+            ? error.response.status
+            : undefined,
+        securityBlocked: error?.code === "ERR_SSRF_BLOCKED"
+      },
+      "External HTTP request failed"
+    );
+    return Promise.reject(error);
+  });
+  return client;
+};
 
 export const externalJsonClient = createClient(HTTP_CLIENT_LIMITS.json);
 export const externalMediaClient = createClient(HTTP_CLIENT_LIMITS.media);
 export const externalUploadClient = createClient(HTTP_CLIENT_LIMITS.upload);
+
+export const externalRestrictedJsonClient = protectUntrustedClient(
+  createClient(HTTP_CLIENT_LIMITS.json, {
+    proxy: false,
+    maxRedirects: 0,
+    socketPath: undefined,
+    allowedSocketPaths: [],
+    httpAgent: restrictedHttpAgent,
+    httpsAgent: restrictedHttpsAgent
+  })
+);
+
+export const externalRestrictedMediaClient = protectUntrustedClient(
+  createClient(HTTP_CLIENT_LIMITS.media, {
+    proxy: false,
+    maxRedirects: 0,
+    socketPath: undefined,
+    allowedSocketPaths: [],
+    httpAgent: restrictedHttpAgent,
+    httpsAgent: restrictedHttpsAgent
+  })
+);
 
 export const createExternalJsonClient = (
   config: AxiosRequestConfig

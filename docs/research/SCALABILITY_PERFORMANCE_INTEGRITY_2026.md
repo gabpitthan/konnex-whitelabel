@@ -517,3 +517,41 @@ Fontes primárias:
 - https://github.com/axios/axios/security/advisories
 - https://github.com/axios/axios/issues/10636
 - https://docs.npmjs.com/cli/commands/npm-audit
+
+## Decisão executada na 1.25 — SSRF e DNS rebinding no egress
+
+A OWASP recomenda validar cada resposta A/AAAA e desabilitar redirects para
+entradas controláveis. Só validar a URL antes da conexão deixaria uma janela de
+DNS rebinding: por isso o lookup do Agent classifica todas as respostas e passa
+o endereço já aprovado diretamente ao socket. A política aceita apenas
+HTTP/HTTPS público, sem credenciais, e nega os registros especiais oficiais da
+IANA, inclusive IPv4 normalizado e IPv4 mapeado em IPv6.
+
+Os clientes restritos desabilitam proxy, redirect e socket path. Agents
+compartilhados usam keep-alive com máximo de 32 sockets e 4 livres por
+protocolo, reduzindo churn sem permitir crescimento sem limite. Um teste real
+detectou que Node 20 solicita `lookup(..., {all:true})`; o contrato foi corrigido
+para devolver o array completo já validado antes do rollout.
+
+Baseline: zero integrações Typebot configuradas na base observada, portanto não
+há dependência conhecida de rede privada. A métrica PostgreSQL permanece com
+99,9951% de cache hit, 2/100 conexões e zero locks/deadlocks/temp spill; SSRF
+não é problema de query, logo índice, cache ou tuning de banco seriam mudanças
+sem causa demonstrada.
+
+Fatos: 38 suítes/157 testes, builds, API 1.25, smoke e bloqueio induzido de
+metadata foram aprovados. O log contém apenas código e classe de segurança.
+Inferência: 32 sockets por protocolo são suficientes para a carga atual, que
+ainda não possui Typebot configurado. Não testado: contas reais Meta, Typebot e
+WhatsApp; firewall de egress segue como defesa operacional complementar.
+
+Fontes primárias:
+
+- https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+- https://owasp.org/www-community/pages/controls/SSRF_Prevention_in_Nodejs
+- https://nodejs.org/api/dns.html
+- https://nodejs.org/api/http.html
+- https://nodejs.org/api/net.html
+- https://github.com/axios/axios
+- https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
+- https://www.iana.org/assignments/iana-ipv6-special-registry/iana-ipv6-special-registry.xhtml

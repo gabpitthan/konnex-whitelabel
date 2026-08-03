@@ -1,12 +1,13 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-08-02
-Versão ativa: 1.24
+Versão ativa: 1.25
 
 ## Em foco
 
-Programa P0/P1 de integridade e escala. A 1.24 iniciou a redução controlada de
-vulnerabilidades com Axios verificado e budgets para integrações externas.
+Programa P0/P1 de integridade e escala. A 1.25 fechou SSRF/DNS rebinding nos
+clientes de URLs não confiáveis; o próximo lote volta às famílias vulneráveis
+alcançáveis e à confiabilidade/idempotência das filas Bull.
 
 ## Estado operacional
 
@@ -98,6 +99,12 @@ vulnerabilidades com Axios verificado e budgets para integrações externas.
 - Produção aplicou extensão em 113 ms; API 1.22, frontend 200 e restart em 2 ms.
 - Primeiro snapshot: 2/100 conexões, cache 99,9936%, zero locks, idle
   transaction, deadlocks e temp spill; pior máximo 14,322 ms.
+- Clientes externos não confiáveis agora negam redes privadas/especiais,
+  validam todos os A/AAAA por conexão e entregam o IP aprovado ao socket.
+- Redirect, proxy e socket path estão desabilitados; pools são limitados a 32
+  sockets e 4 livres por protocolo.
+- Gate 1.25 passou em 38 suítes/157 testes e builds; produção, smoke e bloqueio
+  controlado de metadata passaram sem expor URL/IP/token/tenant no log.
 - Nenhum índice/cache/tuning foi aplicado por falta de evidência de gargalo.
 - Logger deixou timestamp local ambíguo e agora emite ISO-8601 UTC correto.
 - `messageRoutes` possui um único mount e o webhook social existe somente em

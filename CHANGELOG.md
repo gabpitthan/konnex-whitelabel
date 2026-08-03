@@ -2,6 +2,22 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.25] — 2026-08-02 — publicada
+
+### Entregue
+
+- bloqueio de redes privadas, especiais, metadata e credenciais em URLs;
+- validação fail-closed de todos os A/AAAA com o IP aprovado fixado ao socket;
+- redirects, proxy e socket path desabilitados para entradas não confiáveis;
+- pools compartilhados limitados e observabilidade agregada sem dados sensíveis.
+
+### Evidência e rollback
+
+38 suítes/157 testes, builds, API 1.25 e smoke aprovados. Loopback e metadata
+foram bloqueados; destino público respondeu 200. A falha controlada em produção
+registrou apenas `ERR_SSRF_BLOCKED` e a classe de segurança. Sem migration ou
+mudança de banco/cache; rollback: imagem 1.24.
+
 ## [1.24] — 2026-08-02 — publicada
 
 ### Objetivo

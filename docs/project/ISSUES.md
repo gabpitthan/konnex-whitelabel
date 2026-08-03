@@ -2,7 +2,7 @@
 
 | ID | Severidade | Estado | Problema |
 |---|---|---|---|
-| ENG-001 | Alto | parcial | Há 37 suítes/124 testes focados e integrações Redis 7; a cobertura integral do CRM continua pendente. |
+| ENG-001 | Alto | parcial | Há 38 suítes/157 testes focados e integrações Redis 7; a cobertura integral do CRM continua pendente. |
 | SEC-001 | Crítico | aberto | Isolamento multiempresa ainda não foi auditado/testado integralmente. |
 | WA-001 | Alto | parcial | QR funciona; envio, recebimento, mídia e reconexão aguardam teste real. |
 | FE-001 | Alto | aberto | Frontend possui 105 vulnerabilidades npm reportadas no build. |
@@ -23,7 +23,6 @@
 | API-003 | Alto | parcial | Telemetria segura chegou na 1.21 e detecta um legado ativo; falta rotação coordenada, observar 30 dias e remover plaintext. |
 | DB-002 | Alto | parcial | Pool e `pg_stat_statements` entregues; faltam janela representativa, timeouts por workload e alerta de espera. |
 | REDIS-002 | Alto | aberto | Auth/lease, cache e filas compartilham Redis; separar papéis antes de eviction ou escala horizontal. |
-| HTTP-001 | Alto | parcial | Budgets/redaction chegaram na 1.24; URLs Typebot/perfil/mídia configuráveis ainda exigem proteção contra SSRF/DNS rebinding. |
 | MSG-001 | Alto | parcial | Contact/Ticket e Message usam commits fenced separados; caminhos auxiliares e atomicidade integral da ingestão ainda requerem canário/outbox. |
 | OPS-003 | Alto | mitigado | Rollout 1.13 reiniciou por drop de constraint dependente; schema ficou intacto e a regra foi incorporada. |
 
