@@ -1,4 +1,4 @@
-import axios from "axios";
+import { externalJsonClient } from "../../libs/httpClients";
 import Ticket from "../../models/Ticket";
 import QueueIntegrations from "../../models/QueueIntegrations";
 import { WASocket, delay, proto } from "@whiskeysockets/baileys";
@@ -62,7 +62,6 @@ const typebotListener = async ({
 
             const config = {
                 method: 'post',
-                maxBodyLength: Infinity,
                 url: `${url}/api/v1/typebots/${typebotSlug}/startChat`,
                 headers: {
                     'Content-Type': 'application/json',
@@ -71,7 +70,7 @@ const typebotListener = async ({
                 data: reqData
             };
 
-            const request = await axios.request(config);
+            const request = await externalJsonClient.request(config);
 
             return request.data;
 
@@ -134,7 +133,6 @@ const typebotListener = async ({
 
                 let config = {
                     method: 'post',
-                    maxBodyLength: Infinity,
                     url: `${url}/api/v1/sessions/${sessionId}/continueChat`,
                     headers: {
                         'Content-Type': 'application/json',
@@ -142,7 +140,7 @@ const typebotListener = async ({
                     },
                     data: reqData
                 };
-                requestContinue = await axios.request(config);
+                requestContinue = await externalJsonClient.request(config);
                 messages = requestContinue.data?.messages;
                 input = requestContinue.data?.input;
                 clientSideActions = requestContinue.data?.clientSideActions;

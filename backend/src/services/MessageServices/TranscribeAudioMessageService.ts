@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import FormData from 'form-data';
-import axios from 'axios';
+import { externalUploadClient } from '../../libs/httpClients';
 import Setting from '../../models/Setting';
 
 interface Response {
@@ -60,7 +60,7 @@ class TranscribeAudioMessageService {
         form.append('response_format', 'text');
         form.append('language', 'pt');
 
-        const response = await axios.post('https://api.openai.com/v1/audio/transcriptions', form, {
+        const response = await externalUploadClient.post('https://api.openai.com/v1/audio/transcriptions', form, {
           headers: {
             ...form.getHeaders(),
             Authorization: `Bearer ${apiKey}`,
@@ -74,7 +74,7 @@ class TranscribeAudioMessageService {
         form.append('file', audioFile);
 
         // Nota: A URL e a estrutura da resposta devem ser ajustadas conforme a API real do Gemini
-        const response = await axios.post('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:transcribe', form, {
+        const response = await externalUploadClient.post('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:transcribe', form, {
           headers: {
             ...form.getHeaders(),
             Authorization: `Bearer ${apiKey}`,

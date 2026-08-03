@@ -8,8 +8,7 @@ import logger from "../../utils/logger";
 import { isNil } from "lodash";
 import Whatsapp from "../../models/Whatsapp";
 import * as Sentry from "@sentry/node";
-
-const axios = require('axios');
+import { externalMediaClient } from "../../libs/httpClients";
 
 interface ExtraInfo extends ContactCustomField {
   name: string;
@@ -48,7 +47,7 @@ const downloadProfileImage = async ({
 
   try {
 
-    const response = await axios.get(profilePicUrl, {
+    const response = await externalMediaClient.get(profilePicUrl, {
       responseType: 'arraybuffer'
     });
 

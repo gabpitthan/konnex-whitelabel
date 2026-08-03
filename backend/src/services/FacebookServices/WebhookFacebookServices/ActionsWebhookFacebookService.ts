@@ -7,7 +7,6 @@ import ShowTicketService from "../../TicketServices/ShowTicketService";
 import { IConnections, INodes } from "../../WebhookService/DispatchWebHookService"
 import { getAccessToken, sendAttachmentFromUrl, sendText, showTypingIndicator } from "../graphAPI";
 import formatBody from "../../../helpers/Mustache";
-import axios from "axios";
 import fs from "fs";
 import { sendFacebookMessageMedia } from "../sendFacebookMessageMedia";
 import mime from "mime";

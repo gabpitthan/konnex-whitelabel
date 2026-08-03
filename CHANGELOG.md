@@ -2,6 +2,35 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.24] — 2026-08-02 — publicada
+
+### Objetivo
+
+Iniciar a redução controlada de vulnerabilidades pelo cliente HTTP alcançável,
+com limites explícitos e proteção de credenciais.
+
+### Entregue
+
+- Axios backend fixado em 1.18.0, com tag, integridade e provenance verificadas;
+- clientes distintos para JSON, download de mídia e upload;
+- budgets de timeout, corpo, resposta e redirects;
+- integrações Mercado Pago, Meta, Typebot, perfil e transcrição centralizadas;
+- tokens Meta removidos das URLs e chaves sensíveis redigidas em `toJSON()`;
+- contrato bloqueia imports Axios diretos e budgets infinitos.
+
+### Evidência
+
+- 1.376 assinaturas/19 attestations verificadas;
+- audit runtime: 77 → 75; Axios/`follow-redirects` corrigidos ausentes;
+- 37 suítes/124 testes e builds Docker aprovados;
+- API 1.24, smoke e configuração runtime aprovados.
+
+### Banco, limites e rollback
+
+Sem migration ou mudança de cache/banco. Provedores reais sem canal/conta não
+foram exercitados; SSRF/DNS rebinding de URLs configuráveis permanece parcial.
+Rollback: imagem 1.23.
+
 ## [1.23] — 2026-08-01 — publicada
 
 ### Entregue

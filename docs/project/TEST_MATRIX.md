@@ -28,5 +28,6 @@
 | API externa | sim | 401+legado+Redis 7 | uso unique+rate TTL | contexto pelo Bearer | aprovado, canário de envio pendente |
 | Ciclo de token API | sim | 28 focados+relatório runtime | digest+telemetria dual | rotate/revoke/status tenant/admin | parcial, rotação/30 dias pendentes |
 | Composição de rotas | sim | runtime 404/403 | n/a | mounts canônicos | aprovado, 2 contratos |
+| Cliente HTTP externo | sim | runtime de configuração | n/a | sem contexto de tenant | parcial, 6 contratos; provedores reais pendentes |
 
 Cada tarefa deve atualizar as linhas afetadas e registrar evidência no README da subversão.

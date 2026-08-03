@@ -5,7 +5,6 @@ import fs from "fs";
 import * as Sentry from "@sentry/node";
 import { isNil, isNull } from "lodash";
 import { REDIS_URI_MSG_CONN } from "../../config/redis";
-import axios from "axios";
 
 import {
   downloadMediaMessage,

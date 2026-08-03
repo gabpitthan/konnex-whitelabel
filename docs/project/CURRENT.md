@@ -1,12 +1,12 @@
 # Estado atual e handoff
 
-Atualizado em: 2026-08-01
-Versão ativa: 1.23
+Atualizado em: 2026-08-02
+Versão ativa: 1.24
 
 ## Em foco
 
-Programa P0/P1 de integridade e escala. A 1.23 eliminou mounts duplicados e
-restringiu o webhook social ao caminho canônico, com contrato de regressão.
+Programa P0/P1 de integridade e escala. A 1.24 iniciou a redução controlada de
+vulnerabilidades com Axios verificado e budgets para integrações externas.
 
 ## Estado operacional
 
@@ -104,13 +104,25 @@ restringiu o webhook social ao caminho canônico, com contrato de regressão.
   `/webhook`; a raiz voltou ao 404 normal.
 - Gate 1.23 passou em 36 suítes/118 testes e ambos os builds; API 1.23,
   frontend 200 e containers saudáveis foram confirmados em produção.
+- Axios backend 1.18.0 coincide com a tag upstream e possui SLSA provenance;
+  1.376 assinaturas e 19 attestations do grafo instalado foram verificadas.
+- JSON, mídia e upload possuem budgets próprios de 15/30/60 s, 5/25 MiB de
+  resposta, 5/32 MiB de corpo e três redirects.
+- Erros Axios serializados ocultam Authorization e parâmetros de token; métodos
+  Meta deixaram de embutir token na URL.
+- Audit runtime caiu de 77 para 75 achados; Axios e seus transitivos corrigidos
+  não aparecem mais. Permanecem 8 críticos em famílias legadas.
+- Gate 1.24 passou em 37 suítes/124 testes e ambos os builds; API 1.24,
+  smoke e budgets runtime foram aprovados.
+- Janela PostgreSQL de 2026-08-02: cache 99,9951%, 2/100 conexões, zero locks,
+  deadlocks, idle transaction e temp spill; nenhum tuning é necessário.
 
 ## Próximo passo
 
-Coletar uma janela representativa de `pg_stat_statements` e correlacionar os
-query IDs de maior custo sem expor texto/dados. Em paralelo, inventariar a
-alcançabilidade das vulnerabilidades npm em lotes compatíveis, coordenar a
-rotação do cliente API e manter a janela de 30 dias antes do contract.
+Proteger URLs configuráveis/downloads contra SSRF e DNS rebinding com política
+testável. Em paralelo, selecionar a próxima família vulnerável alcançável,
+coordenar a rotação do cliente API e manter a janela de 30 dias antes do
+contract.
 
 ## Fontes
 

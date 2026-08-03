@@ -24,7 +24,6 @@ import CompaniesSettings from "../../models/CompaniesSettings";
 import TicketTraking from "../../models/TicketTraking";
 
 const fs = require('fs')
-var axios = require('axios');
 
 type Session = WASocket & {
   id?: number;

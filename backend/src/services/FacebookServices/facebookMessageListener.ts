@@ -1,6 +1,6 @@
 import { writeFileSync } from "fs";
 import fs from "fs";
-import axios from "axios";
+import { externalMediaClient } from "../../libs/httpClients";
 import moment from "moment";
 import { join } from "path";
 import Contact from "../../models/Contact";
@@ -139,7 +139,7 @@ export const verifyMessageMedia = async (
   contact: Contact,
   fromMe: boolean = false
 ): Promise<void> => {
-  const { data } = await axios.get(msg.attachments[0].payload.url, {
+  const { data } = await externalMediaClient.get(msg.attachments[0].payload.url, {
     responseType: "arraybuffer"
   });
 

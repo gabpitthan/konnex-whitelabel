@@ -476,3 +476,44 @@ Fontes primárias:
 - https://expressjs.com/en/guide/using-middleware.html
 - https://expressjs.com/en/4x/guide/writing-middleware/
 - https://expressjs.com/en/5x/api/router/
+
+## Decisão executada na 1.24 — Axios por evidência e budgets externos
+
+O audit do grafo de produção encontrou Axios 1.7.7 diretamente alcançável em
+nove arquivos e afetado por uma família de SSRF, prototype pollution, header
+injection e DoS. O inventário também encontrou downloads sem timeout/limite e
+Typebot com `maxBodyLength: Infinity`. A documentação oficial alerta que os
+limites contra decompression bomb são opt-in, portanto apenas trocar a versão
+não fecharia o risco operacional.
+
+A cadeia de suprimentos exigiu cuidado adicional: Axios documentou o
+comprometimento das versões 1.14.1 e 0.30.4 em março de 2026. Foi escolhido
+1.18.0, já fora da janela vulnerável do audit e sem seguir `latest`. O commit
+`2d06f96e8602c2db13b65a26340ee4a1bbc0b61f` coincide entre npm e a tag Git;
+integridade do lock, 1.376 assinaturas de registro, 19 attestations e SLSA
+provenance foram verificados.
+
+JSON, mídia e upload agora têm budgets distintos: timeout 15/30/60 s, resposta
+5/25/5 MiB, corpo 5/5/32 MiB e três redirects. O objetivo é backpressure e
+limite de memória sem impedir áudio de até aproximadamente 25 MiB mais overhead.
+Authorization e parâmetros de token são redigidos na serialização de erro; os
+tokens Meta deixaram de compor URLs. Um contrato varre o backend e falha se
+Axios for instanciado fora da composição ou se Infinity reaparecer.
+
+O audit runtime caiu de 77 para 75 achados e Axios/`follow-redirects` corrigidos
+sumiram. Os 8 críticos restantes não pertencem a este lote. PostgreSQL medido
+em paralelo manteve 99,9951% de cache hit, zero locks/deadlocks/temp spill e
+2/100 conexões; não há relação causal que justifique tuning ou novo cache.
+
+Fatos: versões, hashes, audits, budgets, testes e runtime acima foram medidos.
+Inferência: os budgets devem cobrir os payloads normais pelas APIs conhecidas.
+Não testado: contas reais Mercado Pago/Meta/Typebot/transcrição e defesa completa
+contra SSRF/DNS rebinding em URLs configuráveis.
+
+Fontes primárias:
+
+- https://github.com/axios/axios/releases
+- https://github.com/axios/axios/blob/v1.x/CHANGELOG.md
+- https://github.com/axios/axios/security/advisories
+- https://github.com/axios/axios/issues/10636
+- https://docs.npmjs.com/cli/commands/npm-audit

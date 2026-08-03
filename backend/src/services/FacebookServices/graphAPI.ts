@@ -1,12 +1,16 @@
-import axios from "axios";
 import FormData from "form-data";
 import { createReadStream } from "fs";
 import logger from "../../utils/logger";
+import {
+  createExternalJsonClient,
+  createExternalUploadClient,
+  externalJsonClient,
+} from "../../libs/httpClients";
 
 const formData: FormData = new FormData();
 
 const apiBase = (token: string) =>
-  axios.create({
+  createExternalJsonClient({
     baseURL: "https://graph.facebook.com/v18.0/",
     params: {
       access_token: token
@@ -14,7 +18,7 @@ const apiBase = (token: string) =>
   });
 
 export const getAccessToken = async (): Promise<string> => {
-  const { data } = await axios.get(
+  const { data } = await externalJsonClient.get(
     "https://graph.facebook.com/v18.0/oauth/access_token",
     {
       params: {
@@ -136,11 +140,18 @@ export const sendAttachment = async (
   formData.append("filedata", fileReaderStream);
 
   try {
-    await apiBase(token).post("me/messages", formData, {
+    await createExternalUploadClient({
+      baseURL: "https://graph.facebook.com/v18.0/",
+      params: { access_token: token }
+    }).post(
+      "me/messages",
+      formData,
+      {
       headers: {
         ...formData.getHeaders()
       }
-    });
+      }
+    );
   } catch (error) {
     throw new Error(error);
   }
@@ -182,8 +193,9 @@ export const getPageProfile = async (
 
 export const profilePsid = async (id: string, token: string): Promise<any> => {
   try {
-    const { data } = await axios.get(
-      `https://graph.facebook.com/v18.0/${id}?access_token=${token}`
+    const { data } = await externalJsonClient.get(
+      `https://graph.facebook.com/v18.0/${id}`,
+      { params: { access_token: token } }
     );
     return data;
   } catch (error) {
@@ -194,8 +206,8 @@ export const profilePsid = async (id: string, token: string): Promise<any> => {
 
 export const subscribeApp = async (id: string, token: string): Promise<any> => {
   try {
-    const { data } = await axios.post(
-      `https://graph.facebook.com/v18.0/${id}/subscribed_apps?access_token=${token}`,
+    const { data } = await externalJsonClient.post(
+      `https://graph.facebook.com/v18.0/${id}/subscribed_apps`,
       {
         subscribed_fields: [
           "messages",
@@ -204,7 +216,8 @@ export const subscribeApp = async (id: string, token: string): Promise<any> => {
           "message_reads",
           "message_echoes"
         ]
-      }
+      },
+      { params: { access_token: token } }
     );
     return data;
   } catch (error) {
@@ -218,8 +231,9 @@ export const unsubscribeApp = async (
   token: string
 ): Promise<any> => {
   try {
-    const { data } = await axios.delete(
-      `https://graph.facebook.com/v18.0/${id}/subscribed_apps?access_token=${token}`
+    const { data } = await externalJsonClient.delete(
+      `https://graph.facebook.com/v18.0/${id}/subscribed_apps`,
+      { params: { access_token: token } }
     );
     return data;
   } catch (error) {
@@ -247,7 +261,7 @@ export const getAccessTokenFromPage = async (
 
     if (!token) throw new Error("ERR_FETCHING_FB_USER_TOKEN");
 
-    const data = await axios.get(
+    const data = await externalJsonClient.get(
       "https://graph.facebook.com/v18.0/oauth/access_token",
       {
         params: {
@@ -271,7 +285,7 @@ export const removeApplcation = async (
   token: string
 ): Promise<void> => {
   try {
-    await axios.delete(`https://graph.facebook.com/v18.0/${id}/permissions`, {
+    await externalJsonClient.delete(`https://graph.facebook.com/v18.0/${id}/permissions`, {
       params: {
         access_token: token
       }

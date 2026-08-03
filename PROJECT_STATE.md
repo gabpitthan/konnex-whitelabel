@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
-Última atualização: 2026-07-29
-Versão ativa: `1.16`, publicada.
+Última atualização: 2026-08-02
+Versão ativa: `1.24`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -47,6 +47,15 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 - A 1.16 colocou criação de Contact/contexto de Ticket sob o fence, tornou o
   contador de não lidas atômico no PostgreSQL e impôs unicidade parcial para
   Ticket WhatsApp ativo. Backup/restore, migration, 62 testes e deploy passaram.
+- A 1.17–1.21 vinculou a API externa ao tenant, adicionou rate limit Redis,
+  removeu exposição de tokens, adotou digest revogável e mediu migração legada.
+- A 1.22 habilitou `pg_stat_statements` sem texto SQL/PII. A janela até
+  2026-08-02 mantém cache hit 99,9951%, zero locks/deadlocks/temp spill e não
+  justifica índice, cache ou aumento de pool.
+- A 1.23 removeu mounts duplicados e restringiu o webhook social a `/webhook`.
+- A 1.24 fixou Axios backend 1.18.0 com tag/proveniência verificadas,
+  centralizou integrações externas com budgets e redaction, passou em 37
+  suítes/124 testes, builds, deploy e smoke da versão.
 
 ## Memória estruturada
 
@@ -83,11 +92,11 @@ Toda nova sessão deve ler `AGENTS.md`, este índice e `docs/project/CURRENT.md`
 
 Antes de continuar o redesign, executar o P0 de confiabilidade:
 
-1. vincular tokens de API ao tenant;
-2. habilitar medição de queries antes de novos índices;
-3. validar auth state v2 com conta canário, restart e mensagens;
-4. criar regressão automatizada para jornadas completas de WhatsApp;
-5. ampliar fencing aos caminhos auxiliares antes de liberar cluster.
+1. validar auth state v2 com conta canário, restart e mensagens;
+2. criar regressão automatizada para jornadas completas de WhatsApp;
+3. ampliar fencing aos caminhos auxiliares antes de liberar cluster;
+4. proteger URLs configuráveis contra SSRF/DNS rebinding;
+5. reduzir as demais vulnerabilidades por família e alcance.
 
 ## Direção visual aprovada
 

@@ -1,5 +1,50 @@
 # Tarefa ativa
 
+## Versão 1.24 — cliente HTTP seguro e Axios verificado
+
+Estado: publicada
+
+### Objetivo
+
+Remover a família de vulnerabilidades Axios alcançável no backend sem upgrade
+cego e limitar tempo/corpo/resposta das integrações HTTP externas.
+
+### Baseline
+
+- backend resolve Axios 1.7.7 e o audit de produção atribui vulnerabilidade
+  alta ao intervalo 1.0.0–1.17.0;
+- nove arquivos ativos fazem chamadas HTTP; downloads de imagem/mídia e Typebot
+  não possuem timeout ou limite de resposta;
+- Typebot declara `maxBodyLength: Infinity` mesmo enviando JSON pequeno;
+- Axios upstream declara limites de decompression/body como opt-in;
+- versões 1.14.1/0.30.4 sofreram incidente de supply chain e não serão usadas.
+
+### Critérios
+
+- fixar versão upstream corrigida e verificar assinatura/proveniência;
+- audit não pode mais atribuir advisory direto ao Axios;
+- definir clientes JSON, mídia e upload com budgets explícitos;
+- remover `Infinity` e impedir regressão por teste;
+- preservar integrações Mercado Pago, Meta, Typebot e transcrição;
+- builds, regressão, deploy, smoke, rollback e memória aprovados.
+
+### Fora do lote
+
+- migração ampla do Axios frontend 0.x;
+- solução completa de SSRF/DNS rebinding para URLs configuráveis;
+- upgrades Sequelize, Multer, Baileys ou Puppeteer.
+
+### Resultado
+
+- npm/Git/integridade/SLSA provenance conferem para Axios 1.18.0;
+- 1.376 assinaturas e 19 attestations verificadas;
+- audit runtime caiu de 77 para 75; Axios deixou de ser vulnerável;
+- todas as chamadas ativas usam cliente central e tokens Meta saíram da URL;
+- 6 contratos cobrem budgets, centralização e redaction real;
+- gate final: 37 suítes/124 testes e builds aprovados;
+- produção: API 1.24, smoke e budgets runtime aprovados;
+- sem migration; rollback permanece a imagem 1.23.
+
 ## Versão 1.23 — contrato único de rotas e webhook canônico
 
 Estado: publicada

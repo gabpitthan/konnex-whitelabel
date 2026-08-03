@@ -8,7 +8,7 @@ import Company from "../models/Company";
 import Invoices from "../models/Invoices";
 import Setting from "../models/Setting";
 import { getIO } from "../libs/socket";
-import axios from 'axios';
+import { externalJsonClient } from "../libs/httpClients";
 
 dotenv.config();
 
@@ -56,7 +56,7 @@ export const createSubscription = async (
 
   try {
     // Chamada para criar a preferência no Mercado Pago
-    const response = await axios.post('https://api.mercadopago.com/checkout/preferences', data, {
+    const response = await externalJsonClient.post('https://api.mercadopago.com/checkout/preferences', data, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}` // Usando accessToken aqui
@@ -86,7 +86,7 @@ export const webhook = async (
 
   if (data && data.id) {
     try {
-      const paymentResponse = await axios.get(`https://api.mercadopago.com/v1/payments/${data.id}`, {
+      const paymentResponse = await externalJsonClient.get(`https://api.mercadopago.com/v1/payments/${data.id}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}` // Usando accessToken aqui
@@ -133,4 +133,3 @@ export const webhook = async (
 export function createWebhook(arg0: string, createWebhook: any) {
     throw new Error("Function not implemented.");
 }
-
