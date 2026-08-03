@@ -1,5 +1,48 @@
 # Tarefa ativa
 
+## Versão 1.31 — egress seguro do webhook e remoção de `request`
+
+Estado: publicada
+
+### Objetivo e critérios
+
+- remover o único cliente `request` ativo e toda a árvore runtime exclusiva;
+- conduzir URL N8N/webhook configurável pelo egress SSRF-safe compartilhado;
+- limitar timeout, corpo, resposta, sockets e redirects;
+- aguardar o POST e propagar falha sem retry automático ambíguo;
+- comprovar bloqueio de IP privado, contrato do POST e rejeição assíncrona;
+- comparar audit/grafo antes e depois e validar imagem real;
+- executar gate, deploy, smoke, restart e publicar SHA verificado no GitHub.
+
+### Baseline e decisão
+
+- audit 1.30: 72 achados, 7 críticos;
+- `request` 2.88.2 está descontinuado e não possui versão corrigida;
+- seu uso ativo envia a URL persistida do tenant sem proteção SSRF, timeout ou
+  limite de resposta e lança erros dentro de callback fora do `try/catch`;
+- a árvore inclui `form-data` 2.3.3 crítico e `tough-cookie` 2.5.0 vulnerável;
+- o cliente Axios endurecido da 1.25 já resolve DNS por conexão, falha fechado
+  se qualquer A/AAAA é privado, desativa proxy/redirect/socket path e usa pool
+  keep-alive bounded; reutilizá-lo reduz código e conexões.
+
+### Evidência parcial
+
+- três testes focados aprovam POST, falha propagada e bloqueio de loopback;
+- build TypeScript aprovado;
+- `npm ls` não contém `request`, `form-data` 2.x ou `tough-cookie` após prune;
+- audit runtime final: 72→68 achados e 7→5 críticos;
+- não há migration, alteração de cache, Redis, pool PostgreSQL ou dado.
+
+### Resultado final
+
+- gate completo: 59 suítes/217 testes e ambos os builds aprovados;
+- imagem runtime: 67 achados/4 críticos, sem `request` ou `tough-cookie` e com
+  `form-data` 4.0.6;
+- backend/frontend saudáveis, API 1.31 e smoke público aprovado;
+- restart fechou seis filas sem falha em 542 ms e retornou saudável, sem
+  migration pendente;
+- rollback permanece imagem 1.30, sem reversão de dados.
+
 ## Versão 1.30 — remoção do Bull Board legado
 
 Estado: publicada

@@ -97,10 +97,9 @@ import { IOpenAi } from "../../@types/openai";
 import { WhatsAppLease } from "../../libs/whatsappLease";
 import { WhatsappFenceLostError } from "../../libs/whatsappFence";
 import FindOrCreateFencedWhatsappContextService from "./FindOrCreateFencedWhatsappContextService";
+import DispatchIntegrationWebhookService from "./DispatchIntegrationWebhookService";
 
 const os = require("os");
-
-const request = require("request");
 
 let i = 0;
 
@@ -3889,23 +3888,7 @@ export const handleMessageIntegration = async (
 
   if (queueIntegration.type === "n8n" || queueIntegration.type === "webhook") {
     if (queueIntegration?.urlN8N) {
-      const options = {
-        method: "POST",
-        url: queueIntegration?.urlN8N,
-        headers: {
-          "Content-Type": "application/json"
-        },
-        json: msg
-      };
-      try {
-        request(options, function (error, response) {
-          if (error) {
-            throw new Error(error);
-          }
-        });
-      } catch (error) {
-        throw new Error(error);
-      }
+      await DispatchIntegrationWebhookService(queueIntegration.urlN8N, msg);
     }
   } else if (queueIntegration.type === "dialogflow") {
     let inputAudio: string | undefined;

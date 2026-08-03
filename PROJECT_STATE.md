@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-08-03
-Versão ativa: `1.30`, publicada.
+Versão ativa: `1.31`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -92,6 +92,12 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 - Gate 58/214 e builds passaram. Produção confirmou `/admin/queues` 404,
   pacotes vulneráveis ausentes, smoke 1.30, shutdown de filas e retorno
   saudável sem migrations pendentes.
+- A 1.31 troca o `request` sem suporte no webhook configurável por tenant pelo
+  cliente HTTP já protegido contra SSRF/DNS rebinding e com budgets. Falhas
+  agora são aguardadas; `request`, `form-data` 2.x e `tough-cookie` 2.x saem do
+  grafo, reduzindo o audit runtime de 72/7 críticas para 68/5. Testes
+  focados/build, gate 59/217, deploy, smoke e restart passaram. A imagem
+  runtime mediu 67/4 críticas e o shutdown fechou seis filas em 542 ms.
 
 ## Memória estruturada
 

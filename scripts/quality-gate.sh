@@ -57,6 +57,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/services/MessageServices/__tests__/PersistFencedMessageService.spec.ts \
   src/services/MessageServices/__tests__/ListMessagesServiceAll.spec.ts \
   src/services/SocketServices/__tests__/AuthorizeTicketRoomService.spec.ts \
+  src/services/WbotServices/__tests__/DispatchIntegrationWebhookService.spec.ts \
   src/services/ScheduleServices/__tests__/ClaimDueSchedulesService.spec.ts \
   src/services/ScheduleServices/__tests__/ReleaseScheduleDispatchClaimService.spec.ts \
   src/services/ScheduleServices/__tests__/BeginScheduleDispatchService.spec.ts \

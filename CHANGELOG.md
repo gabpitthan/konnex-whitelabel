@@ -2,6 +2,30 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.31] — 2026-08-03 — publicada
+
+### Entregue no código
+
+- substituído `request` no webhook N8N/webhook pelo cliente Axios endurecido;
+- URL configurável passa por bloqueio SSRF e DNS rebinding, sem redirects/proxy;
+- timeout, resposta e corpo possuem limites explícitos e conexões são reutilizadas;
+- falhas assíncronas são aguardadas e propagadas, sem `throw` perdido em callback;
+- removida a árvore sem suporte `request`, `form-data` 2.x e `tough-cookie` 2.x.
+
+### Evidência atual
+
+O caminho é ativo e recebe URL persistida por tenant. O audit runtime caiu de
+72/7 críticas para 68/5; `request`, `form-data` vulnerável e `tough-cookie`
+saíram integralmente. A imagem runtime reportou 67/4 críticas. Gate com 59
+suítes/217 testes, builds, deploy, smoke e restart passaram; o shutdown fechou
+seis filas sem falha em 542 ms e retornou sem migration pendente.
+
+### Limite e rollback
+
+Não há retry automático: o destino pode ter aceitado o POST antes de uma falha
+de rede, portanto repetir cegamente poderia duplicar efeitos. O lote não muda
+banco, cache ou filas. Rollback é a imagem 1.30.
+
 ## [1.30] — 2026-08-03 — publicada
 
 ### Entregue no código

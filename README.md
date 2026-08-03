@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img alt="Versão 1.30" src="https://img.shields.io/badge/vers%C3%A3o-1.30-123d37"></a>
+  <a href="./CHANGELOG.md"><img alt="Versão 1.31" src="https://img.shields.io/badge/vers%C3%A3o-1.31-123d37"></a>
   <a href="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml"><img alt="Quality Gate" src="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml/badge.svg"></a>
   <a href="./backend/Dockerfile"><img alt="Node.js 20" src="https://img.shields.io/badge/Node.js-20-337a5b?logo=node.js&amp;logoColor=white"></a>
   <a href="./compose.yaml"><img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&amp;logoColor=white"></a>
@@ -38,7 +38,9 @@ código.
 
 ## Estado do projeto
 
-- **Publicada:** versão `1.30`, com 58 suítes / 214 testes, builds, deploy,
+- **Publicada:** versão `1.31`, com 59 suítes / 217 testes, builds, deploy,
+  smoke e restart aprovados. O webhook configurável usa egress SSRF-safe e a
+  árvore runtime sem suporte do `request` foi removida.
   smoke e restart aprovados.
 - **Entrega recente:** remoção do Bull Board legado desativado, reduzindo o
   backend runtime de 76/9 críticas para 72/7 críticas sem alterar as filas.

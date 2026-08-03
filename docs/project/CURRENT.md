@@ -1,13 +1,13 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-08-03
-Versão ativa: 1.30 (publicada)
+Versão ativa: 1.31 (publicada)
 
 ## Em foco
 
-Programa P0/P1 de integridade e escala. A 1.30 remove o Bull Board 0.5.0
-desativado e sua superfície crítica sem alterar as filas de negócio. Audit,
-gate, builds, deploy, smoke e restart foram aprovados.
+Programa P0/P1 de integridade e escala. A 1.31 remove `request` do webhook
+configurável e o conduz pelo egress SSRF-safe já validado. Audit, gate 59/217,
+builds, deploy, smoke e restart foram aprovados.
 
 ## Estado operacional
 

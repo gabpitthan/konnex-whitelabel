@@ -6,7 +6,7 @@
 | SEC-001 | Crítico | aberto | Isolamento multiempresa ainda não foi auditado/testado integralmente. |
 | WA-001 | Alto | parcial | QR funciona; envio, recebimento, mídia e reconexão aguardam teste real. |
 | FE-001 | Alto | aberto | Frontend possui 105 vulnerabilidades npm reportadas no build. |
-| BE-001 | Alto | parcial | Axios corrigido na 1.24; remoção do Bull Board legado na 1.30 reduz o backend runtime de 76/9 críticas para 72/7 críticas; outras famílias legadas permanecem. |
+| BE-001 | Alto | parcial | Axios corrigido na 1.24, Bull Board removido na 1.30 e `request` removido na 1.31; imagem runtime caiu a 67/4 críticas. Outras famílias legadas permanecem. |
 | OPS-001 | Alto | mitigado | Backend/frontend possuem healthchecks; faltam monitor externo, SLO e alerta. |
 | OBS-001 | Médio | parcial | Timestamp ISO UTC e métricas PostgreSQL chegaram na 1.22; faltam request ID, SLO e alerta externo. |
 | FE-002 | Médio | aberto | Bundle principal grande e muitos avisos legados de lint. |

@@ -815,3 +815,44 @@ Fatos: baseline, DDL, restore, concorrência e testes focados foram medidos.
 Inferência: lote 100 é conservador para a carga atual nula e deve ser revisto
 por lag/p95 antes de aumentar. Não testado: conta WhatsApp real, crash pós-send,
 áudio em duas chamadas e reconciliação humana.
+
+## Decisão em validação na 1.31 — remover `request` do webhook ativo
+
+Pesquisa de alcance local encontrou um único cliente `request` em código ativo:
+o POST de mensagem para a URL N8N/webhook persistida no cadastro da integração.
+Logo, o alerta não é apenas presença no lock: uma entrada controlável por tenant
+alcança rede diretamente. O mesmo padrão existia em um arquivo histórico não
+importado e também foi substituído para impedir reintrodução acidental.
+
+O projeto Request declarou a biblioteca totalmente descontinuada em 2020. A
+advisory GHSA-p8p7-x288-28g6 descreve bypass SSRF por redirect cross-protocol e
+marca todas as versões até 2.88.2. O audit medido acrescenta `form-data` 2.3.3
+crítico, `tough-cookie` 2.5.0, `qs` e `uuid` sob a dependência sem versão de
+correção. Atualizar transitivas isoladamente deixaria o cliente sem manutenção
+e não corrigiria o egress do produto; remover é a decisão de menor superfície.
+
+O substituto não cria outra abstração de rede: reutiliza o Axios 1.18.0 e os
+Agents entregues na 1.25. O interceptor valida protocolo/credenciais/hostname;
+o lookup do Agent avalia todas as respostas A/AAAA e passa ao socket somente IP
+validado, inclusive em nova resolução. Proxy, redirects e Unix socket paths são
+desativados. O cliente JSON limita request/response a 5 MiB e tempo a 15 s.
+
+Para escala, keep-alive amortiza handshake TCP/TLS, enquanto 32 sockets e 4
+ociosos limitam concorrência e retenção por processo. Não se adiciona cache a
+um efeito externo. Não se adiciona retry: uma falha após o servidor remoto
+aceitar o corpo tem resultado ambíguo e repetir pode duplicar a automação.
+
+Fontes primárias:
+
+- <https://github.com/request/request/issues/3142>
+- <https://github.com/advisories/GHSA-p8p7-x288-28g6>
+- <https://github.com/advisories/GHSA-fjxv-7rqg-78g4>
+- <https://axios-http.com/docs/req_config>
+- <https://nodejs.org/api/dns.html#dnslookuphostname-options-callback>
+- <https://nodejs.org/api/http.html#class-httpagent>
+
+Fatos medidos: uso ativo único, baseline 72/7, versões transitivas, três testes,
+build, audit local 68/5, imagem runtime 67/4 e ausência do grafo. Inferência: 15 s/5 MiB/32 sockets são
+budgets conservadores já compartilhados com integrações JSON; revisar por
+latência e taxa reais antes de ampliar. Não testado ainda: endpoint N8N real e
+falha após aceite remoto. Gate Docker, deploy, smoke e restart 1.31 passaram.
