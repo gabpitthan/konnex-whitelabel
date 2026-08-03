@@ -11,6 +11,7 @@ import {
 } from "sequelize-typescript";
 import Campaign from "./Campaign";
 import ContactListItem from "./ContactListItem";
+import Company from "./Company";
 
 @Table({ tableName: "CampaignShipping" })
 class CampaignShipping extends Model<CampaignShipping> {
@@ -21,6 +22,19 @@ class CampaignShipping extends Model<CampaignShipping> {
 
   @Column
   jobId: string;
+
+  @ForeignKey(() => Company)
+  @Column
+  companyId: number;
+
+  @Column
+  dispatchKey: string;
+
+  @Column
+  dispatchStatus: string;
+
+  @Column
+  dispatchStartedAt: Date;
 
   @Column
   number: string;
@@ -62,6 +76,9 @@ class CampaignShipping extends Model<CampaignShipping> {
 
   @BelongsTo(() => Campaign)
   campaign: Campaign;
+
+  @BelongsTo(() => Company)
+  company: Company;
 }
 
 export default CampaignShipping;

@@ -16,6 +16,9 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/database/migrations/__tests__/addApiCredentialUsageTelemetry.spec.ts \
   src/database/migrations/__tests__/enablePgStatStatements.spec.ts \
   src/database/migrations/__tests__/addScheduleDispatchClaims.spec.ts \
+  src/database/migrations/__tests__/addCampaignShippingDispatchState.spec.ts \
+  src/database/migrations/__tests__/alignCampaignShippingContactForeignKey.spec.ts \
+  src/database/migrations/__tests__/alignCampaignPendingIndex.spec.ts \
   src/helpers/__tests__/useMultiFileAuthState.spec.ts \
   src/jobs/__tests__/handleMessageAckQueue.spec.ts \
   src/jobs/__tests__/handleMessageQueue.spec.ts \
@@ -42,6 +45,9 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/services/ApiServices/__tests__/ResolveApiCredentialService.spec.ts \
   src/services/ApiServices/__tests__/SerializeApiWhatsappService.spec.ts \
   src/services/ContactServices/__tests__/UpsertWhatsappContactService.spec.ts \
+  src/services/CampaignService/__tests__/CampaignDispatchStateServices.spec.ts \
+  src/services/CampaignService/__tests__/CampaignQueueContract.spec.ts \
+  src/services/CampaignService/__tests__/CampaignTenantContract.spec.ts \
   src/services/HealthServices/__tests__/GetReadinessService.spec.ts \
   src/services/MessageServices/__tests__/GetMessageRangeService.spec.ts \
   src/services/MessageServices/__tests__/CreateMessageService.spec.ts \

@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
-Última atualização: 2026-08-02
-Versão ativa: `1.27`, publicada.
+Última atualização: 2026-08-03
+Versão ativa: `1.28`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -68,6 +68,13 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
   PostgreSQL, removeu snapshot de cliente do Redis e impede execução paralela
   por compare-and-set. Backup/restore, 46 suítes/178 testes, builds, migration
   em 170 ms, produção 1.27, CAS 1/2, smoke e restart foram aprovados.
+- A 1.28 torna CampaignShipping tenant-aware e usa uma máquina de estados com
+  UUID/CAS para confirmação e conteúdo. Backup 0600, restore up/down/up,
+  concorrência 1/0, 52 suítes/197 testes e builds passaram. As migrations de
+  estado/FK/índice aplicaram em 162/51/57 ms; smoke e restart em 557 ms passaram. Crash
+  pós-efeito permanece ambíguo e não recebe retry automático.
+  Preparação/disparo usam consultas leves e não recarregam a lista inteira por
+  destinatário; relações de campanha são validadas no tenant autenticado.
 
 ## Memória estruturada
 
@@ -107,7 +114,7 @@ Antes de continuar o redesign, executar o P0 de confiabilidade:
 1. validar auth state v2 com conta canário, restart e mensagens;
 2. criar regressão automatizada para jornadas completas de WhatsApp;
 3. ampliar fencing aos caminhos auxiliares antes de liberar cluster;
-4. proteger URLs configuráveis contra SSRF/DNS rebinding;
+4. criar reconciliação operacional para Schedule/Campaign em PROCESSING;
 5. reduzir as demais vulnerabilidades por família e alcance.
 
 ## Direção visual aprovada

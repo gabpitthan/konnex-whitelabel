@@ -17,6 +17,7 @@
 | Reconexão WhatsApp | sim | política limitada | não | não | pendente canário |
 | Jobs Bull/idempotência | sim | DLQ+shutdown runtime | retenção Redis | companyId handlers ACK/message | parcial, outbox pendente |
 | Agendamento/claim | sim | PG16 concorrente+produção | UUID/CAS PostgreSQL | companyId NOT NULL+CAS | parcial, canário/reconciliação pendentes |
+| Campanha/dispatch | sim | PG16 CAS+confirmação | UUID/fase PostgreSQL | owner/FK/CAS companyId | parcial, gate/canário/reconciliação pendentes |
 | Mídia WhatsApp | sim | não | não | não | pendente |
 | Liveness/readiness | sim | runtime | n/a | n/a | aprovado |
 | Pool PostgreSQL | sim | runtime | n/a | n/a | aprovado, 6→1 idle |

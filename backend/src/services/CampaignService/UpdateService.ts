@@ -4,6 +4,7 @@ import ContactList from "../../models/ContactList";
 import Queue from "../../models/Queue";
 import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
+import ValidateCampaignRelationsService from "./ValidateCampaignRelationsService";
 
 interface Data {
   id: number | string;
@@ -32,7 +33,7 @@ interface Data {
 const UpdateService = async (data: Data): Promise<Campaign> => {
   const { id } = data;
 
-  const record = await Campaign.findByPk(id);
+  const record = await Campaign.findOne({ where: { id, companyId: data.companyId } });
 
   if (!record) {
     throw new AppError("ERR_NO_CAMPAIGN_FOUND", 404);
@@ -52,6 +53,8 @@ const UpdateService = async (data: Data): Promise<Campaign> => {
   ) {
     data.status = "PROGRAMADA";
   }
+
+  await ValidateCampaignRelationsService(data);
 
   await record.update(data);
 

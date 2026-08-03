@@ -2,7 +2,7 @@ import Campaign from "../../models/Campaign";
 import Company from "../../models/Company";
 
 type Params = {
-  companyId: string;
+  companyId: number;
 };
 
 const FindService = async ({ companyId }: Params): Promise<Campaign[]> => {

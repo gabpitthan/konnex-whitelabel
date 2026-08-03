@@ -1,13 +1,13 @@
 # Estado atual e handoff
 
-Atualizado em: 2026-08-02
-Versão ativa: 1.27
+Atualizado em: 2026-08-03
+Versão ativa: 1.28
 
 ## Em foco
 
-Programa P0/P1 de integridade e escala. A 1.27 tornou o claim de Schedule
-transacional e a execução at-most-once automática; o próximo lote leva o mesmo
-rigor a CampaignShipping, que ainda engole falhas e pode duplicar envios.
+Programa P0/P1 de integridade e escala. A 1.28 aplica owner, estado persistido,
+UUID/CAS e recuperação de enqueue a CampaignShipping. O lote está publicado e
+não promete exactly-once do WhatsApp.
 
 ## Estado operacional
 
@@ -137,12 +137,24 @@ rigor a CampaignShipping, que ainda engole falhas e pode duplicar envios.
 - Laboratório PG16 dividiu 20 claims em 7/7/6/0; CAS iniciou 1 de 2 workers.
 - Gate 1.27 passou em 46 suítes/178 testes e builds; migration produção 170 ms.
 - API 1.27, runtime controlado, smoke e restart em 568 ms foram aprovados.
+- CampaignShipping ganhou owner/FK composta, unicidade, estado validado e CAS;
+  confirmação cria uma única segunda fase com UUID nova.
+- Endpoints show/update/delete/media/cancel/restart de campanha agora usam o
+  tenant autenticado; o scanner não interpola mais ID em SQL.
+- Create/update validam ContactList/Whatsapp/User/Queue no tenant; workers de
+  preparação/disparo usam consultas leves, evitando carregar N contatos N vezes.
+- Índice parcial do scanner segue `updatedAt,id` e inclui IDs/tenant/chave.
+- Backup pré-1.28 0600/SHA-256 e cadeia final up/down/up em 232/162/255 ms;
+  execução e confirmação concorrentes produziram 1/0.
+- Gate 52 suítes/197 testes e builds passou; produção migrou estado/FK/índice
+  em 162/51/57 ms e confirmou FK CASCADE e índice coberto.
+- Prova publicada com rollback deu CAS/confirm 1/0, sem dado sintético; API
+  1.28, frontend, smoke e restart em 557 ms foram aprovados.
 
 ## Próximo passo
 
-Aplicar claim/CAS e propagação de falha a CampaignShipping, preservando
-confirmação versus mensagem/mídia e sem prometer exactly-once do WhatsApp.
-Em paralelo, selecionar a próxima família vulnerável alcançável,
+Implementar reconciliação segura dos estados PROCESSING sem retry cego. Em
+paralelo, selecionar a próxima família vulnerável alcançável,
 coordenar a rotação do cliente API e manter a janela de 30 dias antes do
 contract.
 

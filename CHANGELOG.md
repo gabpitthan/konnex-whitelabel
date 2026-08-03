@@ -2,6 +2,35 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.28] — 2026-08-03 — publicada
+
+### Entregue
+
+- owner e FK composta tenant/campanha em `CampaignShipping`;
+- máquina de estados e CAS por UUID antes de efeitos externos;
+- confirmação atômica com chave nova para a fase de conteúdo;
+- recuperação bounded de `PENDING` e `jobId` estável no Bull;
+- falhas propagadas, cancelamento persistente e restart manual de `ERROR`;
+- endpoints e serviços de campanha corrigidos para o tenant autenticado;
+- SQL interpolado removido do scanner de campanhas.
+- preparação/disparo deixaram de carregar todos os contatos por destinatário;
+- ContactList/Whatsapp/User/Queue são validados no tenant antes de create/update.
+- índice parcial segue a ordem global real do scanner e cobre metadados do job.
+
+### Evidência atual
+
+Backup 0600/SHA-256 e cadeia final `up/down/up` em 232/162/255 ms. Concorrência
+de execução e confirmação produziu 1/0. Gate 52 suítes/197 testes e builds
+passou. Produção migrou estado/FK/índice em 162/51/57 ms; prova com rollback deu 1/0 e
+1/0, API 1.28, frontend, smoke e restart em 557 ms foram aprovados. A auditoria
+pós-deploy alinhou a FK obrigatória de contato de SET NULL para CASCADE.
+
+### Limite
+
+Não há exactly-once do WhatsApp. Crash após `PROCESSING`, inclusive entre texto
+e mídia de áudio, permanece ambíguo e sem retry automático. Rollback usa a
+migration `down`, imagem 1.27 e backup externo ao Git.
+
 ## [1.27] — 2026-08-03 — publicada
 
 ### Entregue

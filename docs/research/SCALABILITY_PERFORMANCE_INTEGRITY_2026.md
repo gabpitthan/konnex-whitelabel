@@ -647,3 +647,80 @@ Fontes primárias e padrão:
 - https://www.postgresql.org/docs/16/explicit-locking.html
 - https://github.com/WhiskeySockets/Baileys
 - https://baileys.wiki/docs/socket/handling-messages/
+
+## Decisão executada na 1.28 — campanha em fases persistidas
+
+O fluxo legado de campanha fazia `findOrCreate(campaignId,contactId)` sem
+constraint, não armazenava companyId, aceitava jobs por PK, engolia exceções e
+marcava `deliveredAt` até mesmo depois de pedir confirmação. A resposta do
+cliente então reenfileirava outra execução sem chave estável. Cancelamento e
+rotas de show/update/delete/media também buscavam apenas por ID.
+
+Bull documenta estratégia at-least-once: perda do lock ou stall pode executar
+o mesmo job novamente. PostgreSQL documenta que `UPDATE RETURNING` retorna o
+conjunto realmente alterado e que `SKIP LOCKED` é apropriado para múltiplos
+consumidores de tabelas tipo fila. O padrão outbox ainda pode publicar duas
+vezes e exige consumer idempotente. Não foi encontrada garantia upstream do
+Baileys/WhatsApp de dedupe no servidor ao repetir um message ID. Portanto, a
+mudança assegura exclusão automática, não exactly-once externo.
+
+Cada recipient possui owner, FK composta para Campaign, unicidade por
+tenant/campanha/contato e estados `PENDING`, `PROCESSING`,
+`AWAITING_CONFIRMATION`, `DONE`, `ERROR` e `CANCELLED` protegidos por CHECK. A
+fase PENDING carrega UUID persistida;
+o job Bull usa `campaign:<UUID>` e apenas id/campaignId/companyId/chave. Um CAS
+exato PENDING→PROCESSING vence antes de carregar contato. Confirmação usa CTE,
+row lock/`SKIP LOCKED` e nova UUID para a fase de conteúdo. Scanner bounded
+100/máximo 500 recupera PENDING cujo enqueue se perdeu.
+
+Falha do handler grava ERROR e rejeita o job. Crash depois de PROCESSING não é
+resetado automaticamente, pois o efeito WhatsApp pode ter ocorrido. Restart
+manual gera uma chave nova somente para ERROR. Áudio ainda pode produzir texto
+e mídia na mesma fase; crash intermediário continua explicitamente ambíguo.
+Cancelamento persiste CANCELLED antes de remover jobs do Redis, fechando a
+janela em que o scanner poderia recriar o efeito.
+
+A revisão de escala encontrou o job por destinatário recarregando a lista
+inteira tanto na preparação quanto no envio, comportamento O(N²) em dados
+transferidos/instanciados. Agora apenas ProcessCampaign expande a lista uma
+vez; PrepareContact e DispatchCampaign carregam Campaign/owner leves e um
+contato exato. Create/update também validam ContactList, Whatsapp, User e Queue
+por companyId antes de persistir referência, impedindo associação cross-tenant.
+
+Baseline medido: zero campanhas/envios e CampaignShipping 24 KiB, sem evidência
+para cache, pool ou tuning. Backup 0600 de 214.332 bytes, SHA-256
+`67a1a7aedd17decb2eaef0b23542996dd727e1e4eba7a40a2bea39e45f41e3e2`.
+Restore PG16 e cadeia final das três migrations passaram em up/down/up em
+232/162/255 ms. Dois executores
+concorrentes produziram 1/0 e duas confirmações simultâneas também 1/0.
+
+O gate aprovou 52 suítes/197 testes e builds. Produção migrou estado/FK/índice
+em 162/51/57 ms; prova
+transacional com rollback repetiu início 1/0 e confirmação 1/0, sem persistir
+dado sintético. API 1.28, smoke e restart em 557 ms passaram.
+
+A auditoria pós-deploy encontrou a FK histórica de contactId com `SET NULL`
+incompatível com o novo `NOT NULL`. Uma migration complementar a tornou
+`ON UPDATE/DELETE CASCADE`; laboratório deletou o contato e confirmou zero
+shipping órfão, com rollback. Produção confirmou a definição e zero linhas.
+O índice inicial também foi auditado: `companyId` liderava embora o scanner
+global não filtre tenant. A definição final ordena por `updatedAt,id`, inclui
+companyId/campaignId/dispatchKey e mantém o predicado PENDING; laboratório e
+produção confirmaram exatamente essa definição.
+
+Fontes primárias e padrões consultados:
+
+- https://docs.bullmq.io/bull/important-notes
+- https://www.postgresql.org/docs/16/sql-select.html
+- https://www.postgresql.org/docs/16/sql-update.html
+- https://www.postgresql.org/docs/16/dml-returning.html
+- https://www.postgresql.org/docs/16/explicit-locking.html
+- https://microservices.io/patterns/data/transactional-outbox.html
+- https://microservices.io/patterns/communication-style/idempotent-consumer.html
+- https://github.com/WhiskeySockets/Baileys
+- https://baileys.wiki/docs/socket/handling-messages/
+
+Fatos: baseline, DDL, restore, concorrência e testes focados foram medidos.
+Inferência: lote 100 é conservador para a carga atual nula e deve ser revisto
+por lag/p95 antes de aumentar. Não testado: conta WhatsApp real, crash pós-send,
+áudio em duas chamadas e reconciliação humana.

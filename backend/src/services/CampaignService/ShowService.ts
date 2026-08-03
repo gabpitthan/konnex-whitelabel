@@ -7,14 +7,23 @@ import Whatsapp from "../../models/Whatsapp";
 import User from "../../models/User";
 import Queue from "../../models/Queue";
 
-const ShowService = async (id: string | number): Promise<Campaign> => {
-  const record = await Campaign.findByPk(id, {
+const ShowService = async (
+  id: string | number,
+  companyId: number
+): Promise<Campaign> => {
+  const record = await Campaign.findOne({
+    where: { id, companyId },
     include: [
       { model: CampaignShipping },
-      { model: ContactList, include: [{ model: ContactListItem }] },
-      { model: Whatsapp, attributes: ["id", "name"] },
-      { model: User, attributes: ["id", "name"] },
-      { model: Queue, attributes: ["id", "name"] },
+      {
+        model: ContactList,
+        where: { companyId },
+        required: false,
+        include: [{ model: ContactListItem, where: { companyId }, required: false }]
+      },
+      { model: Whatsapp, where: { companyId }, required: false, attributes: ["id", "name"] },
+      { model: User, where: { companyId }, required: false, attributes: ["id", "name"] },
+      { model: Queue, where: { companyId }, required: false, attributes: ["id", "name"] },
     ]
   });
 

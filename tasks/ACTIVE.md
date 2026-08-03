@@ -1,5 +1,42 @@
 # Tarefa ativa
 
+## Versão 1.28 — integridade de disparos de campanha
+
+Estado: publicada
+
+### Objetivo e critérios
+
+- owner obrigatório e coerente com Campaign;
+- unicidade tenant/campanha/contato;
+- fase persistida, UUID estável e payload Redis mínimo;
+- CAS tenant/key/status antes do efeito externo;
+- confirmação concorrente cria uma única fase de conteúdo;
+- falha rejeita o job; `PROCESSING` ambíguo não tem retry automático;
+- scanner recupera `PENDING` perdido entre PostgreSQL e Redis;
+- preparação/disparo não podem carregar a lista completa N vezes;
+- relações associadas pertencem ao mesmo tenant;
+- índice parcial corresponde ao filtro/ordem do scanner global;
+- cancel/restart e endpoints usam tenant autenticado;
+- migration reversível, backup/restore, concorrência, gate e runtime aprovados.
+
+### Evidência atual
+
+- baseline: zero Campaign/CampaignShipping, tabela 24 KiB;
+- backup 0600 de 214.332 bytes e SHA-256 registrado;
+- cadeia final das três migrations em up/down/up: 232/162/255 ms;
+- CAS de dois workers 1/0; confirmação concorrente 1/0;
+- gate completo: 52 suítes/197 testes e ambos os builds;
+- produção: migrations estado/FK/índice 162/51/57 ms, CAS/confirm 1/0 com rollback,
+  FK CASCADE verificada, API 1.28 e smoke;
+- restart fechou seis filas sem falha em 557 ms e retornou saudável.
+
+### Fora do lote
+
+- exactly-once no servidor WhatsApp;
+- reconciliação visual de `PROCESSING`;
+- decomposição de texto+áudio em subfases;
+- migração BullMQ ou Redis físico separado.
+
 ## Versão 1.27 — claim transacional de agendamentos
 
 Estado: publicada

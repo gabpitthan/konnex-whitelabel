@@ -159,8 +159,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;
+  const { companyId } = req.user;
 
-  const record = await ShowService(id);
+  const record = await ShowService(id, companyId);
 
   return res.status(200).json(record);
 };
@@ -187,7 +188,8 @@ export const update = async (
 
   const record = await UpdateService({
     ...data,
-    id
+    id,
+    companyId
   });
 
   const io = getIO();
@@ -205,8 +207,9 @@ export const cancel = async (
   res: Response
 ): Promise<Response> => {
   const { id } = req.params;
+  const { companyId } = req.user;
 
-  await CancelService(+id);
+  await CancelService(+id, companyId);
 
   return res.status(204).json({ message: "Cancelamento realizado" });
 };
@@ -216,8 +219,9 @@ export const restart = async (
   res: Response
 ): Promise<Response> => {
   const { id } = req.params;
+  const { companyId } = req.user;
 
-  await RestartService(+id);
+  await RestartService(+id, companyId);
 
   return res.status(204).json({ message: "Reinício dos disparos" });
 };
@@ -229,7 +233,7 @@ export const remove = async (
   const { id } = req.params;
   const { companyId } = req.user;
 
-  await DeleteService(id);
+  await DeleteService(id, companyId);
 
   const io = getIO();
   io.of(String(companyId))
@@ -245,8 +249,8 @@ export const findList = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const params = req.query as FindParams;
-  const records: Campaign[] = await FindService(params);
+  const { companyId } = req.user;
+  const records: Campaign[] = await FindService({ companyId });
 
   return res.status(200).json(records);
 };
@@ -256,11 +260,13 @@ export const mediaUpload = async (
   res: Response
 ): Promise<Response> => {
   const { id } = req.params;
+  const { companyId } = req.user;
   const files = req.files as Express.Multer.File[];
   const file = head(files);
 
   try {
-    const campaign = await Campaign.findByPk(id);
+    const campaign = await Campaign.findOne({ where: { id, companyId } });
+    if (!campaign) throw new AppError("ERR_NO_CAMPAIGN_FOUND", 404);
     campaign.mediaPath = file.filename;
     campaign.mediaName = file.originalname;
     await campaign.save();
@@ -278,7 +284,8 @@ export const deleteMedia = async (
   const { id } = req.params;
 
   try {
-    const campaign = await Campaign.findByPk(id);
+    const campaign = await Campaign.findOne({ where: { id, companyId } });
+    if (!campaign) throw new AppError("ERR_NO_CAMPAIGN_FOUND", 404);
     const filePath = path.resolve("public", `company${companyId}`, campaign.mediaPath);
     const fileExists = fs.existsSync(filePath);
     if (fileExists) {

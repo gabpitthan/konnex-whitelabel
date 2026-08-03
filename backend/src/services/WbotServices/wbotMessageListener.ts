@@ -50,6 +50,7 @@ import Campaign from "../../models/Campaign";
 import CampaignShipping from "../../models/CampaignShipping";
 import { Op } from "sequelize";
 import { campaignQueue, parseToMilliseconds, randomValue } from "../../queues";
+import ConfirmCampaignShippingService from "../CampaignService/ConfirmCampaignShippingService";
 import User from "../../models/User";
 import { sayChatbot } from "./ChatBotListener";
 import MarkDeleteWhatsAppMessage from "./MarkDeleteWhatsAppMessage";
@@ -5098,35 +5099,30 @@ const verifyRecentCampaign = async (
   }
   if (!message.key.fromMe) {
     const number = message.key.remoteJid.replace(/\D/g, "");
-    const campaigns = await Campaign.findAll({
-      where: { companyId, status: "EM_ANDAMENTO", confirmation: true }
+    const campaignShipping = await ConfirmCampaignShippingService({
+      companyId,
+      number
     });
-    if (campaigns) {
-      const ids = campaigns.map(c => c.id);
-      const campaignShipping = await CampaignShipping.findOne({
-        where: {
-          campaignId: { [Op.in]: ids },
-          number,
-          confirmation: null,
-          deliveredAt: { [Op.ne]: null }
-        }
-      });
 
-      if (campaignShipping) {
-        await campaignShipping.update({
-          confirmedAt: moment(),
-          confirmation: true
-        });
+    if (campaignShipping) {
+      try {
         await campaignQueue.add(
           "DispatchCampaign",
           {
             campaignShippingId: campaignShipping.id,
-            campaignId: campaignShipping.campaignId
+            campaignId: campaignShipping.campaignId,
+            companyId: campaignShipping.companyId,
+            dispatchKey: campaignShipping.dispatchKey
           },
           {
-            delay: parseToMilliseconds(randomValue(0, 10))
+            delay: parseToMilliseconds(randomValue(0, 10)),
+            jobId: `campaign:${campaignShipping.dispatchKey}`
           }
         );
+      } catch (error) {
+        Sentry.captureException(error);
+        logger.error("confirmed campaign dispatch enqueue failed");
+        // The PostgreSQL PENDING row remains authoritative; the periodic scanner retries.
       }
     }
   }

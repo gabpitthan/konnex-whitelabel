@@ -5,6 +5,7 @@ import ContactList from "../../models/ContactList";
 import Whatsapp from "../../models/Whatsapp";
 import User from "../../models/User";
 import Queue from "../../models/Queue";
+import ValidateCampaignRelationsService from "./ValidateCampaignRelationsService";
 
 interface Data {
   name: string;
@@ -47,6 +48,8 @@ const CreateService = async (data: Data): Promise<Campaign> => {
   if (data.scheduledAt != null && data.scheduledAt != "") {
     data.status = "PROGRAMADA";
   }
+
+  await ValidateCampaignRelationsService(data);
 
   const record = await Campaign.create(data);
 
