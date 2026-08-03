@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-08-02
-Versão ativa: `1.25`, publicada.
+Versão ativa: `1.26`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -60,6 +60,10 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
   os A/AAAA no Agent, fixando o IP aprovado ao socket e desativando redirects,
   proxy e socket path. Passou em 38 suítes/157 testes, builds, deploy, smoke e
   falha controlada sem dados sensíveis no log.
+- A 1.26 fez handlers Bull propagarem falhas, adicionou DLQ/retenção limitada,
+  telemetria sem payload e shutdown explícito. O runtime também revelou e
+  corrigiu conexões ACK vazias quando desabilitadas. Gate 40/168, build final,
+  DLQ induzida, API 1.26, smoke e restart em 538 ms foram aprovados.
 
 ## Memória estruturada
 

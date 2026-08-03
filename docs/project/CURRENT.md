@@ -1,13 +1,13 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-08-02
-Versão ativa: 1.25
+Versão ativa: 1.26
 
 ## Em foco
 
-Programa P0/P1 de integridade e escala. A 1.25 fechou SSRF/DNS rebinding nos
-clientes de URLs não confiáveis; o próximo lote volta às famílias vulneráveis
-alcançáveis e à confiabilidade/idempotência das filas Bull.
+Programa P0/P1 de integridade e escala. A 1.26 criou a fundação de falha,
+retenção, telemetria e shutdown Bull; o próximo lote aprofunda idempotência
+transacional/outbox por fluxo sem assumir que entrega at-least-once é única.
 
 ## Estado operacional
 
@@ -123,11 +123,18 @@ alcançáveis e à confiabilidade/idempotência das filas Bull.
   smoke e budgets runtime foram aprovados.
 - Janela PostgreSQL de 2026-08-02: cache 99,9951%, 2/100 conexões, zero locks,
   deadlocks, idle transaction e temp spill; nenhum tuning é necessário.
+- Bull 3.29.3 é at-least-once; ACK/mensagem agora propagam erros para retry/DLQ.
+- Completed retém 1 h/100 e failed 7 dias/500; logs omitem payload e mensagem.
+- ACK desabilitado não cria mais clientes Redis vazios nem loop de erro.
+- Gate completo 40/168, correção final 4/14 e builds passaram; produção 1.26,
+  DLQ induzida e smoke foram aprovados.
+- Restart fechou seis filas sem falhas em 538 ms; ACK desabilitado fechou zero.
 
 ## Próximo passo
 
-Proteger URLs configuráveis/downloads contra SSRF e DNS rebinding com política
-testável. Em paralelo, selecionar a próxima família vulnerável alcançável,
+Mapear efeitos externos de campanha/agendamento/mensagem e implementar o
+primeiro contrato de idempotência transacional/outbox baseado em chave de
+negócio. Em paralelo, selecionar a próxima família vulnerável alcançável,
 coordenar a rotação do cliente API e manter a janela de 30 dias antes do
 contract.
 

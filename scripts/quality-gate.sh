@@ -17,10 +17,13 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/database/migrations/__tests__/enablePgStatStatements.spec.ts \
   src/helpers/__tests__/useMultiFileAuthState.spec.ts \
   src/jobs/__tests__/handleMessageAckQueue.spec.ts \
+  src/jobs/__tests__/handleMessageQueue.spec.ts \
   src/libs/__tests__/redisPattern.spec.ts \
   src/libs/__tests__/sessionStartRegistry.spec.ts \
   src/libs/__tests__/shutdownState.spec.ts \
   src/libs/__tests__/httpClients.spec.ts \
+  src/libs/__tests__/queueReliability.spec.ts \
+  src/libs/__tests__/queueConfiguration.spec.ts \
   src/libs/__tests__/ssrfProtection.spec.ts \
   src/libs/__tests__/socketContract.spec.ts \
   src/libs/__tests__/whatsappFence.spec.ts \

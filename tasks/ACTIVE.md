@@ -1,5 +1,55 @@
 # Tarefa ativa
 
+## Versão 1.26 — fundação de confiabilidade Bull
+
+Estado: publicada
+
+### Objetivo
+
+Parar de confirmar silenciosamente jobs WhatsApp que falharam, manter uma DLQ
+limitada e observável sem payload e fechar todas as conexões Bull no shutdown.
+
+### Baseline e pesquisa
+
+- Bull 3.29.3 opera com entrega at-least-once e pode duplicar após stall;
+- processadores precisam rejeitar a Promise para retry/failure funcionar;
+- os dois processadores ACK/mensagem capturavam exceções e retornavam sucesso;
+- o logger legado interpolava `job.data`, capaz de expor mensagens/tokens;
+- seis filas principais estavam vazias, exceto quatro jobs repeat delayed;
+- Bull recomenda retenção limitada para Redis não esgotar memória;
+- Redis usa AOF everysec/noeviction: durável, mas pode perder até 1 s em crash.
+
+### Critérios
+
+- erro ou payload inválido rejeita o job e chega ao mecanismo Bull;
+- falha e stall emitem evento estruturado sem `job.data` ou mensagem de erro;
+- completed/failed têm limites simultâneos de idade e contagem;
+- falha final permanece consultável como DLQ limitada;
+- todas as instâncias Bull fecham no shutdown e falha de close é explícita;
+- política não adiciona retries indiscriminados a efeitos não idempotentes;
+- testes cobrem propagação de tenant, falha, sanitização, retenção e close;
+- gate, deploy, falha induzida, restart, memória e rollback aprovados.
+
+### Fora do lote
+
+- idempotência transacional/outbox de campanha e agendamento;
+- migração de Bull 3 para BullMQ;
+- separação física do Redis de filas;
+- canais WhatsApp reais sem conta canário.
+
+### Resultado
+
+- handlers ACK/mensagem propagam falhas e rejeitam contratos inválidos;
+- failed/stalled/error registram somente metadados seguros;
+- retenção bounded aplicada nas oito filas quando configuradas;
+- descoberta runtime: filas ACK desabilitadas abriam conexão vazia em loop;
+- correção final evita criar essas filas e falha explícita no produtor;
+- gate completo: 40 suítes/168 testes e builds aprovados;
+- correção final: 4 suítes/14 testes focados e backend build aprovado;
+- produção: API 1.26, smoke, DLQ induzida e restart aprovados;
+- seis filas fecharam sem erro em 538 ms; ACK desabilitado fechou zero;
+- sem migration; rollback permanece a imagem 1.25.
+
 ## Versão 1.25 — egress HTTP contra SSRF e DNS rebinding
 
 Estado: publicada

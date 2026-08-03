@@ -8,7 +8,7 @@ import { StartAllWhatsAppsSessions } from "./services/WbotServices/StartAllWhats
 import Company from "./models/Company";
 import BullQueue from './libs/queue';
 
-import { startQueueProcess } from "./queues";
+import { closeApplicationQueues, startQueueProcess } from "./queues";
 import {
   beginApplicationDrain,
   completeApplicationShutdown
@@ -107,6 +107,8 @@ gracefulShutdown(server, {
     const startedAt = Date.now();
     await shutdownWbots();
     await closeIO();
+    await closeApplicationQueues();
+    await BullQueue.close();
     completeApplicationShutdown();
     logger.info({
       event: "application_shutdown_resources_closed",

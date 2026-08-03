@@ -555,3 +555,46 @@ Fontes primárias:
 - https://github.com/axios/axios
 - https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
 - https://www.iana.org/assignments/iana-ipv6-special-registry/iana-ipv6-special-registry.xhtml
+
+## Decisão executada na 1.26 — falha, retenção e shutdown Bull
+
+Bull 3.29.3 documenta entrega at-least-once: perda do lock transforma o job em
+stalled e permite nova execução. Portanto retry e `jobId` não provam exatamente
+uma vez; efeitos externos ainda precisam chave idempotente ou outbox/inbox. O
+contrato do processor também é explícito: rejeição/throw marca falha. Os dois
+handlers ACK/mensagem violavam esse contrato ao capturar toda exceção e retornar
+sucesso, descartando a única oportunidade de retry/DLQ.
+
+O baseline agregado encontrou seis filas sem waiting/active/failed/completed e
+quatro repeat jobs delayed. Redis usava 2,31 MiB, AOF yes/everysec,
+`noeviction` e nenhum maxmemory. Foram adotados limites simultâneos de idade e
+contagem: completed 1 h/100, failed 7 dias/500 por fila. Isso mantém diagnóstico
+sem crescimento ilimitado; não foi adicionado retry automático a campanhas ou
+agendamentos porque seus efeitos ainda não são comprovadamente idempotentes.
+
+Telemetria de failed/stalled/error inclui somente fila, tipo, presença de ID e tentativas;
+`job.data`, corpo de mensagem, tenant, token e texto do erro ficam fora. O
+rollout dessa telemetria revelou duas filas ACK tentando conectar a URL vazia a
+cada 20 segundos. A correção não instancia clientes quando ACK está desativado
+e mantém falha explícita se um produtor violar a configuração.
+
+O shutdown agora chama a API oficial `Queue#close()` em instâncias únicas. Em
+produção, seis filas fecharam em 538 ms sem falha; as filas ACK desabilitadas
+fecharam zero instâncias. Um job diagnóstico sem dados reais chegou a failed,
+emitiu somente metadados seguros e foi removido.
+
+Fatos: baseline, configuração Redis, 40 suítes/168 testes, 4/14 testes finais,
+builds, API 1.26, smoke, DLQ e restart acima foram medidos. Inferência: os
+limites atendem a carga atual vazia e precisam alerta antes de saturar. Não
+testado: efeitos reais WhatsApp/campanha/agendamento, crash entre efeito externo
+e commit, AOF recovery e escala multiworker.
+
+Fontes primárias e casos upstream:
+
+- https://github.com/OptimalBits/bull
+- https://github.com/OptimalBits/bull/blob/develop/REFERENCE.md
+- https://github.com/OptimalBits/bull/blob/develop/PATTERNS.md
+- https://github.com/OptimalBits/bull/issues/1828
+- https://github.com/OptimalBits/bull/issues/1447
+- https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/
+- https://redis.io/docs/latest/develop/reference/eviction/

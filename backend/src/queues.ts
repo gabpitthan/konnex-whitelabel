@@ -41,6 +41,7 @@ import TicketTag from "./models/TicketTag";
 import Tag from "./models/Tag";
 import { delay } from "@whiskeysockets/baileys";
 import Plan from "./models/Plan";
+import { closeBullQueues, QUEUE_RETENTION, registerQueueTelemetry } from "./libs/queueReliability";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -71,18 +72,40 @@ interface DispatchCampaignData {
   contactListItemId: number;
 }
 
-export const userMonitor = new BullQueue("UserMonitor", connection);
-export const scheduleMonitor = new BullQueue("ScheduleMonitor", connection);
-export const sendScheduledMessages = new BullQueue("SendSacheduledMessages", connection);
-export const campaignQueue = new BullQueue("CampaignQueue", connection);
-export const queueMonitor = new BullQueue("QueueMonitor", connection);
+const queueDefaults = {
+  defaultJobOptions: {
+    removeOnComplete: QUEUE_RETENTION.completed,
+    removeOnFail: QUEUE_RETENTION.failed
+  }
+};
+
+export const userMonitor = new BullQueue("UserMonitor", connection, queueDefaults);
+export const scheduleMonitor = new BullQueue("ScheduleMonitor", connection, queueDefaults);
+export const sendScheduledMessages = new BullQueue("SendSacheduledMessages", connection, queueDefaults);
+export const campaignQueue = new BullQueue("CampaignQueue", connection, queueDefaults);
+export const queueMonitor = new BullQueue("QueueMonitor", connection, queueDefaults);
 
 export const messageQueue = new BullQueue("MessageQueue", connection, {
+  ...queueDefaults,
   limiter: {
     max: limiterMax as number,
     duration: limiterDuration as number
   }
 });
+
+export const applicationQueues = [
+  userMonitor,
+  scheduleMonitor,
+  sendScheduledMessages,
+  campaignQueue,
+  queueMonitor,
+  messageQueue
+];
+
+applicationQueues.forEach(registerQueueTelemetry);
+
+export const closeApplicationQueues = (): Promise<void> =>
+  closeBullQueues(applicationQueues);
 
 let isProcessing = false;
 
@@ -100,8 +123,11 @@ async function handleSendMessage(job) {
 
     await SendMessage(whatsapp, messageData);
   } catch (e: any) {
-    Sentry.captureException(e);
-    logger.error("MessageQueue -> SendMessage: error", e.message);
+    Sentry.captureException(new Error("MESSAGE_QUEUE_SEND_FAILED_SANITIZED"));
+    logger.error({
+      event: "message_queue_send_failed",
+      errorClass: e instanceof Error ? e.name : "UnknownError"
+    });
     throw e;
   }
 }

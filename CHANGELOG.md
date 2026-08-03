@@ -2,6 +2,29 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.26] — 2026-08-03 — publicada
+
+### Objetivo e entregue
+
+Fundação de confiabilidade Bull: handlers ACK/mensagem agora rejeitam falhas,
+retenção completed/failed é limitada, failed/stalled/error têm telemetria sem
+payload e todas as filas configuradas fecham no shutdown. Filas ACK desativadas
+deixaram de criar clientes Redis inválidos em loop.
+
+### Evidência
+
+- baseline: seis filas sem backlog e quatro repeat jobs delayed;
+- Redis: 2,31 MiB, AOF everysec e noeviction;
+- gate completo 40 suítes/168 testes e ambos os builds;
+- correção final 4 suítes/14 testes focados e build backend;
+- API 1.26, smoke e job diagnóstico `failed` com log sanitizado;
+- restart fechou seis filas sem falha em 538 ms e zero filas ACK desabilitadas.
+
+### Dados, limites e rollback
+
+Sem migration ou tuning. Bull continua at-least-once; idempotência/outbox por
+efeito externo e Redis separado permanecem pendentes. Rollback: imagem 1.25.
+
 ## [1.25] — 2026-08-02 — publicada
 
 ### Entregue

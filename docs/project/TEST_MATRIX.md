@@ -15,7 +15,7 @@
 | Shutdown do backend | sim | estado unitário | auth preservado por desenho | owner tenant-aware | parcial, runtime pendente |
 | Purge Redis | sim | SCAN/UNLINK unitário | n/a | pattern do chamador | aprovado |
 | Reconexão WhatsApp | sim | política limitada | não | não | pendente canário |
-| Jobs Bull/idempotência | sim | não | não | não | pendente |
+| Jobs Bull/idempotência | sim | DLQ+shutdown runtime | retenção Redis | companyId handlers ACK/message | parcial, outbox pendente |
 | Mídia WhatsApp | sim | não | não | não | pendente |
 | Liveness/readiness | sim | runtime | n/a | n/a | aprovado |
 | Pool PostgreSQL | sim | runtime | n/a | n/a | aprovado, 6→1 idle |

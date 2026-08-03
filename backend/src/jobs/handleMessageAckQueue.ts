@@ -6,11 +6,10 @@ export default {
     priority: 1
   },
   async handle({ data }) {
-    try {
-      const { msg, chat, companyId } = data;
-      await handleMsgAck(msg, chat, companyId);
-    } catch (error) {
-      console.log("error", error)
+    const { msg, chat, companyId } = data;
+    if (msg === undefined || chat === undefined || companyId === undefined) {
+      throw new Error("INVALID_MESSAGE_ACK_JOB_DATA");
     }
+    await handleMsgAck(msg, chat, companyId);
   },
 };

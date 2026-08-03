@@ -3,7 +3,7 @@ import BullQueue from 'bull';
 import { REDIS_URI_MSG_CONN } from "../config/redis";
 import configLoader from '../services/ConfigLoaderService/configLoaderService';
 import * as jobs from '../jobs';
-import logger from '../utils/logger';
+import { closeBullQueues, QUEUE_RETENTION, registerQueueTelemetry } from './queueReliability';
 
 const config = configLoader(); // Carregue as configurações
 
@@ -14,8 +14,8 @@ const queueOptions = {
       type: config.webhook.backoff.type,
       delay: config.webhook.backoff.delay,
     },
-    removeOnFail: false,
-    removeOnComplete: true,
+    removeOnFail: QUEUE_RETENTION.failed,
+    removeOnComplete: QUEUE_RETENTION.completed,
   },
   limiter: {
     max: config.webhook.limiter.max,
@@ -23,9 +23,11 @@ const queueOptions = {
   },
 };
 
-const queues = Object.values(jobs).reduce((acc, job) => {
+const queues = REDIS_URI_MSG_CONN === "" ? [] : Object.values(jobs).reduce((acc, job) => {
+  const bull = new BullQueue(job.key, REDIS_URI_MSG_CONN, queueOptions);
+  registerQueueTelemetry(bull);
   acc.push({
-    bull: new BullQueue(job.key, REDIS_URI_MSG_CONN, queueOptions),
+    bull,
     name: job.key,
     handle: job.handle,
   });
@@ -41,16 +43,14 @@ export default {
       throw new Error(`Queue ${name} not found`);
     }
 
-    return queue.bull.add(data, { ...params, removeOnComplete: true });
+    return queue.bull.add(data, params);
   },
   process() {
     return this.queues.forEach(queue => {
       queue.bull.process(queue.handle);
-
-      queue.bull.on('failed', (job, err) => {
-        logger.error(`Job failed: ${queue.key} ${job.data}`);
-        logger.error(err);
-      });
     })
+  },
+  close() {
+    return closeBullQueues(this.queues.map(queue => queue.bull));
   }
 }
