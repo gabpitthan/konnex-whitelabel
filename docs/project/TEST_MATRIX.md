@@ -16,6 +16,7 @@
 | Purge Redis | sim | SCAN/UNLINK unitário | n/a | pattern do chamador | aprovado |
 | Reconexão WhatsApp | sim | política limitada | não | não | pendente canário |
 | Jobs Bull/idempotência | sim | DLQ+shutdown runtime | retenção Redis | companyId handlers ACK/message | parcial, outbox pendente |
+| Bull Board legado | sim | rota 404+pacotes ausentes | n/a | n/a | removido na 1.30, 2 contratos |
 | Agendamento/claim | sim | PG16 concorrente+produção | UUID/CAS + reconciliação | companyId NOT NULL+CAS | parcial, canário pendente |
 | Campanha/dispatch | sim | PG16 CAS+confirmação | UUID/fase + reconciliação | owner/FK/CAS companyId | parcial, gate/canário pendente |
 | Mídia WhatsApp | sim | não | não | não | pendente |

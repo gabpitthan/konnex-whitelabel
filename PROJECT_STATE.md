@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-08-03
-Versão ativa: `1.29`, publicada.
+Versão ativa: `1.30`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -86,6 +86,12 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 - O único repositório público da conta é
   `https://github.com/gabpitthan/konnex-whitelabel`; credenciais GitHub ficam
   fora do projeto em armazenamento local 0600.
+- A 1.30 remove o Bull Board 0.5.0 dormente e o Basic Auth exclusivo dele. O
+  baseline de produção confirmou painel/ACK/credenciais desativados; audit
+  runtime caiu de 76/9 críticas para 72/7 críticas sem tocar no Bull.
+- Gate 58/214 e builds passaram. Produção confirmou `/admin/queues` 404,
+  pacotes vulneráveis ausentes, smoke 1.30, shutdown de filas e retorno
+  saudável sem migrations pendentes.
 
 ## Memória estruturada
 

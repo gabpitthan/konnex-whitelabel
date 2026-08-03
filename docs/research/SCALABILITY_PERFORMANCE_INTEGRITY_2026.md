@@ -449,6 +449,46 @@ runtime backend, 105 no frontend e o bundle gzip de 1,68 MB permanecem riscos
 reais, mas exigem inventário de caminhos alcançáveis, upgrades segmentados e
 rollback próprio; `npm audit fix --force` não é uma correção segura.
 
+## Decisão em validação na 1.30 — remover Bull Board dormente
+
+O novo inventário runtime de 2026-08-03 encontrou 76 advisories, 9 críticos.
+`bull-board` 0.5.0 era importado pelo processo HTTP e montava
+`/admin/queues`, trazendo EJS vulnerável, React Highlight e outra cópia do Bull.
+O advisory EJS descreve template injection com impacto crítico; o grafo npm não
+oferece correção dentro do pacote monolítico legado.
+
+A observação de produção mostrou simultaneamente `BULL_BOARD=false`, Redis ACK
+ausente e usuário/senha ausentes. O código confirmou que nenhum produtor,
+consumer, DLQ, retenção ou shutdown depende da UI. O upstream atual separa API,
+UI e adaptadores por framework (`@bull-board/api` e `@bull-board/express`), de
+modo que migrar a integração desativada adicionaria superfície e manutenção sem
+um requisito operacional comprovado.
+
+Decisão: remover rota, pacote e Basic Auth exclusivo; manter toda a operação
+Bull existente. Resultado do lockfile: 72 advisories runtime, 7 críticos;
+`bull-board`, EJS e React Highlight não aparecem mais. Não há efeito em banco,
+cache, Redis, pool ou throughput de jobs; há pequena redução de dependências e
+de código carregado no startup.
+
+Alternativas rejeitadas: atualizar em bloco com `npm audit fix --force` por
+quebrar contratos; migrar já para o dashboard modular por não haver operador nem
+credencial configurados; apenas manter a flag desligada porque código e pacote
+continuariam na imagem e poderiam ser reativados acidentalmente.
+
+Rollout: build/gate, deploy somente backend, confirmar 404 da rota antiga,
+processadores/health/shutdown e novo audit. Rollback: imagem 1.29, sem migration.
+Como ainda pode falhar: uma rotina operacional externa não inventariada pode
+esperar o painel, ou uma inspeção emergencial futura pode perder conveniência;
+as filas continuam observáveis pelos eventos estruturados e Redis/Bull, e uma
+UI futura exige autenticação forte e restrição de rede próprias.
+
+Fontes primárias:
+
+- https://github.com/felixmosh/bull-board
+- https://github.com/felixmosh/bull-board/releases
+- https://github.com/advisories/GHSA-phwq-j96m-2c2q
+- https://securitylab.github.com/advisories/GHSL-2021-021-tj-ejs/
+
 ## Decisão executada na 1.23 — composição única de rotas Express
 
 A documentação oficial do Express estabelece que middleware é executado na

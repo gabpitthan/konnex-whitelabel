@@ -1,5 +1,37 @@
 # Tarefa ativa
 
+## Versão 1.30 — remoção do Bull Board legado
+
+Estado: publicada
+
+### Objetivo e critérios
+
+- remover o painel `bull-board` 0.5.0 desativado e sua rota HTTP;
+- remover `basic-auth`, usuário e senha que existiam apenas para essa rota;
+- preservar produtores, consumidores, retenção, DLQ, shutdown e telemetria Bull;
+- comprovar ausência da rota e dos pacotes no grafo runtime;
+- comparar `npm audit --omit=dev` antes/depois sem upgrades forçados;
+- registrar pesquisa upstream, alcance, rollback e riscos residuais;
+- executar gate, deploy, smoke e publicar o SHA aprovado no GitHub.
+
+### Baseline
+
+- produção: painel desabilitado, Redis ACK ausente e credenciais ausentes;
+- código: única montagem em `/admin/queues`, condicionada a flags;
+- audit runtime em 2026-08-03: 76 achados, 9 críticos;
+- `bull-board` arrasta EJS vulnerável, React Highlight e uma cópia antiga do Bull;
+- filas de negócio vivem em módulos independentes e não dependem da UI.
+
+### Resultado final
+
+- audit runtime: 76→72 total e 9→7 críticos;
+- `bull-board`, `basic-auth`, EJS e React Highlight ausentes do grafo/imagem;
+- testes focados 3 suítes/9 testes; gate total 58 suítes/214 testes;
+- builds backend/frontend reproduzíveis aprovados;
+- produção: rota antiga 404, API 1.30, frontend e containers saudáveis;
+- restart fechou filas e recursos e retornou sem migration pendente;
+- não houve migration, cache, índice, alteração de pool ou dado de tenant.
+
 ## Versão 1.29 — reconciliação operacional e repositório público
 
 Estado: publicada

@@ -1,13 +1,13 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-08-03
-Versão ativa: 1.29 (publicada)
+Versão ativa: 1.30 (publicada)
 
 ## Em foco
 
-Programa P0/P1 de integridade e escala. A 1.29 adiciona decisão humana,
-tenant-aware e auditável aos estados de disparo ambíguos, sem prometer
-exactly-once do WhatsApp. Laboratório, gate, deploy e E2E foram aprovados.
+Programa P0/P1 de integridade e escala. A 1.30 remove o Bull Board 0.5.0
+desativado e sua superfície crítica sem alterar as filas de negócio. Audit,
+gate, builds, deploy, smoke e restart foram aprovados.
 
 ## Estado operacional
 
@@ -161,12 +161,18 @@ exactly-once do WhatsApp. Laboratório, gate, deploy e E2E foram aprovados.
   retornou 1.29 saudável, sem migration pendente.
 - GitHub `gabpitthan/konnex-whitelabel` é o único repositório público; README,
   CI, segurança, contribuição e templates estão versionados.
+- Baseline 1.30 confirmou Bull Board desabilitado, Redis ACK ausente e nenhuma
+  credencial configurada em produção.
+- A remoção de `bull-board`/`basic-auth` eliminou EJS/React Highlight do grafo e
+  reduziu o audit runtime de 76/9 críticas para 72/7 críticas.
+- Gate passou em 58 suítes/214 testes e ambos os builds; produção confirmou
+  rota antiga 404, pacotes ausentes, versão 1.30 e shutdown/retorno saudável.
 
 ## Próximo passo
 
-Selecionar a próxima família vulnerável alcançável; em paralelo, coordenar a
-rotação do cliente API, manter a janela de 30 dias antes do contract e planejar
-canário WhatsApp real sem liberar cluster prematuramente.
+Selecionar a próxima família vulnerável alcançável. Em paralelo, coordenar a
+rotação do cliente API e o canário WhatsApp real sem liberar cluster
+prematuramente.
 
 ## Fontes
 

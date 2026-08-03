@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img alt="Versão 1.29" src="https://img.shields.io/badge/vers%C3%A3o-1.29-123d37"></a>
+  <a href="./CHANGELOG.md"><img alt="Versão 1.30" src="https://img.shields.io/badge/vers%C3%A3o-1.30-123d37"></a>
   <a href="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml"><img alt="Quality Gate" src="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml/badge.svg"></a>
   <a href="./backend/Dockerfile"><img alt="Node.js 20" src="https://img.shields.io/badge/Node.js-20-337a5b?logo=node.js&amp;logoColor=white"></a>
   <a href="./compose.yaml"><img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&amp;logoColor=white"></a>
@@ -38,10 +38,10 @@ código.
 
 ## Estado do projeto
 
-- **Publicada:** versão `1.29`, com 57 suítes / 212 testes, builds, laboratório
-  PostgreSQL 16, deploy e navegador autenticado aprovados.
-- **Entrega recente:** reconciliação humana e auditável de disparos cujo efeito
-  externo ficou ambíguo após uma interrupção.
+- **Publicada:** versão `1.30`, com 58 suítes / 214 testes, builds, deploy,
+  smoke e restart aprovados.
+- **Entrega recente:** remoção do Bull Board legado desativado, reduzindo o
+  backend runtime de 76/9 críticas para 72/7 críticas sem alterar as filas.
 - **Operação real ainda necessária:** pareamento, envio, recebimento, mídia e
   reconexão com conta WhatsApp canário.
 - **Escala horizontal:** permanece bloqueada por desenho onde o fencing ainda

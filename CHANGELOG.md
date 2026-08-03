@@ -2,6 +2,30 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.30] — 2026-08-03 — publicada
+
+### Entregue no código
+
+- removido o painel dormente `bull-board` 0.5.0 e `/admin/queues`;
+- removido `basic-auth` e as credenciais exclusivas da rota;
+- preservadas filas, DLQ, retenção, telemetria e shutdown do Bull;
+- regressão impede retorno do pacote, rota ou variáveis legadas.
+
+### Evidência atual
+
+Produção tinha o painel desabilitado, sem Redis ACK e sem credenciais. O audit
+runtime caiu de 76 para 72 achados e de 9 para 7 críticos; `bull-board`, EJS e
+React Highlight saíram do grafo sem upgrade forçado. Gate 58 suítes/214 testes
+e builds passaram. Em produção a rota respondeu 404, os pacotes ficaram
+ausentes da imagem, smoke 1.30 e restart com fechamento de filas passaram.
+
+### Limite e rollback
+
+O lote não atualiza Bull nem oferece UI substituta. Caso a inspeção visual de
+filas volte a ser requisito, ela deve usar os pacotes modulares oficiais atuais,
+autenticação administrativa forte e exposição de rede restrita. Rollback é a
+imagem 1.29; não há migration nem mudança de dados.
+
 ## [1.29] — 2026-08-03 — publicada
 
 ### Entregue no código

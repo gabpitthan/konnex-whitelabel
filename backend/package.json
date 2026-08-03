@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "1.29",
+  "version": "1.30",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -30,11 +30,9 @@
     "@whiskeysockets/baileys": "6.7.22",
     "async-mutex": "^0.5.0",
     "axios": "1.18.0",
-    "basic-auth": "^2.0.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "bull": "^3.11.0",
-    "bull-board": "^0.5.0",
     "cache-manager": "^5.2.2",
     "cluster": "^0.7.7",
     "colors": "^1.4.0",
