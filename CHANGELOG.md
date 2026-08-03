@@ -2,6 +2,32 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.27] — 2026-08-03 — publicada
+
+### Entregue
+
+- claim PostgreSQL bounded com `FOR UPDATE SKIP LOCKED` e recuperação de órfão;
+- jobId por UUID persistida e payload Redis reduzido a IDs/chave;
+- compare-and-set tenant/key/status antes de carregar contato ou enviar;
+- companyId NOT NULL e índices parciais para due/recovery/unicidade;
+- falha de enqueue libera somente o claim exato;
+- mídia agendada recebe a sessão Baileys correta;
+- logs vazios do scanner rebaixados a debug.
+
+### Evidência
+
+Backup 0600 com SHA-256 registrado; restore `up/down/up` em 38–66 ms. Quatro
+workers reclamaram 20 linhas em 7/7/6/0 sem duplicata; somente um de dois
+executores iniciou. Gate 46/178 e builds passaram. Produção aplicou migration
+em 170 ms; API 1.27, CAS controlado, smoke e restart em 568 ms passaram. A linha
+sintética foi removida e Schedules retornou a zero.
+
+### Limite e rollback
+
+Não há garantia exactly-once do WhatsApp. Crash após PROCESSANDO permanece
+visível e não é reenviado automaticamente. Rollback: down e imagem 1.26; backup
+`pre-1.27-20260803.dump` permanece fora do Git.
+
 ## [1.26] — 2026-08-03 — publicada
 
 ### Objetivo e entregue

@@ -15,6 +15,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/database/migrations/__tests__/createApiCredentials.spec.ts \
   src/database/migrations/__tests__/addApiCredentialUsageTelemetry.spec.ts \
   src/database/migrations/__tests__/enablePgStatStatements.spec.ts \
+  src/database/migrations/__tests__/addScheduleDispatchClaims.spec.ts \
   src/helpers/__tests__/useMultiFileAuthState.spec.ts \
   src/jobs/__tests__/handleMessageAckQueue.spec.ts \
   src/jobs/__tests__/handleMessageQueue.spec.ts \
@@ -47,6 +48,10 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/services/MessageServices/__tests__/PersistFencedMessageService.spec.ts \
   src/services/MessageServices/__tests__/ListMessagesServiceAll.spec.ts \
   src/services/SocketServices/__tests__/AuthorizeTicketRoomService.spec.ts \
+  src/services/ScheduleServices/__tests__/ClaimDueSchedulesService.spec.ts \
+  src/services/ScheduleServices/__tests__/ReleaseScheduleDispatchClaimService.spec.ts \
+  src/services/ScheduleServices/__tests__/BeginScheduleDispatchService.spec.ts \
+  src/services/ScheduleServices/__tests__/ScheduleQueueContract.spec.ts \
   src/services/TicketServices/__tests__/FindOrCreateTicketService.spec.ts \
   src/services/WbotServices/__tests__/FindOrCreateFencedWhatsappContextService.spec.ts \
   src/services/WhatsappService/__tests__/ListAllWhatsAppService.spec.ts \

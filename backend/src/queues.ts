@@ -42,6 +42,9 @@ import Tag from "./models/Tag";
 import { delay } from "@whiskeysockets/baileys";
 import Plan from "./models/Plan";
 import { closeBullQueues, QUEUE_RETENTION, registerQueueTelemetry } from "./libs/queueReliability";
+import ClaimDueSchedulesService from "./services/ScheduleServices/ClaimDueSchedulesService";
+import ReleaseScheduleDispatchClaimService from "./services/ScheduleServices/ReleaseScheduleDispatchClaimService";
+import BeginScheduleDispatchService from "./services/ScheduleServices/BeginScheduleDispatchService";
 
 const connection = process.env.REDIS_URI || "";
 const limiterMax = process.env.REDIS_OPT_LIMITER_MAX || 1;
@@ -134,62 +137,82 @@ async function handleSendMessage(job) {
 
 async function handleVerifySchedules(job) {
   try {
-    const { count, rows: schedules } = await Schedule.findAndCountAll({
-      where: {
-        status: "PENDENTE",
-        sentAt: null,
-        sendAt: {
-          [Op.gte]: moment().format("YYYY-MM-DD HH:mm:ss"),
-          [Op.lte]: moment().add("30", "seconds").format("YYYY-MM-DD HH:mm:ss")
+    const claims = await ClaimDueSchedulesService();
+    const results = await Promise.all(
+      claims.map(async claim => {
+        try {
+          await sendScheduledMessages.add(
+            "SendMessage",
+            {
+              scheduleId: claim.id,
+              companyId: claim.companyId,
+              dispatchKey: claim.dispatchKey
+            },
+            {
+              delay: 40_000,
+              attempts: 1,
+              jobId: `schedule:${claim.dispatchKey}`
+            }
+          );
+          return true;
+        } catch (error) {
+          await ReleaseScheduleDispatchClaimService(claim);
+          logger.error({
+            event: "schedule_enqueue_failed",
+            errorClass: error instanceof Error ? error.name : "UnknownError"
+          });
+          return false;
         }
-      },
-      include: [{ model: Contact, as: "contact" }, { model: User, as: "user", attributes: ["name"] }],
-      distinct: true,
-      subQuery: false
-    });
+      })
+    );
 
-    if (count > 0) {
-      schedules.map(async schedule => {
-        await schedule.update({
-          status: "AGENDADA"
-        });
-        sendScheduledMessages.add(
-          "SendMessage",
-          { schedule },
-          { delay: 40000 }
-        );
-        logger.info(`Disparo agendado para: ${schedule.contact.name}`);
-      });
-    }
+    const batchEvent = {
+      event: "schedule_claim_batch_completed",
+      claimedCount: claims.length,
+      enqueuedCount: results.filter(Boolean).length,
+      releasedCount: results.filter(result => !result).length
+    };
+    if (claims.length > 0) logger.info(batchEvent);
+    else logger.debug(batchEvent);
   } catch (e: any) {
-    Sentry.captureException(e);
-    logger.error("SendScheduledMessage -> Verify: error", e.message);
+    Sentry.captureException(new Error("SCHEDULE_CLAIM_BATCH_FAILED_SANITIZED"));
+    logger.error({
+      event: "schedule_claim_batch_failed",
+      errorClass: e instanceof Error ? e.name : "UnknownError"
+    });
     throw e;
   }
 }
 
 async function handleSendScheduledMessage(job) {
-  const {
-    data: { schedule }
-  } = job;
   let scheduleRecord: Schedule | null = null;
 
   try {
-    scheduleRecord = await Schedule.findByPk(schedule.id);
-  } catch (e) {
-    Sentry.captureException(e);
-    logger.info(`Erro ao tentar consultar agendamento: ${schedule.id}`);
-  }
-
-  try {
-    let whatsapp
-
-    if (!isNil(schedule.whatsappId)) {
-      whatsapp = await Whatsapp.findByPk(schedule.whatsappId);
+    const { scheduleId, companyId, dispatchKey } = job.data || {};
+    if (
+      !Number.isInteger(scheduleId) ||
+      !Number.isInteger(companyId) ||
+      typeof dispatchKey !== "string"
+    ) {
+      throw new Error("INVALID_SCHEDULE_JOB_DATA");
     }
 
-    if (!whatsapp)
-      whatsapp = await GetDefaultWhatsApp(whatsapp.id,schedule.companyId);
+    scheduleRecord = await BeginScheduleDispatchService({
+      id: scheduleId,
+      companyId,
+      dispatchKey
+    });
+
+    if (!scheduleRecord) {
+      logger.info({ event: "schedule_dispatch_duplicate_skipped" });
+      return;
+    }
+
+    const schedule = scheduleRecord;
+    const whatsapp = await GetDefaultWhatsApp(
+      schedule.whatsappId,
+      schedule.companyId
+    );
 
 
     // const settings = await CompaniesSettings.findOne({
@@ -243,7 +266,8 @@ async function handleSendScheduledMessage(job) {
       );
 
       if (schedule.mediaPath) {
-        await verifyMediaMessage(sentMessage, ticket, ticket.contact, null, true, false, whatsapp);
+        const wbot = await GetWhatsappWbot(whatsapp);
+        await verifyMediaMessage(sentMessage, ticket, ticket.contact, null, true, false, wbot);
       } else {
         await verifyMessage(sentMessage, ticket, ticket.contact, null, true, false);
       }
@@ -317,12 +341,10 @@ async function handleSendScheduledMessage(job) {
       // Realizar a soma da data com base no intervalo e valor do intervalo
       let novaData = new Date(dataExistente); // Clone da data existente para não modificar a original
 
-      console.log(unidadeIntervalo)
       if (unidadeIntervalo !== "minuts") {
         novaData.setDate(novaData.getDate() + schedule.valorIntervalo * (unidadeIntervalo === 'days' ? 1 : unidadeIntervalo === 'weeks' ? 7 : 30));
       } else {
         novaData.setMinutes(novaData.getMinutes() + Number(schedule.valorIntervalo));
-        console.log(novaData)
       }
 
       if (schedule.tipoDias === 5 && !isDiaUtil(novaData)) {
@@ -337,22 +359,32 @@ async function handleSendScheduledMessage(job) {
       await scheduleRecord?.update({
         status: "PENDENTE",
         contadorEnvio: schedule.contadorEnvio + 1,
-        sendAt: new Date(novaData.toISOString().slice(0, 19).replace('T', ' ')) // Mantendo o formato de hora
+        sendAt: new Date(novaData.toISOString().slice(0, 19).replace('T', ' ')),
+        dispatchKey: null,
+        dispatchClaimedAt: null,
+        dispatchStartedAt: null
       })
     } else {
       await scheduleRecord?.update({
         sentAt: new Date(moment().format("YYYY-MM-DD HH:mm")),
-        status: "ENVIADA"
+        status: "ENVIADA",
+        dispatchKey: null,
+        dispatchClaimedAt: null,
+        dispatchStartedAt: null
       });
     }
-    logger.info(`Mensagem agendada enviada para: ${schedule.contact.name}`);
-    sendScheduledMessages.clean(15000, "completed");
+    logger.info({ event: "schedule_dispatch_completed" });
   } catch (e: any) {
-    Sentry.captureException(e);
+    Sentry.captureException(new Error("SCHEDULE_DISPATCH_FAILED_SANITIZED"));
     await scheduleRecord?.update({
-      status: "ERRO"
+      status: "ERRO",
+      dispatchClaimedAt: null,
+      dispatchStartedAt: null
     });
-    logger.error("SendScheduledMessage -> SendMessage: error", e.message);
+    logger.error({
+      event: "schedule_dispatch_failed",
+      errorClass: e instanceof Error ? e.name : "UnknownError"
+    });
     throw e;
   }
 }

@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-08-02
-Versão ativa: `1.26`, publicada.
+Versão ativa: `1.27`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -64,6 +64,10 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
   telemetria sem payload e shutdown explícito. O runtime também revelou e
   corrigiu conexões ACK vazias quando desabilitadas. Gate 40/168, build final,
   DLQ induzida, API 1.26, smoke e restart em 538 ms foram aprovados.
+- A 1.27 tornou o claim de agendamento concorrente e tenant-aware no
+  PostgreSQL, removeu snapshot de cliente do Redis e impede execução paralela
+  por compare-and-set. Backup/restore, 46 suítes/178 testes, builds, migration
+  em 170 ms, produção 1.27, CAS 1/2, smoke e restart foram aprovados.
 
 ## Memória estruturada
 

@@ -598,3 +598,52 @@ Fontes primárias e casos upstream:
 - https://github.com/OptimalBits/bull/issues/1447
 - https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/
 - https://redis.io/docs/latest/develop/reference/eviction/
+
+## Decisão executada na 1.27 — claim Schedule, não “exactly once” fictício
+
+O scanner de Schedule lia uma janela `[agora, agora+30s]`, portanto ignorava
+atrasados; usava `map(async)` sem await; atualizava AGENDADA antes de um enqueue
+não transacional; e persistia no Redis o snapshot inteiro com mensagem e
+contato. O consumer aceitava esse snapshot sem companyId/chave/status no banco.
+
+Outbox não fecha sozinho o último dual write: a literatura registra que o relay
+pode publicar duas vezes e exige consumer idempotente. Bull também é
+at-least-once. O Baileys 6.7.22 instalado aceita `messageId`, mas nem o projeto
+nem WhatsApp documentam que repetir o ID deduplica o efeito no servidor. Logo a
+1.27 não anuncia exactly-once: ela impede concorrência automática e deixa crash
+após PROCESSANDO visível para reconciliação, sem reenvio cego.
+
+Um CTE único seleciona overdue/PENDENTE ou AGENDADA órfã, ordena por sendAt/id,
+limita 100 (máximo 500), usa `FOR UPDATE SKIP LOCKED`, grava UUID/claimedAt e
+retorna somente id/companyId/chave. PostgreSQL recomenda SKIP LOCKED justamente
+para tabelas tipo fila; `UPDATE RETURNING` prova o conjunto alterado. Falha de
+enqueue faz compare-and-set reverso apenas no mesmo tenant/chave/status.
+
+O consumer muda AGENDADA→PROCESSANDO atomicamente por id/companyId/UUID/status.
+Só o vencedor carrega associações e chama WhatsApp; duplicata/stale sai antes.
+Sucesso limpa o claim para recorrência, falha vira ERRO. `companyId` tornou-se
+NOT NULL após precheck fail-closed. Índices parciais correspondem exatamente a
+due scan, recovery scan e unicidade UUID; nenhum cache/pool foi alterado.
+
+Baseline: zero Schedules, 24 KiB, somente PK/companyId. Backup 0600 SHA-256
+`b3ad617f013ae401c7424c2ef4328b82aa7d2a69c8440a81cc0ceba3813e56fc`.
+Restore passou em up/down/up (38–66 ms). Quatro claimers PG16 dividiram 20
+linhas em 7/7/6/0, 20 IDs/UUIDs únicos; CAS iniciou só 1/2. Produção aplicou em
+170 ms e repetiu CAS 1/2 sem envio externo; dado sintético foi removido.
+
+Fatos: baseline, backup/hash, DDL, concorrência, 46 suítes/178 testes, builds,
+API 1.27, smoke e restart foram medidos. Inferência: batch 100 é conservador
+para a carga atual nula e deve ser revisto por atraso/saturação. Não testado:
+canal WhatsApp real, mídia, recorrência, crash pós-send e reconciliação visual.
+
+Fontes primárias e padrão:
+
+- https://github.com/OptimalBits/bull
+- https://github.com/OptimalBits/bull/blob/develop/REFERENCE.md
+- https://microservices.io/patterns/data/transactional-outbox.html
+- https://microservices.io/patterns/communication-style/idempotent-consumer.html
+- https://www.postgresql.org/docs/16/sql-select.html
+- https://www.postgresql.org/docs/16/sql-update.html
+- https://www.postgresql.org/docs/16/explicit-locking.html
+- https://github.com/WhiskeySockets/Baileys
+- https://baileys.wiki/docs/socket/handling-messages/

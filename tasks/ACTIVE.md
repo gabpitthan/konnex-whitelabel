@@ -1,5 +1,64 @@
 # Tarefa ativa
 
+## Versão 1.27 — claim transacional de agendamentos
+
+Estado: publicada
+
+### Objetivo
+
+Eliminar enqueues concorrentes e payloads de cliente no Redis, recuperar claim
+órfão antes do envio e impedir execução automática concorrente do mesmo disparo.
+
+### Baseline e pesquisa
+
+- zero agendamentos e tabela de 24 KiB no banco atual;
+- scanner usava `map(async)` sem await e confirmava o próprio job cedo;
+- `PENDENTE` atrasado nunca era buscado por exigir `sendAt >= now`;
+- update `AGENDADA` e enqueue não eram atômicos; crash deixava órfão;
+- o job armazenava o objeto Schedule completo, inclusive conteúdo/contato;
+- consumer buscava apenas por PK e aceitava snapshot stale sem tenant/key;
+- Bull é at-least-once; outbox também pode republicar;
+- Baileys aceita `messageId`, mas upstream não garante dedupe do servidor;
+- PostgreSQL recomenda `FOR UPDATE SKIP LOCKED` para tabelas tipo fila.
+
+### Critérios
+
+- claim usa row lock, `SKIP LOCKED`, lote bounded e ordem determinística;
+- buscar vencidos e recuperar `AGENDADA` órfã com a mesma chave;
+- Redis recebe somente scheduleId/companyId/dispatchKey;
+- falha de enqueue libera apenas claim exato do tenant;
+- jobId deriva de UUID persistido e não muda na recuperação;
+- consumer entra em PROCESSANDO por compare-and-set tenant/key/status;
+- duplicata/stale não carrega contato nem executa efeito externo;
+- sucesso limpa claim; falha fica ERRO e crash fica PROCESSANDO para revisão,
+  sem reenvio automático ambíguo;
+- índices correspondem às consultas comprovadas;
+- migration recusa schedule sem companyId e torna o owner obrigatório;
+- backup/restore, migration up/down/up, gate, deploy e runtime aprovados.
+
+### Fora do lote
+
+- promessa de exactly-once no servidor WhatsApp;
+- reconciliação visual de PROCESSANDO órfão;
+- idempotência de campanha e mensagem avulsa;
+- migração BullMQ ou Redis dedicado.
+
+### Resultado
+
+- scanner usa claim CTE bounded, ordenado e `FOR UPDATE SKIP LOCKED`;
+- overdue e claim órfão entram no lote; UUID persistida é preservada;
+- payload Redis contém somente scheduleId/companyId/dispatchKey;
+- execução AGENDADA→PROCESSANDO é compare-and-set tenant-aware;
+- companyId tornou-se NOT NULL após precheck com zero ownerless;
+- backup 0600 e restore `up → down → up` em 38–66 ms aprovados;
+- quatro claimers dividiram 20 linhas em 7/7/6/0, sem duplicata;
+- somente um de dois executores concorrentes iniciou;
+- gate: 46 suítes/178 testes e ambos os builds aprovados;
+- produção: migration 170 ms, API 1.27, smoke e CAS 1/2 aprovados;
+- dado sintético removido; Schedules voltou a zero linhas;
+- restart fechou filas sem falha em 568 ms;
+- sem mudança de cache/pool; rollback é migration/imagem 1.26.
+
 ## Versão 1.26 — fundação de confiabilidade Bull
 
 Estado: publicada

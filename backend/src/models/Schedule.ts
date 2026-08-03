@@ -119,6 +119,15 @@ class Schedule extends Model<Schedule> {
   @Column
   contadorEnvio: number;
 
+  @Column(DataType.UUID)
+  dispatchKey: string;
+
+  @Column
+  dispatchClaimedAt: Date;
+
+  @Column
+  dispatchStartedAt: Date;
+
   @Default(false)
   @Column
   assinar: boolean;

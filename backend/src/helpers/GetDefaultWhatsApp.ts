@@ -10,8 +10,6 @@ const GetDefaultWhatsApp = async (
   let connection: Whatsapp;
   let defaultWhatsapp = null;
 
-  console.log({ whatsappId, companyId, userId })
-  
   if (whatsappId) {
     defaultWhatsapp = await Whatsapp.findOne({
       where: { id: whatsappId, companyId }

@@ -1,13 +1,13 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-08-02
-Versão ativa: 1.26
+Versão ativa: 1.27
 
 ## Em foco
 
-Programa P0/P1 de integridade e escala. A 1.26 criou a fundação de falha,
-retenção, telemetria e shutdown Bull; o próximo lote aprofunda idempotência
-transacional/outbox por fluxo sem assumir que entrega at-least-once é única.
+Programa P0/P1 de integridade e escala. A 1.27 tornou o claim de Schedule
+transacional e a execução at-most-once automática; o próximo lote leva o mesmo
+rigor a CampaignShipping, que ainda engole falhas e pode duplicar envios.
 
 ## Estado operacional
 
@@ -129,12 +129,20 @@ transacional/outbox por fluxo sem assumir que entrega at-least-once é única.
 - Gate completo 40/168, correção final 4/14 e builds passaram; produção 1.26,
   DLQ induzida e smoke foram aprovados.
 - Restart fechou seis filas sem falhas em 538 ms; ACK desabilitado fechou zero.
+- Schedule usa claim PostgreSQL bounded/ordenado com SKIP LOCKED e UUID estável.
+- Redis recebe somente scheduleId/companyId/dispatchKey, nunca snapshot/contato.
+- Execução AGENDADA→PROCESSANDO exige tenant, chave e status exatos; duplicata
+  retorna antes de carregar dados ou enviar.
+- companyId de Schedules é NOT NULL e três índices cobrem due/recovery/UUID.
+- Laboratório PG16 dividiu 20 claims em 7/7/6/0; CAS iniciou 1 de 2 workers.
+- Gate 1.27 passou em 46 suítes/178 testes e builds; migration produção 170 ms.
+- API 1.27, runtime controlado, smoke e restart em 568 ms foram aprovados.
 
 ## Próximo passo
 
-Mapear efeitos externos de campanha/agendamento/mensagem e implementar o
-primeiro contrato de idempotência transacional/outbox baseado em chave de
-negócio. Em paralelo, selecionar a próxima família vulnerável alcançável,
+Aplicar claim/CAS e propagação de falha a CampaignShipping, preservando
+confirmação versus mensagem/mídia e sem prometer exactly-once do WhatsApp.
+Em paralelo, selecionar a próxima família vulnerável alcançável,
 coordenar a rotação do cliente API e manter a janela de 30 dias antes do
 contract.
 
