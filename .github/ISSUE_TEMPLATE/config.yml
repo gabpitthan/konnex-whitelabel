@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Relatar vulnerabilidade
+    url: https://github.com/gabpitthan/konnex-whitelabel/security/advisories/new
+    about: Use o canal privado; nunca publique detalhes de segurança em issues.

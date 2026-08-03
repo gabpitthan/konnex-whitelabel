@@ -39,6 +39,7 @@ import apiMessageRoutes from "./api/apiMessageRoutes";
 import companySettingsRoutes from "./companySettingsRoutes";
 import clientErrorRoutes from "./clientErrorRoutes";
 import healthRoutes from "./healthRoutes";
+import dispatchReconciliationRoutes from "./dispatchReconciliationRoutes";
 
 import promptRoutes from "./promptRouter";
 import statisticsRoutes from "./statisticsRoutes";
@@ -51,6 +52,7 @@ import flowCampaignRoutes from "./flowCampaignRoutes";
 const routes = Router();
 
 routes.use(healthRoutes);
+routes.use(dispatchReconciliationRoutes);
 routes.use(userRoutes);
 routes.use("/auth", authRoutes);
 routes.use("/api/messages", apiRoutes);

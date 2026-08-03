@@ -61,9 +61,10 @@ canário de duas instâncias pendentes.
 
 ### REL-005 — idempotência e Bull
 
-Estado: parcial nas versões 1.26–1.28 — falhas observáveis, retenção bounded,
-Schedule e CampaignShipping usam CAS/UUID persistida; reconciliação visual,
-mensagem avulsa e separação física do Redis continuam pendentes.
+Estado: parcial nas versões 1.26–1.29 — falhas observáveis, retenção bounded,
+Schedule e CampaignShipping usam CAS/UUID persistida e possuem reconciliação
+humana auditável; mensagem avulsa e separação física do Redis continuam
+pendentes.
 
 - identificar jobs críticos;
 - chave idempotente e constraint;

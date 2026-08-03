@@ -24,7 +24,7 @@
 | DB-002 | Alto | parcial | Pool e `pg_stat_statements` entregues; faltam janela representativa, timeouts por workload e alerta de espera. |
 | REDIS-002 | Alto | aberto | Auth/lease, cache e filas compartilham Redis; separar papéis antes de eviction ou escala horizontal. |
 | MSG-001 | Alto | parcial | Contact/Ticket e Message usam commits fenced separados; caminhos auxiliares e atomicidade integral da ingestão ainda requerem canário/outbox. |
-| SCHED-001 | Alto | parcial | Claim/CAS evita concorrência; crash após PROCESSANDO permanece ambíguo e exige reconciliação manual, sem reenvio automático. |
+| SCHED-001 | Alto | mitigado | Claim/CAS evita concorrência; a 1.29 oferece decisão humana auditável para PROCESSANDO ambíguo, sem reenvio automático. Canário real permanece pendente. |
 | OPS-003 | Alto | mitigado | Rollout 1.13 reiniciou por drop de constraint dependente; schema ficou intacto e a regra foi incorporada. |
 
 Problemas corrigidos pertencem ao changelog e aos READMEs de versão, não devem continuar descritos como falhas atuais.

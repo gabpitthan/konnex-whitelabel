@@ -1,5 +1,51 @@
 # Tarefa ativa
 
+## Versão 1.29 — reconciliação operacional e repositório público
+
+Estado: publicada
+
+### Objetivo e critérios
+
+- listar apenas Schedule/CampaignShipping `PROCESSING` antigos do tenant;
+- nenhuma repetição automática quando o efeito WhatsApp for ambíguo;
+- administrador atual do tenant escolhe reconhecer ou rearmar;
+- exigir justificativa de 10–500 caracteres e gravar auditoria transacional;
+- usar UUID do dispatch como CAS; timestamp serve apenas para exibição;
+- preservar recorrência de Schedule ao reconhecer um envio;
+- campanha com confirmação avança a fase correta e finaliza somente quando completa;
+- UI responsiva deixa explícito o risco de duplicação;
+- consultas bounded e índices parciais liderados por companyId;
+- backup/restore, `up/down/up`, concorrência, gate, deploy e rollback aprovados;
+- publicar somente Konnex Whitelabel e manter documentação pública organizada.
+
+### Evidência atual
+
+- fontes primárias Microsoft/AWS/PostgreSQL/OWASP sustentam pausa humana,
+  compensação idempotente, row lock/CAS e trilha administrativa sanitizada;
+- build isolado de backend e frontend aprovado;
+- testes focados: 5 suítes/14 testes antes do endurecimento final;
+- backup pré-1.29 modo 0600, 218.216 bytes, SHA-256 registrado;
+- restore PostgreSQL 16 e migration inicial `up/down/up` aprovados;
+- laboratório revelou microssegundos perdidos no round-trip JSON e substituiu
+  timestamp pela UUID persistida como token CAS;
+- prova corrigida: dois executores produziram 1 sucesso/1 conflito e uma única
+  auditoria; dados sintéticos removidos;
+- GitHub público criado/renomeado para `gabpitthan/konnex-whitelabel`; auditoria
+  confirmou que os outros oito repositórios próprios estão privados.
+
+### Resultado final
+
+- migration final `up/down/up`: 143/48/107 ms no restore PostgreSQL 16;
+- CHECK inválido rejeitado e concorrência UUID 1 sucesso/1 conflito/1 auditoria;
+- gate completo: 57 suítes/212 testes e dois builds aprovados;
+- produção: migration 191 ms, DDL/índices confirmados e prova 1/1 conflito;
+- E2E autenticado reconheceu item pela UI, persistiu uma auditoria e limpou o
+  item; desktop/mobile sem overflow, console/page errors ou request failures;
+- restart total 3.070 ms; shutdown fechou seis filas em 542 ms, sem falhas, e
+  retornou com zero migrations pendentes, versão 1.29 e saúde aprovada;
+- zero auditorias/schedules sintéticos após limpeza;
+- push e SHA remoto fazem parte do fechamento obrigatório deste lote.
+
 ## Versão 1.28 — integridade de disparos de campanha
 
 Estado: publicada

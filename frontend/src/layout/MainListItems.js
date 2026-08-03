@@ -196,7 +196,7 @@ const MainListItems = ({ compact = false, onNavigate, onExpand }) => {
     automation: /^\/(flowbuilders|flowbuilder|phrase-lists|prompts|queue-integration|messages-api)/.test(location.pathname),
     campaigns: /^\/(campaigns|contact-lists|campaigns-config)/.test(location.pathname),
     analytics: /^\/(reports|moments)/.test(location.pathname),
-    admin: /^\/(users|queues|connections|allConnections|files|financeiro|settings|companies|announcements|helps)/.test(location.pathname),
+    admin: /^\/(users|queues|connections|allConnections|files|financeiro|settings|dispatch-reconciliation|companies|announcements|helps)/.test(location.pathname),
   });
 
   useEffect(() => {
@@ -253,7 +253,7 @@ const MainListItems = ({ compact = false, onNavigate, onExpand }) => {
           <NavItem to="/reports" label="Relatórios" onNavigate={onNavigate} />
           <NavItem to="/moments" label="Operação em tempo real" onNavigate={onNavigate} />
         </Group></Admin>
-        <Group id="admin" label="Administração" icon={<SettingsOutlinedIcon />} paths={["/users", "/queues", "/connections", "/allConnections", "/files", "/financeiro", "/settings", "/companies", "/announcements", "/helps"]} {...groupProps}>
+        <Group id="admin" label="Administração" icon={<SettingsOutlinedIcon />} paths={["/users", "/queues", "/connections", "/allConnections", "/files", "/financeiro", "/settings", "/dispatch-reconciliation", "/companies", "/announcements", "/helps"]} {...groupProps}>
           <Admin user={user}><NavItem to="/users" label="Equipe e usuários" onNavigate={onNavigate} /></Admin>
           <Admin user={user}><NavItem to="/queues" label="Filas de atendimento" onNavigate={onNavigate} /></Admin>
           <Admin user={user} connections><NavItem to="/connections" label="Canais e conexões" warning={connectionWarning} onNavigate={onNavigate} /></Admin>
@@ -261,6 +261,7 @@ const MainListItems = ({ compact = false, onNavigate, onExpand }) => {
           <Admin user={user}><NavItem to="/files" label="Biblioteca de arquivos" onNavigate={onNavigate} /></Admin>
           <Admin user={user}><NavItem to="/financeiro" label="Financeiro" onNavigate={onNavigate} /></Admin>
           <Admin user={user}><NavItem to="/settings" label="Configurações" onNavigate={onNavigate} /></Admin>
+          <Admin user={user}><NavItem to="/dispatch-reconciliation" label="Reconciliação de envios" onNavigate={onNavigate} /></Admin>
           {user.super && <NavItem to="/companies" label="Empresas" onNavigate={onNavigate} />}
           {user.super && <NavItem to="/announcements" label="Comunicados" onNavigate={onNavigate} />}
           <NavItem to="/helps" label="Central de ajuda" onNavigate={onNavigate} />

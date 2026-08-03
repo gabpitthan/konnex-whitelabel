@@ -49,6 +49,7 @@ import Kanban from "../pages/Kanban";
 import TagsKanban from "../pages/TagsKanban";
 import ForgotPassword from "../pages/ForgetPassWord";
 import ResetPassword from "../pages/ResetPassword";
+import DispatchReconciliation from "../pages/DispatchReconciliation";
 
 
 const Routes = () => {
@@ -88,6 +89,7 @@ const Routes = () => {
                 <Route exact path="/users" component={Users} isPrivate />
                 <Route exact path="/messages-api" component={MessagesAPI} isPrivate />
                 <Route exact path="/settings" component={SettingsCustom} isPrivate />
+                <Route exact path="/dispatch-reconciliation" component={DispatchReconciliation} isPrivate />
                 <Route exact path="/queues" component={Queues} isPrivate />
                 <Route exact path="/reports" component={Reports} isPrivate />
                 <Route exact path="/queue-integration" component={QueueIntegration} isPrivate />

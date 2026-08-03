@@ -19,6 +19,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/database/migrations/__tests__/addCampaignShippingDispatchState.spec.ts \
   src/database/migrations/__tests__/alignCampaignShippingContactForeignKey.spec.ts \
   src/database/migrations/__tests__/alignCampaignPendingIndex.spec.ts \
+  src/database/migrations/__tests__/createDispatchReconciliationAudits.spec.ts \
   src/helpers/__tests__/useMultiFileAuthState.spec.ts \
   src/jobs/__tests__/handleMessageAckQueue.spec.ts \
   src/jobs/__tests__/handleMessageQueue.spec.ts \
@@ -35,6 +36,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/middleware/__tests__/apiRateLimit.spec.ts \
   src/middleware/__tests__/tokenAuth.spec.ts \
   src/routes/__tests__/routeMountContract.spec.ts \
+  src/routes/__tests__/dispatchReconciliationContract.spec.ts \
   src/services/ApiServices/__tests__/RecordApiUsageService.spec.ts \
   src/services/ApiServices/__tests__/ApiTokenCryptoService.spec.ts \
   src/services/ApiServices/__tests__/GenerateApiTokenService.spec.ts \
@@ -58,6 +60,9 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/services/ScheduleServices/__tests__/ReleaseScheduleDispatchClaimService.spec.ts \
   src/services/ScheduleServices/__tests__/BeginScheduleDispatchService.spec.ts \
   src/services/ScheduleServices/__tests__/ScheduleQueueContract.spec.ts \
+  src/services/ScheduleServices/__tests__/ResolveScheduleDispatchOutcome.spec.ts \
+  src/services/DispatchReconciliationServices/__tests__/ListDispatchReconciliationsService.spec.ts \
+  src/services/DispatchReconciliationServices/__tests__/ReconcileDispatchService.spec.ts \
   src/services/TicketServices/__tests__/FindOrCreateTicketService.spec.ts \
   src/services/WbotServices/__tests__/FindOrCreateFencedWhatsappContextService.spec.ts \
   src/services/WhatsappService/__tests__/ListAllWhatsAppService.spec.ts \

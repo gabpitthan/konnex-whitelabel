@@ -708,6 +708,57 @@ global não filtre tenant. A definição final ordena por `updatedAt,id`, inclui
 companyId/campaignId/dispatchKey e mantém o predicado PENDING; laboratório e
 produção confirmaram exatamente essa definição.
 
+## Decisão em validação na 1.29 — reconciliação humana e CAS por UUID
+
+Um crash depois de entrar em `PROCESSING` não informa se o WhatsApp recebeu o
+efeito. Microsoft recomenda pausar para revisão humana quando a compensação é
+ambígua ou de alto impacto, registrar progresso e tornar comandos repetíveis
+idempotentes. AWS separa recuperação para frente de compensação em Sagas. Isso
+invalida um reset automático: a 1.29 expõe ao administrador as alternativas
+“reconhecer efeito” e “rearmar”, esta última com aviso explícito de duplicação.
+
+OWASP recomenda auditar ações administrativas, mas excluir tokens e PII. A
+lista retorna somente tipo, IDs, fase, estado, início e token opaco; não retorna
+mensagem, número ou payload Bull. A justificativa é limitada a 10–500 caracteres
+e a UI instrui o operador a não copiar conteúdo sensível. Estado e auditoria
+entram na mesma transação.
+
+PostgreSQL mantém `FOR UPDATE` até o fim da transação e bloqueia outro writer da
+mesma linha. O lock é combinado a tenant, estado, limite de idade e UUID de
+dispatch. O laboratório demonstrou por que a UUID é necessária: um
+`timestamptz` criado por `NOW()` reteve microssegundos, mas o round-trip
+Sequelize/JSON produziu milissegundos; dois CAS por timestamp retornaram 0/0.
+Substituído pelo UUID persistido, dois reconciliadores produziram exatamente
+1 sucesso/1 conflito e uma auditoria, deixando zero dado sintético.
+
+Reconhecer Schedule usa a mesma função pura do worker para encerrar ou avançar
+recorrência, incluindo contador nulo e regra de dia útil. Reconhecer confirmação
+leva CampaignShipping a `AWAITING_CONFIRMATION`; conteúdo vai a `DONE` e só
+finaliza a campanha se a mesma contagem tenant-aware do worker estiver completa.
+Rearmar Schedule volta a `PENDENTE`; CampaignShipping recebe nova UUID e só
+volta a `PENDING` com campanha `EM_ANDAMENTO`.
+
+As listagens são bounded em 200. Índices parciais usam
+`(companyId, dispatchStartedAt, id)` e incluem IDs/chave necessários, pois a
+consulta operacional sempre pertence a um tenant. Não foi introduzido cache:
+decisões exigem estado atual e invalidar cache acrescentaria risco sem carga
+medida que justificasse a complexidade.
+
+Fontes primárias:
+
+- https://learn.microsoft.com/azure/architecture/patterns/compensating-transaction
+- https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-patterns.html
+- https://www.postgresql.org/docs/16/explicit-locking.html
+- https://www.postgresql.org/docs/16/sql-select.html
+- https://www.postgresql.org/docs/16/sql-update.html
+- https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html
+
+Fato medido: falha 0/0 com timestamp, correção UUID 1/1 conflito, uma auditoria,
+índices finais e zero sintético em restore PostgreSQL 16. Inferência: 15 minutos
+é um default conservador e configurável entre 1 minuto e 7 dias; deve ser
+reavaliado por duração real de mídia/campanha. Não testado ainda: conta WhatsApp
+canário, julgamento humano real e efeito pós-send no servidor externo.
+
 Fontes primárias e padrões consultados:
 
 - https://docs.bullmq.io/bull/important-notes

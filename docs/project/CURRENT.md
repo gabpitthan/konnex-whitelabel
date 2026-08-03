@@ -1,13 +1,13 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-08-03
-Versão ativa: 1.28
+Versão ativa: 1.29 (publicada)
 
 ## Em foco
 
-Programa P0/P1 de integridade e escala. A 1.28 aplica owner, estado persistido,
-UUID/CAS e recuperação de enqueue a CampaignShipping. O lote está publicado e
-não promete exactly-once do WhatsApp.
+Programa P0/P1 de integridade e escala. A 1.29 adiciona decisão humana,
+tenant-aware e auditável aos estados de disparo ambíguos, sem prometer
+exactly-once do WhatsApp. Laboratório, gate, deploy e E2E foram aprovados.
 
 ## Estado operacional
 
@@ -150,13 +150,23 @@ não promete exactly-once do WhatsApp.
   em 162/51/57 ms e confirmou FK CASCADE e índice coberto.
 - Prova publicada com rollback deu CAS/confirm 1/0, sem dado sintético; API
   1.28, frontend, smoke e restart em 557 ms foram aprovados.
+- Reconciliação 1.29 lista apenas PROCESSING antigo do tenant e exige decisão
+  admin atual, UUID CAS e justificativa; auditoria e estado são atômicos.
+- Laboratório final passou migration em 143/48/107 ms, CHECK inválido e
+  concorrência 1 sucesso/1 conflito/1 auditoria, sem resíduos.
+- Gate 57 suítes/212 testes e builds passou; produção migrou em 191 ms e repetiu
+  concorrência 1/1 conflito com limpeza 0/0.
+- E2E autenticado desktop/mobile executou reconhecer→auditar, sem overflow,
+  console/page error ou request failure. Restart fechou seis filas em 542 ms e
+  retornou 1.29 saudável, sem migration pendente.
+- GitHub `gabpitthan/konnex-whitelabel` é o único repositório público; README,
+  CI, segurança, contribuição e templates estão versionados.
 
 ## Próximo passo
 
-Implementar reconciliação segura dos estados PROCESSING sem retry cego. Em
-paralelo, selecionar a próxima família vulnerável alcançável,
-coordenar a rotação do cliente API e manter a janela de 30 dias antes do
-contract.
+Selecionar a próxima família vulnerável alcançável; em paralelo, coordenar a
+rotação do cliente API, manter a janela de 30 dias antes do contract e planejar
+canário WhatsApp real sem liberar cluster prematuramente.
 
 ## Fontes
 

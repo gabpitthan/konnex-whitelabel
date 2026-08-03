@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-08-03
-Versão ativa: `1.28`, publicada.
+Versão ativa: `1.29`, publicada.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 
@@ -75,6 +75,17 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
   pós-efeito permanece ambíguo e não recebe retry automático.
   Preparação/disparo usam consultas leves e não recarregam a lista inteira por
   destinatário; relações de campanha são validadas no tenant autenticado.
+- A 1.29 cria reconciliação humana para Schedule/CampaignShipping
+  presos após início do efeito externo. A decisão exige admin atual, tenant,
+  UUID CAS e justificativa; estado e auditoria são gravados juntos. O primeiro
+  laboratório detectou perda de microssegundos no timestamp via JSON, e a UUID
+  corrigida produziu 1 sucesso/1 conflito sob dois reconciliadores.
+- Gate 57/212, builds, migration produção em 191 ms e E2E autenticado
+  reconhecer→auditar passaram. Desktop/mobile não tiveram overflow nem erros;
+  restart fechou seis filas em 542 ms e voltou saudável, sem migration pendente.
+- O único repositório público da conta é
+  `https://github.com/gabpitthan/konnex-whitelabel`; credenciais GitHub ficam
+  fora do projeto em armazenamento local 0600.
 
 ## Memória estruturada
 
@@ -114,7 +125,7 @@ Antes de continuar o redesign, executar o P0 de confiabilidade:
 1. validar auth state v2 com conta canário, restart e mensagens;
 2. criar regressão automatizada para jornadas completas de WhatsApp;
 3. ampliar fencing aos caminhos auxiliares antes de liberar cluster;
-4. criar reconciliação operacional para Schedule/Campaign em PROCESSING;
+4. concluir e operar a reconciliação de Schedule/Campaign em PROCESSING;
 5. reduzir as demais vulnerabilidades por família e alcance.
 
 ## Direção visual aprovada

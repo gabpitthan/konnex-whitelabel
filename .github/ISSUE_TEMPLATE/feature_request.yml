@@ -1,0 +1,33 @@
+name: Propor evolução
+description: Mudança baseada em problema e evidência
+title: "[Evolução]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema a resolver
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidência, casos e documentação
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Impacto considerado
+      options:
+        - label: Multi-tenancy e autorização
+        - label: Concorrência e integridade
+        - label: Escalabilidade, banco, filas e cache
+        - label: Operação e rollback
+

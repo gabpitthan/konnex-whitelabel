@@ -45,6 +45,7 @@ import { closeBullQueues, QUEUE_RETENTION, registerQueueTelemetry } from "./libs
 import ClaimDueSchedulesService from "./services/ScheduleServices/ClaimDueSchedulesService";
 import ReleaseScheduleDispatchClaimService from "./services/ScheduleServices/ReleaseScheduleDispatchClaimService";
 import BeginScheduleDispatchService from "./services/ScheduleServices/BeginScheduleDispatchService";
+import ResolveScheduleDispatchOutcome from "./services/ScheduleServices/ResolveScheduleDispatchOutcome";
 import { randomUUID } from "crypto";
 import BeginCampaignDispatchService from "./services/CampaignService/BeginCampaignDispatchService";
 import CompleteCampaignDispatchService from "./services/CampaignService/CompleteCampaignDispatchService";
@@ -300,86 +301,13 @@ async function handleSendScheduledMessage(job) {
         schedule.contact.isGroup);
     }
 
-    if (schedule.valorIntervalo > 0 && (isNil(schedule.contadorEnvio) || schedule.contadorEnvio < schedule.enviarQuantasVezes)) {
-      let unidadeIntervalo;
-      switch (schedule.intervalo) {
-        case 1:
-          unidadeIntervalo = 'days';
-          break;
-        case 2:
-          unidadeIntervalo = 'weeks';
-          break;
-        case 3:
-          unidadeIntervalo = 'months';
-          break;
-        case 4:
-          unidadeIntervalo = 'minuts';
-          break;
-        default:
-          throw new Error('Intervalo inválido');
-      }
-
-      function isDiaUtil(date) {
-        const dayOfWeek = date.day();
-        return dayOfWeek >= 1 && dayOfWeek <= 5; // 1 é segunda-feira, 5 é sexta-feira
-      }
-
-      function proximoDiaUtil(date) {
-        let proximoDia = date.clone();
-        do {
-          proximoDia.add(1, 'day');
-        } while (!isDiaUtil(proximoDia));
-        return proximoDia;
-      }
-
-      // Função para encontrar o dia útil anterior
-      function diaUtilAnterior(date) {
-        let diaAnterior = date.clone();
-        do {
-          diaAnterior.subtract(1, 'day');
-        } while (!isDiaUtil(diaAnterior));
-        return diaAnterior;
-      }
-
-      const dataExistente = new Date(schedule.sendAt);
-      const hora = dataExistente.getHours();
-      const fusoHorario = dataExistente.getTimezoneOffset();
-
-      // Realizar a soma da data com base no intervalo e valor do intervalo
-      let novaData = new Date(dataExistente); // Clone da data existente para não modificar a original
-
-      if (unidadeIntervalo !== "minuts") {
-        novaData.setDate(novaData.getDate() + schedule.valorIntervalo * (unidadeIntervalo === 'days' ? 1 : unidadeIntervalo === 'weeks' ? 7 : 30));
-      } else {
-        novaData.setMinutes(novaData.getMinutes() + Number(schedule.valorIntervalo));
-      }
-
-      if (schedule.tipoDias === 5 && !isDiaUtil(novaData)) {
-        novaData = diaUtilAnterior(novaData);
-      } else if (schedule.tipoDias === 6 && !isDiaUtil(novaData)) {
-        novaData = proximoDiaUtil(novaData);
-      }
-
-      novaData.setHours(hora);
-      novaData.setMinutes(novaData.getMinutes() - fusoHorario);
-
-      await scheduleRecord?.update({
-        status: "PENDENTE",
-        contadorEnvio: schedule.contadorEnvio + 1,
-        sendAt: new Date(novaData.toISOString().slice(0, 19).replace('T', ' ')),
-        dispatchKey: null,
-        dispatchClaimedAt: null,
-        dispatchStartedAt: null
-      })
-    } else {
-      await scheduleRecord?.update({
-        sentAt: new Date(moment().format("YYYY-MM-DD HH:mm")),
-        status: "ENVIADA",
-        dispatchKey: null,
-        dispatchClaimedAt: null,
-        dispatchStartedAt: null
-      });
-    }
+    const outcome = ResolveScheduleDispatchOutcome(schedule, new Date());
+    await scheduleRecord.update({
+      ...outcome,
+      dispatchKey: null,
+      dispatchClaimedAt: null,
+      dispatchStartedAt: null
+    });
     logger.info({ event: "schedule_dispatch_completed" });
   } catch (e: any) {
     Sentry.captureException(new Error("SCHEDULE_DISPATCH_FAILED_SANITIZED"));

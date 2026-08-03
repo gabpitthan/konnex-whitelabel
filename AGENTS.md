@@ -110,3 +110,6 @@ Quando o usuário disser que a versão está pronta:
 - Manter commits pequenos por subversão e sincronizar o repositório remoto
   configurado. Nunca publicar `.env`, tokens, credenciais, bancos, uploads,
   certificados privados ou logs.
+- Cada lote aprovado só termina após push para `main` de
+  `gabpitthan/konnex-whitelabel` e verificação do SHA remoto. Este deve
+  permanecer o único repositório público da conta salvo nova ordem explícita.

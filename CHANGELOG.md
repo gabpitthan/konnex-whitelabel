@@ -2,6 +2,36 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.29] — 2026-08-03 — publicada
+
+### Entregue no código
+
+- reconciliação administrativa de Schedule/CampaignShipping ambíguos;
+- decisão explícita `ACKNOWLEDGE` ou `REARM`, sem retry automático;
+- row lock e CAS pela UUID persistida do dispatch, isolados por tenant;
+- justificativa obrigatória e auditoria na mesma transação;
+- recorrência de Schedule centralizada entre worker e reconciliação;
+- fechamento condicional de campanha após reconhecimento de conteúdo;
+- índices parciais tenant-first e listagens bounded sem mensagem/telefone;
+- interface responsiva com alerta de duplicação e histórico;
+- README público, política de segurança, contribuição, templates e CI.
+
+### Evidência atual
+
+Backup 0600/SHA-256 e restore PostgreSQL 16 foram aprovados. O laboratório
+encontrou e corrigiu uma comparação inválida de timestamp com microssegundos;
+com UUID, dois reconciliadores produziram 1 sucesso/1 conflito e uma auditoria.
+Migration final passou em 143/48/107 ms; gate fechou 57 suítes/212 testes e
+builds. Produção migrou em 191 ms, repetiu 1/1 conflito e ficou sem sintéticos.
+E2E autenticado desktop/mobile executou reconhecer→auditar sem console/page
+errors; restart fechou seis filas em 542 ms e retornou saudável na versão 1.29.
+
+### Limite
+
+Reconhecer não prova entrega no servidor WhatsApp: é uma decisão humana após
+verificação externa. Rearmar pode duplicar mensagem já entregue. O recurso não
+substitui outbox nem exactly-once externo.
+
 ## [1.28] — 2026-08-03 — publicada
 
 ### Entregue

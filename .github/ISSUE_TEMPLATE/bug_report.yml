@@ -1,0 +1,33 @@
+name: Relatar problema
+description: Comportamento reproduzível sem dados sensíveis
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Não inclua tokens, telefones, mensagens, dumps ou detalhes de uma instalação real. Vulnerabilidades devem seguir SECURITY.md."
+  - type: input
+    id: version
+    attributes:
+      label: Versão
+      placeholder: "1.28"
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Comportamento atual e esperado
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reprodução com dados sintéticos
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Ambiente sanitizado
+      description: Docker/Node/PostgreSQL/Redis, sem hostnames ou credenciais reais.
+
