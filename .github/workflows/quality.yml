@@ -21,9 +21,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Ambiente seguro de CI
+        run: cp .env.example .env
+
       - name: Preflight
         run: scripts/preflight.sh
 
       - name: Testes e builds reproduzíveis
         run: scripts/quality-gate.sh
-
