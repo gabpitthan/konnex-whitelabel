@@ -68,7 +68,7 @@ Uma tarefa só está pronta quando as respostas aplicáveis forem "sim":
 - Um lote funcional = exatamente uma subversão em `VERSION` (hoje `1.32`), incrementada antes do commit, com entrada em `CHANGELOG.md` e README em `docs/versions/X.Y/`. Não incrementar por leitura, diagnóstico sem mudança ou atualização só de documentação. O número principal só muda quando Gabriel declarar a versão pronta.
 - Versão exibida no frontend, endpoint `/version`, `package.json` e `VERSION` sempre sincronizados.
 - Encerramento: `scripts/preflight.sh` → `scripts/quality-gate.sh` → (em deploy) `scripts/smoke-test.sh` → autoavaliação 0–2 acima.
-- Build passar e HTTP 200 **não provam nada**. **Este ambiente não tem browser nem screenshots** (ver CAPABILITY_MATRIX): a verificação visual depende de Gabriel, e o agente deve declarar UNVERIFIED em vez de alegar que verificou.
+- Build passar e HTTP 200 **não provam nada**. Rota autenticada exige navegador real: console, rede, desktop claro/escuro e mobile. **Este ambiente tem browser e screenshots** (Playwright, receita em `runtime/CAPABILITY_MATRIX.md`) — a verificação visual é obrigação do agente. Declarar UNVERIFIED só vale para o que realmente não foi verificado, nunca como atalho.
 - Commitado não é implantado. A prova sai de dentro da imagem em execução e do `dist/`, não do repositório.
 - Nunca ler, imprimir ou copiar `credentials.txt` / `.env`. O hook `block-secrets` nega de fato — se ele bloquear, mude a abordagem, não contorne.
 - Regra P0: falha em auth, isolamento multi-tenant, integridade de dados, WhatsApp, tickets/mensagens ou tela branca **congela novas features** na superfície afetada até causa comprovada + correção + regressão + validação runtime + observação pós-deploy.
