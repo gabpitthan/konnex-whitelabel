@@ -1,16 +1,34 @@
 import React, { useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
-import { Badge, Collapse, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import DashboardOutlinedIcon from "@material-ui/icons/DashboardOutlined";
 import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ContactPhoneOutlinedIcon from "@material-ui/icons/ContactPhoneOutlined";
 import ViewWeekOutlinedIcon from "@material-ui/icons/ViewWeekOutlined";
+import EventNoteOutlinedIcon from "@material-ui/icons/EventNoteOutlined";
+import FlashOnOutlinedIcon from "@material-ui/icons/FlashOnOutlined";
+import LocalOfferOutlinedIcon from "@material-ui/icons/LocalOfferOutlined";
+import ForumOutlinedIcon from "@material-ui/icons/ForumOutlined";
 import AccountTreeOutlinedIcon from "@material-ui/icons/AccountTreeOutlined";
+import CallSplitOutlinedIcon from "@material-ui/icons/CallSplitOutlined";
+import MemoryOutlinedIcon from "@material-ui/icons/MemoryOutlined";
+import ExtensionOutlinedIcon from "@material-ui/icons/ExtensionOutlined";
+import CodeOutlinedIcon from "@material-ui/icons/CodeOutlined";
 import RecordVoiceOverOutlinedIcon from "@material-ui/icons/RecordVoiceOverOutlined";
+import ListAltOutlinedIcon from "@material-ui/icons/ListAltOutlined";
+import TuneOutlinedIcon from "@material-ui/icons/TuneOutlined";
 import AssessmentOutlinedIcon from "@material-ui/icons/AssessmentOutlined";
+import TimelineOutlinedIcon from "@material-ui/icons/TimelineOutlined";
+import PeopleOutlineIcon from "@material-ui/icons/PeopleOutline";
+import QueuePlayNextOutlinedIcon from "@material-ui/icons/QueuePlayNextOutlined";
+import SettingsInputAntennaOutlinedIcon from "@material-ui/icons/SettingsInputAntennaOutlined";
+import FolderOutlinedIcon from "@material-ui/icons/FolderOutlined";
+import ReceiptOutlinedIcon from "@material-ui/icons/ReceiptOutlined";
 import SettingsOutlinedIcon from "@material-ui/icons/SettingsOutlined";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import SyncProblemOutlinedIcon from "@material-ui/icons/SyncProblemOutlined";
+import BusinessOutlinedIcon from "@material-ui/icons/BusinessOutlined";
+import CampaignIcon from "@material-ui/icons/AnnouncementOutlined";
+import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
 import { Can } from "../components/Can";
@@ -20,114 +38,148 @@ import toastError from "../errors/toastError";
 
 const packageVersion = require("../../package.json").version;
 
-const useStyles = makeStyles((theme) => ({
+/**
+ * Navegação principal.
+ *
+ * Estrutura em seções planas com rótulo discreto, não accordion aninhado. O
+ * padrão anterior exigia abrir um grupo antes de ver qualquer destino, o que
+ * custava um clique extra em toda navegação e escondia o mapa do produto.
+ * Aqui a seção é só um rótulo; os itens ficam sempre visíveis e a barra rola.
+ *
+ * O estado ativo usa superfície de marca discreta mais o texto em cor de
+ * marca — nunca bloco saturado.
+ */
+const useStyles = makeStyles(() => ({
   navigation: {
     height: "100%",
     minHeight: 0,
     display: "flex",
     flexDirection: "column",
-    color: theme.palette.text.primary,
+    color: "var(--text-primary)",
   },
   brand: {
-    height: 72,
+    height: "var(--topbar-height)",
     flexShrink: 0,
     display: "flex",
     alignItems: "center",
-    gap: 11,
-    padding: (props) => props.compact ? "0 17px" : "0 20px",
-    borderBottom: `1px solid ${theme.palette.divider}`,
+    gap: "var(--space-4)",
+    padding: (props) => (props.compact ? "0 var(--space-5)" : "0 var(--space-5)"),
+    borderBottom: "1px solid var(--border-subtle)",
     overflow: "hidden",
   },
   mark: {
-    width: 38,
-    height: 38,
+    width: 26,
+    height: 26,
     flexShrink: 0,
     display: "grid",
     placeItems: "center",
-    borderRadius: 9,
-    color: "#eafff9",
-    background: theme.mode === "light" ? "#123d37" : "#2b7668",
-    fontSize: 18,
-    fontWeight: 900,
-    letterSpacing: "-.08em",
+    borderRadius: "var(--radius-md)",
+    color: "var(--on-brand)",
+    background: "var(--brand-base)",
+    fontSize: "var(--text-xs)",
+    fontWeight: 600,
   },
-  brandCopy: { minWidth: 0, opacity: (props) => props.compact ? 0 : 1, transition: "opacity 120ms ease" },
-  brandName: { display: "block", fontSize: 15, fontWeight: 800, letterSpacing: "-.025em" },
-  brandMeta: { display: "block", marginTop: 1, color: theme.palette.text.secondary, fontSize: 10, letterSpacing: ".04em" },
+  brandCopy: {
+    minWidth: 0,
+    display: (props) => (props.compact ? "none" : "block"),
+  },
+  brandName: {
+    display: "block",
+    fontSize: "var(--text-base)",
+    fontWeight: 600,
+    letterSpacing: "var(--tracking-tight)",
+    color: "var(--text-primary)",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
   scroll: {
     flex: 1,
     minHeight: 0,
     overflowY: "auto",
     overflowX: "hidden",
     overscrollBehavior: "contain",
-    padding: "14px 10px 20px",
-    ...theme.scrollbarStyles,
+    padding: "var(--space-4) var(--space-3) var(--space-8)",
+    "&::-webkit-scrollbar": { width: 6 },
+    "&::-webkit-scrollbar-thumb": {
+      background: "var(--border-default)",
+      borderRadius: "var(--radius-full)",
+    },
   },
-  group: { marginBottom: 4 },
-  groupButton: {
-    width: "100%",
-    minHeight: 42,
-    border: 0,
-    borderRadius: 7,
-    padding: (props) => props.compact ? "7px 13px" : "7px 10px",
+  section: { marginBottom: "var(--space-5)" },
+  // Rótulo de seção: pequeno, muted, em caixa alta, sem competir com os itens.
+  sectionLabel: {
+    display: (props) => (props.compact ? "none" : "block"),
+    padding: "0 var(--space-3)",
+    marginBottom: "var(--space-2)",
+    fontSize: "var(--text-2xs)",
+    fontWeight: 500,
+    letterSpacing: "var(--tracking-wide)",
+    textTransform: "uppercase",
+    color: "var(--text-muted)",
+  },
+  // Separador usado no modo recolhido, onde o rótulo textual some.
+  sectionRule: {
+    display: (props) => (props.compact ? "block" : "none"),
+    height: 1,
+    margin: "var(--space-4) var(--space-3)",
+    background: "var(--border-subtle)",
+  },
+  item: {
+    position: "relative",
     display: "grid",
-    gridTemplateColumns: (props) => props.compact ? "32px" : "32px minmax(0,1fr) 20px",
+    gridTemplateColumns: (props) => (props.compact ? "20px" : "20px minmax(0,1fr) auto"),
     alignItems: "center",
-    gap: 8,
-    color: theme.palette.text.secondary,
-    background: "transparent",
-    cursor: "pointer",
-    textAlign: "left",
-    transition: "background 130ms ease, color 130ms ease",
-    "&:hover": { color: theme.palette.text.primary, background: theme.mode === "light" ? "rgba(12,68,58,.055)" : "rgba(255,255,255,.055)" },
+    gap: "var(--space-4)",
+    height: "var(--nav-item-height)",
+    padding: (props) => (props.compact ? "0 var(--space-4)" : "0 var(--space-3)"),
+    justifyContent: (props) => (props.compact ? "center" : undefined),
+    borderRadius: "var(--radius-md)",
+    color: "var(--text-secondary)",
+    textDecoration: "none",
+    fontSize: "var(--text-sm)",
+    fontWeight: 500,
+    transition:
+      "background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard)",
+    "&:hover": { background: "var(--surface-hover)", color: "var(--text-primary)" },
+    "&:focus-visible": { outline: "2px solid var(--border-focus)", outlineOffset: -2 },
   },
-  groupActive: { color: theme.mode === "light" ? "#0a6756" : "#76d8c2" },
+  itemActive: {
+    background: "var(--brand-soft)",
+    color: "var(--text-brand)",
+    fontWeight: 500,
+    "&:hover": { background: "var(--brand-soft)", color: "var(--text-brand)" },
+    "& $icon": { color: "var(--text-brand)" },
+  },
   icon: {
-    width: 32,
     display: "grid",
     placeItems: "center",
-    "& .MuiSvgIcon-root": { fontSize: 20 },
+    color: "var(--text-muted)",
+    "& .MuiSvgIcon-root": { fontSize: 18 },
   },
-  groupLabel: { fontSize: 12, fontWeight: 760, letterSpacing: ".005em", whiteSpace: "nowrap" },
-  chevron: { fontSize: 18, transition: "transform 150ms ease" },
-  chevronOpen: { transform: "rotate(180deg)" },
-  children: { margin: "2px 0 8px 40px", paddingLeft: 9, borderLeft: `1px solid ${theme.palette.divider}` },
-  link: {
-    position: "relative",
-    minHeight: 36,
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "5px 9px",
-    margin: "1px 0",
-    borderRadius: 6,
-    color: theme.palette.text.secondary,
-    textDecoration: "none",
-    fontSize: 12,
-    fontWeight: 600,
-    transition: "background 130ms ease, color 130ms ease",
-    "&:hover": { color: theme.palette.text.primary, background: theme.mode === "light" ? "rgba(12,68,58,.05)" : "rgba(255,255,255,.05)" },
+  label: {
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    display: (props) => (props.compact ? "none" : "block"),
   },
-  linkActive: {
-    color: theme.mode === "light" ? "#075f50" : "#86e2ce",
-    background: theme.mode === "light" ? "rgba(18,132,109,.095)" : "rgba(76,205,175,.1)",
-    fontWeight: 740,
+  // Ponto de atenção: acompanha o item, não vira badge colorida chamativa.
+  alert: {
+    width: 6,
+    height: 6,
+    borderRadius: "var(--radius-full)",
+    background: "var(--signal-wait)",
+    flexShrink: 0,
   },
-  directLink: {
-    gridTemplateColumns: (props) => props.compact ? "32px" : "32px minmax(0,1fr)",
-  },
-  directLabel: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   footer: {
-    minHeight: 45,
+    minHeight: 34,
     flexShrink: 0,
     display: "flex",
     alignItems: "center",
-    padding: (props) => props.compact ? "0 23px" : "0 20px",
-    borderTop: `1px solid ${theme.palette.divider}`,
-    color: theme.palette.text.secondary,
-    fontSize: 9,
-    fontWeight: 700,
-    letterSpacing: ".09em",
+    padding: (props) => (props.compact ? "0 var(--space-5)" : "0 var(--space-5)"),
+    borderTop: "1px solid var(--border-subtle)",
+    color: "var(--text-muted)",
+    fontSize: "var(--text-2xs)",
     whiteSpace: "nowrap",
     overflow: "hidden",
   },
@@ -135,77 +187,89 @@ const useStyles = makeStyles((theme) => ({
 
 const reducer = (state, action) => {
   if (action.type === "LOAD") return action.payload || [];
-  if (action.type === "CHANGE") return state.map((chat) => chat.id === action.payload.chat.id ? action.payload.chat : chat);
+  if (action.type === "CHANGE") {
+    const chats = [...state];
+    const index = chats.findIndex((chat) => chat.id === action.payload.id);
+    if (index !== -1) chats[index] = action.payload;
+    else chats.unshift(action.payload);
+    return chats;
+  }
   return state;
 };
 
 const Admin = ({ user, children, connections = false }) => (
   <Can
-    role={connections && user.profile === "user" && user.allowConnections === "enabled" ? "admin" : user.profile}
+    role={
+      connections && user.profile === "user" && user.allowConnections === "enabled"
+        ? "admin"
+        : user.profile
+    }
     perform={connections ? "drawer-admin-items:view" : "dashboard:view"}
     yes={() => children}
   />
 );
 
-const NavItem = ({ to, label, warning, onNavigate }) => {
-  const classes = useStyles({ compact: false });
+const NavItem = ({ to, label, icon, warning, onNavigate, compact }) => {
+  const classes = useStyles({ compact });
   const location = useLocation();
-  const active = to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
+  const active =
+    to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
   return (
-    <RouterLink to={to} className={`${classes.link} ${active ? classes.linkActive : ""}`} onClick={onNavigate} aria-current={active ? "page" : undefined}>
-      <span>{label}</span>
-      {warning && <Badge color="error" variant="dot" />}
+    <RouterLink
+      to={to}
+      className={`${classes.item} ${active ? classes.itemActive : ""}`}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      title={compact ? label : undefined}
+    >
+      <span className={classes.icon}>{icon}</span>
+      <span className={classes.label}>{label}</span>
+      {warning && !compact && <span className={classes.alert} aria-label="Requer atenção" />}
     </RouterLink>
   );
 };
 
-const Group = ({ id, label, icon, paths, children, openGroups, setOpenGroups, compact, onExpand }) => {
+const Section = ({ label, compact, children }) => {
   const classes = useStyles({ compact });
-  const location = useLocation();
-  const active = paths.some((path) => path === "/" ? location.pathname === "/" : location.pathname.startsWith(path));
-  const open = Boolean(openGroups[id]);
-  const toggle = () => {
-    if (compact && onExpand) {
-      onExpand();
-      setOpenGroups((current) => ({ ...current, [id]: true }));
-      return;
-    }
-    setOpenGroups((current) => ({ ...current, [id]: !current[id] }));
-  };
+  // Se todos os filhos foram filtrados por permissão ou plano, a seção some
+  // junto — rótulo sem item é ruído.
+  const temItem = React.Children.toArray(children).some(Boolean);
+  if (!temItem) return null;
   return (
-    <section className={classes.group}>
-      <button type="button" className={`${classes.groupButton} ${active ? classes.groupActive : ""}`} onClick={toggle} title={compact ? label : undefined} aria-expanded={open}>
-        <span className={classes.icon}>{icon}</span>
-        {!compact && <><span className={classes.groupLabel}>{label}</span><ExpandMoreIcon className={`${classes.chevron} ${open ? classes.chevronOpen : ""}`} /></>}
-      </button>
-      {!compact && <Collapse in={open} timeout={150}><div className={classes.children}>{children}</div></Collapse>}
+    <section className={classes.section}>
+      <div className={classes.sectionRule} />
+      {label && <div className={classes.sectionLabel}>{label}</div>}
+      {children}
     </section>
   );
 };
 
 const MainListItems = ({ compact = false, onNavigate, onExpand }) => {
   const classes = useStyles({ compact });
-  const location = useLocation();
   const { whatsApps } = useContext(WhatsAppsContext);
   const { user, socket } = useContext(AuthContext);
   const { getPlanCompany } = usePlans();
   const [flags, setFlags] = useState({});
   const [chats, dispatch] = useReducer(reducer, []);
-  const [openGroups, setOpenGroups] = useState({
-    routine: /^\/(kanban|schedules|quick-messages|tags|chats)/.test(location.pathname),
-    automation: /^\/(flowbuilders|flowbuilder|phrase-lists|prompts|queue-integration|messages-api)/.test(location.pathname),
-    campaigns: /^\/(campaigns|contact-lists|campaigns-config)/.test(location.pathname),
-    analytics: /^\/(reports|moments)/.test(location.pathname),
-    admin: /^\/(users|queues|connections|allConnections|files|financeiro|settings|dispatch-reconciliation|companies|announcements|helps)/.test(location.pathname),
-  });
 
   useEffect(() => {
     let mounted = true;
-    getPlanCompany(undefined, user.companyId).then(({ plan }) => mounted && setFlags(plan || {})).catch(toastError);
-    return () => { mounted = false; };
+    getPlanCompany(undefined, user.companyId)
+      .then(({ plan }) => mounted && setFlags(plan || {}))
+      .catch(toastError);
+    return () => {
+      mounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.companyId]);
-  useEffect(() => { api.get("/chats/").then(({ data }) => dispatch({ type: "LOAD", payload: data.records })).catch(toastError); }, []);
+
+  useEffect(() => {
+    api
+      .get("/chats/")
+      .then(({ data }) => dispatch({ type: "LOAD", payload: data.records }))
+      .catch(toastError);
+  }, []);
+
   useEffect(() => {
     if (!socket || typeof socket.on !== "function" || !user.companyId) return undefined;
     const event = `company-${user.companyId}-chat`;
@@ -216,58 +280,222 @@ const MainListItems = ({ compact = false, onNavigate, onExpand }) => {
     };
   }, [socket, user.companyId]);
 
-  const unreadChat = useMemo(() => chats.some((chat) => (chat.users || []).some((item) => item.userId === user.id && item.unreads > 0)), [chats, user.id]);
-  const connectionWarning = useMemo(() => whatsApps.some(({ status }) => ["qrcode", "PAIRING", "DISCONNECTED", "TIMEOUT", "OPENING"].includes(status)), [whatsApps]);
-  const groupProps = { openGroups, setOpenGroups, compact, onExpand };
+  const unreadChat = useMemo(
+    () =>
+      chats.some((chat) =>
+        (chat.users || []).some((item) => item.userId === user.id && item.unreads > 0)
+      ),
+    [chats, user.id]
+  );
+
+  const connectionWarning = useMemo(
+    () =>
+      whatsApps.some(({ status }) =>
+        ["qrcode", "PAIRING", "DISCONNECTED", "TIMEOUT", "OPENING"].includes(status)
+      ),
+    [whatsApps]
+  );
+
+  const nav = { onNavigate, compact };
 
   return (
     <div className={classes.navigation}>
-      <header className={classes.brand}>
+      <header className={classes.brand} onClick={compact && onExpand ? onExpand : undefined}>
         <span className={classes.mark}>K</span>
-        <span className={classes.brandCopy}><Typography className={classes.brandName}>Konnex</Typography><span className={classes.brandMeta}>Central de relacionamento</span></span>
+        <span className={classes.brandCopy}>
+          <span className={classes.brandName}>{user?.company?.name || "Konnex"}</span>
+        </span>
       </header>
+
       <nav className={classes.scroll} aria-label="Navegação principal">
-        <Admin user={user}><Group id="overview" label="Visão geral" icon={<DashboardOutlinedIcon />} paths={["/"]} {...groupProps}><NavItem to="/" label="Painel da operação" onNavigate={onNavigate} /></Group></Admin>
-        <Group id="conversations" label="Conversas" icon={<ChatBubbleOutlineIcon />} paths={["/tickets"]} {...groupProps}><NavItem to="/tickets" label="Caixa de entrada" onNavigate={onNavigate} /></Group>
-        <Group id="contacts" label="Contatos" icon={<ContactPhoneOutlinedIcon />} paths={["/contacts"]} {...groupProps}><NavItem to="/contacts" label="Base de contatos" onNavigate={onNavigate} /></Group>
-        <Group id="routine" label="Rotina" icon={<ViewWeekOutlinedIcon />} paths={["/kanban", "/schedules", "/quick-messages", "/tags", "/chats"]} {...groupProps}>
-          {flags.useKanban && <NavItem to="/kanban" label="Quadros Kanban" onNavigate={onNavigate} />}
-          {flags.useSchedules && <NavItem to="/schedules" label="Agenda" onNavigate={onNavigate} />}
-          <NavItem to="/quick-messages" label="Respostas rápidas" onNavigate={onNavigate} />
-          <NavItem to="/tags" label="Organização por tags" onNavigate={onNavigate} />
-          {flags.useInternalChat && <NavItem to="/chats" label="Chat da equipe" warning={unreadChat} onNavigate={onNavigate} />}
-        </Group>
-        <Admin user={user}><Group id="automation" label="Automação" icon={<AccountTreeOutlinedIcon />} paths={["/flowbuilders", "/flowbuilder", "/phrase-lists", "/prompts", "/queue-integration", "/messages-api"]} {...groupProps}>
-          <NavItem to="/flowbuilders" label="Fluxos de conversa" onNavigate={onNavigate} />
-          <NavItem to="/phrase-lists" label="Fluxos de campanha" onNavigate={onNavigate} />
-          {flags.useOpenAi && <NavItem to="/prompts" label="Prompts e IA" onNavigate={onNavigate} />}
-          {flags.useIntegrations && <NavItem to="/queue-integration" label="Integrações" onNavigate={onNavigate} />}
-          {flags.useExternalApi && <NavItem to="/messages-api" label="API e webhooks" onNavigate={onNavigate} />}
-        </Group></Admin>
-        {flags.useCampaigns && <Admin user={user}><Group id="campaigns" label="Campanhas" icon={<RecordVoiceOverOutlinedIcon />} paths={["/campaigns", "/contact-lists", "/campaigns-config"]} {...groupProps}>
-          <NavItem to="/campaigns" label="Gestão de campanhas" onNavigate={onNavigate} />
-          <NavItem to="/contact-lists" label="Listas de contatos" onNavigate={onNavigate} />
-          <NavItem to="/campaigns-config" label="Preferências" onNavigate={onNavigate} />
-        </Group></Admin>}
-        <Admin user={user}><Group id="analytics" label="Análises" icon={<AssessmentOutlinedIcon />} paths={["/reports", "/moments"]} {...groupProps}>
-          <NavItem to="/reports" label="Relatórios" onNavigate={onNavigate} />
-          <NavItem to="/moments" label="Operação em tempo real" onNavigate={onNavigate} />
-        </Group></Admin>
-        <Group id="admin" label="Administração" icon={<SettingsOutlinedIcon />} paths={["/users", "/queues", "/connections", "/allConnections", "/files", "/financeiro", "/settings", "/dispatch-reconciliation", "/companies", "/announcements", "/helps"]} {...groupProps}>
-          <Admin user={user}><NavItem to="/users" label="Equipe e usuários" onNavigate={onNavigate} /></Admin>
-          <Admin user={user}><NavItem to="/queues" label="Filas de atendimento" onNavigate={onNavigate} /></Admin>
-          <Admin user={user} connections><NavItem to="/connections" label="Canais e conexões" warning={connectionWarning} onNavigate={onNavigate} /></Admin>
-          {user.super && <NavItem to="/allConnections" label="Todas as conexões" onNavigate={onNavigate} />}
-          <Admin user={user}><NavItem to="/files" label="Biblioteca de arquivos" onNavigate={onNavigate} /></Admin>
-          <Admin user={user}><NavItem to="/financeiro" label="Financeiro" onNavigate={onNavigate} /></Admin>
-          <Admin user={user}><NavItem to="/settings" label="Configurações" onNavigate={onNavigate} /></Admin>
-          <Admin user={user}><NavItem to="/dispatch-reconciliation" label="Reconciliação de envios" onNavigate={onNavigate} /></Admin>
-          {user.super && <NavItem to="/companies" label="Empresas" onNavigate={onNavigate} />}
-          {user.super && <NavItem to="/announcements" label="Comunicados" onNavigate={onNavigate} />}
-          <NavItem to="/helps" label="Central de ajuda" onNavigate={onNavigate} />
-        </Group>
+        <Section compact={compact}>
+          <Admin user={user}>
+            <NavItem to="/" label="Visão geral" icon={<DashboardOutlinedIcon />} {...nav} />
+          </Admin>
+          <NavItem
+            to="/tickets"
+            label="Conversas"
+            icon={<ChatBubbleOutlineIcon />}
+            {...nav}
+          />
+          <NavItem
+            to="/contacts"
+            label="Contatos"
+            icon={<ContactPhoneOutlinedIcon />}
+            {...nav}
+          />
+        </Section>
+
+        <Section label="Rotina" compact={compact}>
+          {flags.useKanban && (
+            <NavItem to="/kanban" label="Kanban" icon={<ViewWeekOutlinedIcon />} {...nav} />
+          )}
+          {flags.useSchedules && (
+            <NavItem to="/schedules" label="Agenda" icon={<EventNoteOutlinedIcon />} {...nav} />
+          )}
+          <NavItem
+            to="/quick-messages"
+            label="Respostas rápidas"
+            icon={<FlashOnOutlinedIcon />}
+            {...nav}
+          />
+          <NavItem to="/tags" label="Tags" icon={<LocalOfferOutlinedIcon />} {...nav} />
+          {flags.useInternalChat && (
+            <NavItem
+              to="/chats"
+              label="Chat da equipe"
+              icon={<ForumOutlinedIcon />}
+              warning={unreadChat}
+              {...nav}
+            />
+          )}
+        </Section>
+
+        <Admin user={user}>
+          <Section label="Automação" compact={compact}>
+            <NavItem
+              to="/flowbuilders"
+              label="Fluxos de conversa"
+              icon={<AccountTreeOutlinedIcon />}
+              {...nav}
+            />
+            <NavItem
+              to="/phrase-lists"
+              label="Fluxos de campanha"
+              icon={<CallSplitOutlinedIcon />}
+              {...nav}
+            />
+            {flags.useOpenAi && (
+              <NavItem to="/prompts" label="Prompts e IA" icon={<MemoryOutlinedIcon />} {...nav} />
+            )}
+            {flags.useIntegrations && (
+              <NavItem
+                to="/queue-integration"
+                label="Integrações"
+                icon={<ExtensionOutlinedIcon />}
+                {...nav}
+              />
+            )}
+            {flags.useExternalApi && (
+              <NavItem
+                to="/messages-api"
+                label="API e webhooks"
+                icon={<CodeOutlinedIcon />}
+                {...nav}
+              />
+            )}
+          </Section>
+        </Admin>
+
+        {flags.useCampaigns && (
+          <Admin user={user}>
+            <Section label="Campanhas" compact={compact}>
+              <NavItem
+                to="/campaigns"
+                label="Campanhas"
+                icon={<RecordVoiceOverOutlinedIcon />}
+                {...nav}
+              />
+              <NavItem
+                to="/contact-lists"
+                label="Listas de contatos"
+                icon={<ListAltOutlinedIcon />}
+                {...nav}
+              />
+              <NavItem
+                to="/campaigns-config"
+                label="Preferências"
+                icon={<TuneOutlinedIcon />}
+                {...nav}
+              />
+            </Section>
+          </Admin>
+        )}
+
+        <Admin user={user}>
+          <Section label="Análises" compact={compact}>
+            <NavItem
+              to="/reports"
+              label="Relatórios"
+              icon={<AssessmentOutlinedIcon />}
+              {...nav}
+            />
+            <NavItem
+              to="/moments"
+              label="Tempo real"
+              icon={<TimelineOutlinedIcon />}
+              {...nav}
+            />
+          </Section>
+        </Admin>
+
+        <Section label="Administração" compact={compact}>
+          <Admin user={user}>
+            <NavItem to="/users" label="Equipe" icon={<PeopleOutlineIcon />} {...nav} />
+          </Admin>
+          <Admin user={user}>
+            <NavItem
+              to="/queues"
+              label="Filas"
+              icon={<QueuePlayNextOutlinedIcon />}
+              {...nav}
+            />
+          </Admin>
+          <Admin user={user} connections>
+            <NavItem
+              to="/connections"
+              label="Conexões"
+              icon={<SettingsInputAntennaOutlinedIcon />}
+              warning={connectionWarning}
+              {...nav}
+            />
+          </Admin>
+          {user.super && (
+            <NavItem
+              to="/allConnections"
+              label="Todas as conexões"
+              icon={<SettingsInputAntennaOutlinedIcon />}
+              {...nav}
+            />
+          )}
+          <Admin user={user}>
+            <NavItem to="/files" label="Arquivos" icon={<FolderOutlinedIcon />} {...nav} />
+          </Admin>
+          <Admin user={user}>
+            <NavItem
+              to="/financeiro"
+              label="Financeiro"
+              icon={<ReceiptOutlinedIcon />}
+              {...nav}
+            />
+          </Admin>
+          <Admin user={user}>
+            <NavItem
+              to="/settings"
+              label="Configurações"
+              icon={<SettingsOutlinedIcon />}
+              {...nav}
+            />
+          </Admin>
+          <Admin user={user}>
+            <NavItem
+              to="/dispatch-reconciliation"
+              label="Reconciliação"
+              icon={<SyncProblemOutlinedIcon />}
+              {...nav}
+            />
+          </Admin>
+          {user.super && (
+            <NavItem to="/companies" label="Empresas" icon={<BusinessOutlinedIcon />} {...nav} />
+          )}
+          {user.super && (
+            <NavItem to="/announcements" label="Comunicados" icon={<CampaignIcon />} {...nav} />
+          )}
+          <NavItem to="/helps" label="Ajuda" icon={<HelpOutlineOutlinedIcon />} {...nav} />
+        </Section>
       </nav>
-      <footer className={classes.footer}>{compact ? "K" : `KONNEX SIGNAL · ${packageVersion}`}</footer>
+
+      <footer className={classes.footer}>{compact ? "K" : `Konnex · ${packageVersion}`}</footer>
     </div>
   );
 };

@@ -7,7 +7,7 @@ const useStyles = makeStyles(theme => ({
         borderRadius: "3px",
         fontSize: "0.8em",
         fontWeight: "bold",
-        color: "#FFF",
+        color: "var(--text-inverse)",
         marginRight: "5px",
         whiteSpace: "nowrap"
     }

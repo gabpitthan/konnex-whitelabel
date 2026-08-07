@@ -71,7 +71,7 @@ const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
 const useStyles = makeStyles((theme) => ({
   mainWrapper: {
-    background: "#eee",
+    background: "var(--surface-sunken)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -88,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "25%",
   },
   dropInfo: {
-    background: "#eee",
+    background: "var(--surface-sunken)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -159,14 +159,14 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: theme.mode === 'light' ? "#ffffff" : "#202c33",
+    backgroundColor: theme.mode === 'light' ? "var(--surface-raised)" : "#202c33",
     borderTop: "1px solid rgba(0, 0, 0, 0.12)",
   },
   emojiBox: {
     position: "absolute",
     bottom: 63,
     width: 40,
-    borderTop: "1px solid #e8e8e8",
+    borderTop: "1px solid var(--border-subtle)",
   },
   circleLoading: {
     color: green[500],
@@ -1080,7 +1080,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
                     onClick={handleChangeSign}
                   >
                     {signMessage === true ? (
-                      <Create style={{ color: theme.mode === "light" ? theme.palette.primary.main : "#EEE" }} />
+                      <Create style={{ color: theme.mode === "light" ? theme.palette.primary.main : "var(--surface-sunken)" }} />
                     ) : (
                       <Create style={{ color: "grey" }} />
                     )}
@@ -1094,7 +1094,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
                   onClick={handlePrivateMessage}
                 >
                   {privateMessage === true ? (
-                    <Comment style={{ color: theme.mode === "light" ? theme.palette.primary.main : "#EEE" }} />
+                    <Comment style={{ color: theme.mode === "light" ? theme.palette.primary.main : "var(--surface-sunken)" }} />
                   ) : (
                     <Comment style={{ color: "grey" }} />
                   )}
@@ -1162,7 +1162,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
                       onClick={handleChangeSign}
                     >
                       {signMessage === true ? (
-                        <Create style={{ color: theme.mode === "light" ? theme.palette.primary.main : "#EEE" }} />
+                        <Create style={{ color: theme.mode === "light" ? theme.palette.primary.main : "var(--surface-sunken)" }} />
                       ) : (
                         <Create style={{ color: "grey" }} />
                       )}
@@ -1176,7 +1176,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
                     onClick={handlePrivateMessage}
                   >
                     {privateMessage === true ? (
-                      <Comment style={{ color: theme.mode === "light" ? theme.palette.primary.main : "#EEE" }} />
+                      <Comment style={{ color: theme.mode === "light" ? theme.palette.primary.main : "var(--surface-sunken)" }} />
                     ) : (
                       <Comment style={{ color: "grey" }} />
                     )}

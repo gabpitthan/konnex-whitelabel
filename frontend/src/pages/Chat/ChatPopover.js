@@ -268,7 +268,7 @@ export default function ChatPopover() {
                   key={key}
                   style={{
                     background: key % 2 === 0 ? "#ededed" : "white",
-                    border: "1px solid #eee",
+                    border: "1px solid var(--border-subtle)",
                     cursor: "pointer",
                   }}
                   onClick={() => goToMessages(item)}

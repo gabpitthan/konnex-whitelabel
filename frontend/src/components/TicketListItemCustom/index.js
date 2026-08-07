@@ -56,8 +56,8 @@ const useStyles = makeStyles((theme) => ({
         cursor: "unset",
     },
     queueTag: {
-        background: "#FCFCFC",
-        color: "#000",
+        background: "var(--surface-raised)",
+        color: "var(--text-primary)",
         marginRight: 1,
         padding: 1,
         fontWeight: 'bold',
@@ -91,7 +91,7 @@ const useStyles = makeStyles((theme) => ({
     },
     connectionTag: {
         background: "green",
-        color: "#FFF",
+        color: "var(--surface-raised)",
         marginRight: 1,
         padding: 1,
         fontWeight: 'bold',
@@ -238,11 +238,11 @@ const useStyles = makeStyles((theme) => ({
         position: "relative",
     },
     fromMe: {
-        backgroundColor: "#dcf8c6",
+        backgroundColor: "var(--surface-selected)",
         marginLeft: "auto",
     },
     fromThem: {
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "var(--surface-sunken)",
     },
     messageTime: {
         fontSize: "0.75rem",
@@ -713,8 +713,8 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                                 )}
                                 <span className={classes.secondaryContentSecond} >
                                     {ticket?.whatsapp ? <Badge className={classes.connectionTag} style={{ backgroundColor: ticket.channel === "whatsapp" ? "#25D366" : ticket.channel === "facebook" ? "#4267B2" : "#E1306C" }}>{ticket.whatsapp?.name.toUpperCase()}</Badge> : <br></br>}
-                                    {<Badge style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queueId ? ticket.queue?.name.toUpperCase() : ticket.status === "lgpd" ? "LGPD" : "SEM FILA"}</Badge>}
-                                    {ticket?.user && (<Badge style={{ backgroundColor: "#000000" }} className={classes.connectionTag}>{ticket.user?.name.toUpperCase()}</Badge>)}
+                                    {<Badge style={{ backgroundColor: ticket.queue?.color || "var(--text-muted)" }} className={classes.connectionTag}>{ticket.queueId ? ticket.queue?.name.toUpperCase() : ticket.status === "lgpd" ? "LGPD" : "SEM FILA"}</Badge>}
+                                    {ticket?.user && (<Badge style={{ backgroundColor: "var(--text-primary)" }} className={classes.connectionTag}>{ticket.user?.name.toUpperCase()}</Badge>)}
                                 </span>
                                 <span className={classes.secondaryContentSecond} >
                                     {
@@ -764,7 +764,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     <span className={classes.secondaryContentSecond}>
                         {(ticket.status === "pending" && (ticket.queueId === null || ticket.queueId === undefined)) && (
                             <ButtonWithSpinner
-                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', borderRadius: "50%", right: '51px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
+                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "var(--brand-base)" : "var(--surface-raised)", padding: '0px', borderRadius: "50%", right: '51px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
                                 size="small"
@@ -780,7 +780,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     <span className={classes.secondaryContentSecond} >
                         {(ticket.status === "pending" && ticket.queueId !== null) && (
                             <ButtonWithSpinner
-                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', borderRadius: "50%", right: '51px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
+                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "var(--brand-base)" : "var(--surface-raised)", padding: '0px', borderRadius: "50%", right: '51px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
                                 size="small"
@@ -796,7 +796,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     <span className={classes.secondaryContentSecond1} >
                         {(ticket.status === "pending" || ticket.status === "open" || ticket.status === "group") && (
                             <ButtonWithSpinner
-                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', borderRadius: "50%", right: '26px', position: 'absolute', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
+                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "var(--brand-base)" : "var(--surface-raised)", padding: '0px', borderRadius: "50%", right: '26px', position: 'absolute', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
                                 size="small"
@@ -812,7 +812,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     <span className={classes.secondaryContentSecond} >
                         {(ticket.status === "open" || ticket.status === "group") && (
                             <ButtonWithSpinner
-                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
+                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "var(--brand-base)" : "var(--surface-raised)", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
                                 size="small"
@@ -828,7 +828,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     <span className={classes.secondaryContentSecond} >
                         {((ticket.status === "pending" || ticket.status === "lgpd") && (user.userClosePendingTicket === "enabled" || user.profile === "admin")) && (
                             <ButtonWithSpinner
-                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
+                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "var(--brand-base)" : "var(--surface-raised)", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
                                 size="small"
@@ -845,7 +845,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                     {(ticket.status === "closed" && (ticket.queueId === null || ticket.queueId === undefined)) && (
                             <ButtonWithSpinner
                                 //color="primary"
-                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
+                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "var(--brand-base)" : "var(--surface-raised)", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
                                 size="small"
@@ -863,7 +863,7 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
                         {(ticket.status === "closed" && ticket.queueId !== null) && (
                             <ButtonWithSpinner
                                 //color="primary"
-                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "#0872B9" : "#FFF", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
+                                style={{ backgroundColor: 'transparent', boxShadow: 'none', border: 'none', color: theme.mode === "light" ? "var(--brand-base)" : "var(--surface-raised)", padding: '0px', bottom: '0px', borderRadius: "50%", right: '1px', fontSize: '0.6rem', bottom: '-30px', minWidth: '2em', width: 'auto' }}
                                 variant="contained"
                                 className={classes.acceptButton}
                                 size="small"

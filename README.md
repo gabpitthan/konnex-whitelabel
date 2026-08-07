@@ -133,7 +133,7 @@ completa está em [DEFINITION_OF_DONE.md](./docs/DEFINITION_OF_DONE.md).
 
 ```text
 backend/             API, domínio, workers, models e migrations
-frontend/            interface React e identidade Konnex Signal
+frontend/            interface React (design system do ADR-0004)
 docs/project/        estado, arquitetura, roadmap, issues, testes e runbook
 docs/research/       pesquisa técnica e evidências para decisões
 docs/versions/       relatório imutável de cada subversão

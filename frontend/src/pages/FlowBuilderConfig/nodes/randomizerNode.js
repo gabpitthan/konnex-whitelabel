@@ -16,18 +16,17 @@ export default memo(({ data, isConnectable, id }) => {
   return (
     <div
       style={{
-        backgroundColor: "#F8FCFD",
+        backgroundColor: "var(--surface-sunken)",
         padding: "8px",
         borderRadius: "8px",
         width: "185px",
-        border: "1px solid rgba(31, 186, 220, 0.25)"
+        border: "1px solid var(--border-default)"
       }}
     >
       <Handle
         type="target"
         position="left"
         style={{
-          background: "#0000FF",
           width: "18px",
           height: "18px",
           top: "20px",
@@ -39,7 +38,7 @@ export default memo(({ data, isConnectable, id }) => {
       >
         <ArrowForwardIos
           sx={{
-            color: "#ffff",
+            color: "var(--text-secondary)",
             width: "10px",
             height: "10px",
             marginLeft: "3.5px",
@@ -63,7 +62,7 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("duplicate");
           }}
-          sx={{ width: "12px", height: "12px", color: "#1FBADC" }}
+          sx={{ width: "12px", height: "12px", color: "var(--signal-info)" }}
         />
 
         <Delete
@@ -71,13 +70,13 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("delete");
           }}
-          sx={{ width: "12px", height: "12px", color: "#1FBADC" }}
+          sx={{ width: "12px", height: "12px", color: "var(--signal-info)" }}
         />
       </div>
       <div
         style={{
-          color: "#ededed",
-          fontSize: "16px",
+          color: "var(--text-primary)",
+          fontSize: "14px",
           flexDirection: "row",
           display: "flex"
         }}
@@ -88,10 +87,10 @@ export default memo(({ data, isConnectable, id }) => {
             height: "16px",
             marginRight: "4px",
             marginTop: "4px",
-            color: "#1FBADC"
+            color: "var(--signal-info)"
           }}
         />
-        <div style={{ color: "#232323", fontSize: "16px" }}>Randomizador</div>
+        <div style={{ color: "var(--text-primary)", fontSize: "14px" }}>Randomizador</div>
       </div>
       <div
         style={{
@@ -102,7 +101,7 @@ export default memo(({ data, isConnectable, id }) => {
           justifyContent: "end",
           position: "relative",
           display: "flex",
-          color: "#232323"
+          color: "var(--text-primary)"
         }}
       >
         {`${data.percent}%`}
@@ -112,7 +111,6 @@ export default memo(({ data, isConnectable, id }) => {
         position="right"
         id="a"
         style={{
-          background: "#0000FF",
           width: "18px",
           height: "18px",
           right: "-11px",
@@ -123,7 +121,7 @@ export default memo(({ data, isConnectable, id }) => {
       >
         <ArrowForwardIos
           sx={{
-            color: "#ffff",
+            color: "var(--text-secondary)",
             width: "10px",
             height: "10px",
             marginLeft: "2.9px",
@@ -142,7 +140,7 @@ export default memo(({ data, isConnectable, id }) => {
           position: "relative",
           display: "flex",
           marginTop: "8px",
-          color: "#232323"
+          color: "var(--text-primary)"
         }}
       >
         {`${100 - data.percent}%`}
@@ -152,7 +150,6 @@ export default memo(({ data, isConnectable, id }) => {
         position="right"
         id="b"
         style={{
-          background: "#0000FF",
           width: "18px",
           height: "18px",
           right: "-11px",
@@ -163,7 +160,7 @@ export default memo(({ data, isConnectable, id }) => {
       >
         <ArrowForwardIos
           sx={{
-            color: "#ffff",
+            color: "var(--text-secondary)",
             width: "10px",
             height: "10px",
             marginLeft: "2.9px",

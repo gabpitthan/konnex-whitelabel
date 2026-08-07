@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
         alignItems: "center",
         justifyContent: "center",
         height: "100%",
-        // backgroundColor: "#eee"
+        // backgroundColor: "var(--surface-sunken)"
         background: theme.palette.tabHeaderBackground,
     },
     placeholderItem: {

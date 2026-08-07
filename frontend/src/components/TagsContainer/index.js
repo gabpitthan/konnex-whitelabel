@@ -111,7 +111,7 @@ export function TagsContainer({ contact }) {
                             variant="outlined"
                             style={{
                                 backgroundColor: option.color || '#eee',
-                                color: "#FFF",
+                                color: "var(--text-inverse)",
                                 marginRight: 1,
                                 padding: 1,
                                 fontWeight: 'bold',

@@ -7,7 +7,7 @@ import Skeleton from "@material-ui/lab/Skeleton";
 const useStyles = makeStyles(theme => ({
 	ticketHeader: {
 		display: "flex",
-		// backgroundColor: "#eee",
+		// backgroundColor: "var(--surface-sunken)",
 		background: theme.palette.tabHeaderBackground,
 		flex: "none",
 		borderBottom: "1px solid rgba(0, 0, 0, 0.12)",

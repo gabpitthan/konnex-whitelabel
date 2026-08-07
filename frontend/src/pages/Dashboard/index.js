@@ -31,10 +31,10 @@ import ForbiddenPage from "../../components/ForbiddenPage";
 import { i18n } from "../../translate/i18n";
 
 const signalColors = {
-  live: "#16856f",
-  attention: "#c78312",
-  quiet: "#71807b",
-  danger: "#c94f45",
+  live: "var(--signal-live)",
+  attention: "var(--signal-wait)",
+  quiet: "var(--text-muted)",
+  danger: "var(--signal-fail)",
 };
 
 const Dashboard = () => {
@@ -116,8 +116,9 @@ const Dashboard = () => {
   }
 
   const surface = {
-    border: `1px solid ${theme.palette.divider}`,
-    backgroundColor: theme.palette.background.paper,
+    border: "1px solid var(--border-default)",
+    backgroundColor: "var(--surface-raised)",
+    boxShadow: "none",
   };
 
   return (
@@ -136,14 +137,14 @@ const Dashboard = () => {
           <Box>
             <Typography
               component="p"
-              sx={{ color: "text.secondary", fontSize: 11, fontWeight: 800, letterSpacing: ".12em", textTransform: "uppercase", mb: .5 }}
+              sx={{ color: "var(--text-muted)", fontSize: "var(--text-2xs)", fontWeight: 500, letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", mb: .5 }}
             >
               Central operacional
             </Typography>
-            <Typography component="h1" sx={{ fontSize: { xs: 25, md: 34 }, fontWeight: 750, letterSpacing: "-.04em", lineHeight: 1.1 }}>
+            <Typography component="h1" sx={{ fontSize: { xs: 18, md: 20 }, fontWeight: 600, letterSpacing: "var(--tracking-tight)", lineHeight: 1.25 }}>
               O que está acontecendo agora
             </Typography>
-            <Typography sx={{ color: "text.secondary", mt: 1, fontSize: { xs: 13, md: 14 } }}>
+            <Typography sx={{ color: "var(--text-secondary)", mt: .5, fontSize: "var(--text-sm)" }}>
               {moment(dateStartTicket).format("DD/MM/YYYY")} — {moment(dateEndTicket).format("DD/MM/YYYY")}
             </Typography>
           </Box>
@@ -284,12 +285,12 @@ const Dashboard = () => {
                   value={counters.npsScore || 0}
                   title="NPS"
                   color={(Number(counters.npsPromotersPerc || 0) + Number(counters.npsDetractorsPerc || 0) + Number(counters.npsPassivePerc || 0)) === 0
-                    ? ["#71807b"] : ["#16856f", "#c94f45", "#c78312"]}
+                    ? ["var(--text-muted)"] : ["var(--signal-live)", "var(--signal-fail)", "var(--signal-wait)"]}
                   featured
                 />
-                <ChartDonut title={i18n.t("dashboard.assessments.prosecutors")} value={counters.npsPromotersPerc || 0} data={[`{'name':'Promotores','value':100}`]} color={["#16856f"]} />
-                <ChartDonut title={i18n.t("dashboard.assessments.neutral")} value={counters.npsPassivePerc || 0} data={[`{'name':'Neutros','value':100}`]} color={["#c78312"]} />
-                <ChartDonut title={i18n.t("dashboard.assessments.detractors")} value={counters.npsDetractorsPerc || 0} data={[`{'name':'Detratores','value':100}`]} color={["#c94f45"]} />
+                <ChartDonut title={i18n.t("dashboard.assessments.prosecutors")} value={counters.npsPromotersPerc || 0} data={[`{'name':'Promotores','value':100}`]} color={["var(--signal-live)"]} />
+                <ChartDonut title={i18n.t("dashboard.assessments.neutral")} value={counters.npsPassivePerc || 0} data={[`{'name':'Neutros','value':100}`]} color={["var(--signal-wait)"]} />
+                <ChartDonut title={i18n.t("dashboard.assessments.detractors")} value={counters.npsDetractorsPerc || 0} data={[`{'name':'Detratores','value':100}`]} color={["var(--signal-fail)"]} />
               </Box>
               <Divider />
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" } }}>

@@ -296,7 +296,7 @@ export default function AnnouncementsPopover() {
                   key={key}
                   style={{
                     background: key % 2 === 0 ? "primary" : "secondary",
-                    border: "1px solid #eee",
+                    border: "1px solid var(--border-subtle)",
                     borderLeft: borderPriority(item.priority),
                     cursor: "pointer",
                   }}

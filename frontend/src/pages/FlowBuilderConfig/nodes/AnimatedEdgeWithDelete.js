@@ -47,7 +47,7 @@ const AnimatedEdgeWithDelete = ({
           <div
             onClick={onDelete}
             style={{
-              background: "#ff0000",
+              background: "var(--signal-fail)",
               borderRadius: "100%",
               width: "40px",
               height: "40px",
@@ -55,14 +55,14 @@ const AnimatedEdgeWithDelete = ({
               justifyContent: "center",
               alignItems: "center",
               cursor: "pointer",
-              boxShadow: "0px 0px 5px rgba(0,0,0,0.2)"
+              boxShadow: "0px 0px 5px var(--border-default)"
             }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
               height="20"
-              fill="#fff"
+              fill="var(--text-secondary)"
               viewBox="0 0 24 24"
             >
               <path d="M9 3V4H4V6H5V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V6H20V4H15V3H9ZM7 6H17V20H7V6ZM9 8V18H11V8H9ZM13 8V18H15V8H13Z" />

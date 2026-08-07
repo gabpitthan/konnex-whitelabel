@@ -7,16 +7,16 @@ import Brightness7Icon from "@material-ui/icons/Brightness7";
 
 const useStyles = makeStyles((theme) => ({
     icons: {
-        color: "#fff",
+        color: "var(--text-inverse)",
     },
     switch: {
-        color: "#fff",
+        color: "var(--text-inverse)",
     },
     visible: {
         display: "none",
     },
     btnHeader: {
-        color: "#fff",
+        color: "var(--text-inverse)",
     },
 }));
 

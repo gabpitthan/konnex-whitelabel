@@ -321,11 +321,11 @@ const FlowBuilder = () => {
             onChange={handleSearch}
             InputProps={{
               style: {
-                color: colorTitleTable()
+                color: "var(--text-primary)"
               },
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon style={{ color: "gray" }} />
+                  <SearchIcon style={{ color: "var(--text-muted)" }} />
                 </InputAdornment>
               )
             }}
@@ -336,7 +336,7 @@ const FlowBuilder = () => {
             style={{
               textTransform: "none",
               backgroundColor: theme.palette.primary.main,
-              color: "#fff"
+              color: "var(--text-primary)"
             }}
           >
             <Stack direction={"row"} gap={1}>
@@ -369,12 +369,15 @@ const FlowBuilder = () => {
                 container
                 key={contact.id}
                 sx={{
-                  padding: "8px",
-                  backgroundColor: theme.palette.primary.main,
-                  borderRadius: 2,
-                  marginTop: 0.5,
+                  // Cada linha vinha pintada com a cor de marca cheia, virando
+                  // uma faixa azul por fluxo. A cor de marca é para ação e
+                  // seleção; linha de lista é superfície neutra.
+                  padding: "10px 12px",
+                  backgroundColor: "var(--surface-raised)",
+                  borderBottom: "1px solid var(--border-subtle)",
+                  cursor: "pointer",
                   "&:hover": {
-                    backgroundColor: theme.palette.primary.dark,
+                    backgroundColor: "var(--surface-subtle)",
                   }
                 }}
               >
@@ -382,7 +385,7 @@ const FlowBuilder = () => {
                   <Stack
                     justifyContent={"center"}
                     height={"100%"}
-                    style={{ color: "#ededed" }}
+                    style={{ color: "var(--text-primary)" }}
                   >
                     <Stack direction={"row"}>
                       <DevicesFold />
@@ -392,7 +395,7 @@ const FlowBuilder = () => {
                     </Stack>
                   </Stack>
                 </Grid>
-                <Grid item xs={4} align="center" style={{ color: "#ededed" }}  onClick={() => history.push(`/flowbuilder/${contact.id}`)}>
+                <Grid item xs={4} align="center" style={{ color: "var(--text-primary)" }}  onClick={() => history.push(`/flowbuilder/${contact.id}`)}>
                   <Stack justifyContent={"center"} height={"100%"}>
                     {contact.active ? "Ativo" : "Desativado"}
                   </Stack>
@@ -410,14 +413,14 @@ const FlowBuilder = () => {
                     sx={{ borderRadius: "36px", minWidth: "24px" }}
                   >
                     <MoreVert
-                      sx={{ color: "#ededed", width: "21px", height: "21px" }}
+                      sx={{ color: "var(--text-secondary)", width: "21px", height: "21px" }}
                     />
                   </Button>
                   {/* <IconButton
                     size="small"
                     onClick={() => hadleEditContact(contact.id, contact.name)}
                   >
-                    <EditIcon style={{ color: "#ededed" }} />
+                    <EditIcon style={{ color: "var(--text-primary)" }} />
                   </IconButton>
                   <IconButton
                     size="small"
@@ -426,14 +429,14 @@ const FlowBuilder = () => {
                       setDeletingContact(contact);
                     }}
                   >
-                    <ContentCopy style={{ color: "#ededed" }} />
+                    <ContentCopy style={{ color: "var(--text-primary)" }} />
                   </IconButton>
                   <IconButton
                     size="small"
                     onClick={() => history.push(`/flowbuilder/${contact.id}`)}
                   >
                     <Stack sx={{ width: 24 }}>
-                      <Build sx={{ width: 20, color: "#ededed" }} />
+                      <Build sx={{ width: 20, color: "var(--text-secondary)" }} />
                     </Stack>
                   </IconButton>
                   <Can
@@ -447,7 +450,7 @@ const FlowBuilder = () => {
                           setDeletingContact(contact);
                         }}
                       >
-                        <DeleteOutlineIcon style={{ color: "#ededed" }} />
+                        <DeleteOutlineIcon style={{ color: "var(--text-primary)" }} />
                       </IconButton>
                     )}
                   /> */}

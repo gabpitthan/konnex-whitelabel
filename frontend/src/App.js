@@ -14,12 +14,20 @@ import defaultLogoLight from "./assets/logo.png";
 import defaultLogoDark from "./assets/logo-black.png";
 import defaultLogoFavicon from "./assets/favicon.ico";
 import useSettings from "./hooks/useSettings";
+import applyTokens from "./design-system/applyTokens";
+import {
+  muiPaletteFromTokens,
+  muiTypographyFromTokens,
+  muiShapeFromTokens,
+} from "./design-system/muiThemeFromTokens";
+import overridesFromTokens, { muiPropsDefaults } from "./design-system/muiOverrides";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [locale, setLocale] = useState();
-  const appColorLocalStorage = localStorage.getItem("primaryColorLight") || localStorage.getItem("primaryColorDark") || "#065183";
+  // Vazio significa "usar o token de marca do design system".
+  const appColorLocalStorage = localStorage.getItem("primaryColorLight") || localStorage.getItem("primaryColorDark") || "";
   const appNameLocalStorage = localStorage.getItem("appName") || "";
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   const preferredTheme = window.localStorage.getItem("preferredTheme");
@@ -80,129 +88,15 @@ const App = () => {
               backgroundColor: mode === "light" ? "#F3F3F3" : "#333333",
             },
           },
-          palette: {
-            type: mode,
-            primary: { main: mode === "light" ? primaryColorLight : primaryColorDark },
-            secondary: { main: "#16856f" },
-            background: {
-              default: mode === "light" ? "#f7f6f1" : "#0f1715",
-              paper: mode === "light" ? "#fffefa" : "#16211e",
-            },
-            text: {
-              primary: mode === "light" ? "#152521" : "#edf2ef",
-              secondary: mode === "light" ? "#5d6b67" : "#aebbb6",
-            },
-            divider: mode === "light" ? "rgba(65, 80, 76, 0.14)" : "rgba(237, 242, 239, 0.12)",
-            textPrimary: mode === "light" ? primaryColorLight : primaryColorDark,
-            borderPrimary: mode === "light" ? primaryColorLight : primaryColorDark,
-            dark: { main: mode === "light" ? "#333333" : "#F3F3F3" },
-            light: { main: mode === "light" ? "#F3F3F3" : "#333333" },
-            fontColor: mode === "light" ? primaryColorLight : primaryColorDark,
-            tabHeaderBackground: mode === "light" ? "#EEE" : "#666",
-            optionsBackground: mode === "light" ? "#fafafa" : "#333",
-            fancyBackground: mode === "light" ? "#f7f6f1" : "#0f1715",
-            total: mode === "light" ? "#fffefa" : "#16211e",
-            messageIcons: mode === "light" ? "grey" : "#F3F3F3",
-            inputBackground: mode === "light" ? "#FFFFFF" : "#333",
-            barraSuperior: mode === "light" ? "#fffefa" : "#16211e",
-          },
-          typography: {
-            fontFamily: '"Inter", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-            fontSize: 14,
-            h1: { fontSize: "2rem", fontWeight: 720, letterSpacing: "-0.035em" },
-            h2: { fontSize: "1.5rem", fontWeight: 720, letterSpacing: "-0.025em" },
-            h3: { fontSize: "1.2rem", fontWeight: 700, letterSpacing: "-0.015em" },
-            h4: { fontSize: "1.05rem", fontWeight: 700 },
-            h5: { fontSize: "1rem", fontWeight: 700 },
-            h6: { fontSize: ".925rem", fontWeight: 700 },
-            button: { fontWeight: 700, letterSpacing: 0, textTransform: "none" },
-          },
-          shape: {
-            borderRadius: 8,
-          },
-          props: {
-            MuiButton: {
-              disableElevation: true,
-            },
-            MuiTextField: {
-              variant: "outlined",
-              size: "small",
-            },
-          },
-          overrides: {
-            MuiCssBaseline: {
-              "@global": {
-                body: {
-                  backgroundColor: mode === "light" ? "#f7f6f1" : "#0f1715",
-                  color: mode === "light" ? "#152521" : "#edf2ef",
-                },
-              },
-            },
-            MuiButton: {
-              root: {
-                minHeight: 40,
-                borderRadius: 8,
-                padding: "8px 15px",
-                transition: "background-color 160ms ease, border-color 160ms ease, transform 160ms ease",
-              },
-              containedPrimary: {
-                "&:hover": {
-                  transform: "translateY(-1px)",
-                },
-              },
-            },
-            MuiIconButton: {
-              root: {
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-              },
-            },
-            MuiOutlinedInput: {
-              root: {
-                borderRadius: 7,
-                backgroundColor: mode === "light" ? "#fffefa" : "#16211e",
-                "&:hover $notchedOutline": {
-                  borderColor: mode === "light" ? "#70807a" : "#82918c",
-                },
-                "&$focused $notchedOutline": {
-                  borderWidth: 1,
-                },
-              },
-              notchedOutline: {
-                borderColor: mode === "light" ? "rgba(65,80,76,.24)" : "rgba(237,242,239,.2)",
-              },
-            },
-            MuiPaper: {
-              rounded: {
-                borderRadius: 12,
-              },
-              elevation1: {
-                boxShadow: "none",
-                border: `1px solid ${mode === "light" ? "rgba(65,80,76,.14)" : "rgba(237,242,239,.12)"}`,
-              },
-            },
-            MuiMenu: {
-              paper: {
-                border: `1px solid ${mode === "light" ? "rgba(65,80,76,.16)" : "rgba(237,242,239,.14)"}`,
-                boxShadow: mode === "light" ? "0 18px 45px rgba(21,37,33,.14)" : "0 22px 55px rgba(0,0,0,.35)",
-              },
-            },
-            MuiMenuItem: {
-              root: {
-                minHeight: 42,
-                margin: "2px 6px",
-                borderRadius: 7,
-              },
-            },
-            MuiTab: {
-              root: {
-                minHeight: 44,
-                textTransform: "none",
-                fontWeight: 680,
-              },
-            },
-          },
+          // Paleta, tipografia e raio vêm dos tokens do design system
+          // (ADR-0004). Isso mantém as telas ainda não migradas visualmente
+          // coerentes com as migradas, em vez de conviverem duas identidades
+          // durante a transição.
+          palette: muiPaletteFromTokens(mode),
+          typography: muiTypographyFromTokens(),
+          shape: muiShapeFromTokens(),
+          props: muiPropsDefaults,
+          overrides: overridesFromTokens(mode),
           mode,
           appLogoLight,
           appLogoDark,
@@ -270,10 +164,10 @@ const App = () => {
   };
 
   useEffect(() => {
-    const i18nlocale = localStorage.getItem("i18nextLng");
-    const browserLocale = i18nlocale.substring(0, 2) + i18nlocale.substring(3, 5);
-
-    if (browserLocale === "ptBR") {
+    // O produto é brasileiro: pt é o padrão, e a ausência da chave não pode
+    // quebrar o boot (antes um `substring` em null derrubava o App).
+    const i18nlocale = localStorage.getItem("i18nextLng") || "pt";
+    if (i18nlocale.startsWith("pt")) {
       setLocale(ptBR);
     }
   }, []);
@@ -291,14 +185,17 @@ const App = () => {
     
     getPublicSetting("primaryColorLight")
       .then((color) => {
-        setPrimaryColorLight(color || "#0000FF");
+        // Sem cor configurada pelo tenant, o padrão é o token de marca do
+        // design system. O default anterior era #0000FF (azul puro), que
+        // sobrescrevia a identidade com uma cor que ninguém escolheu.
+        setPrimaryColorLight(color || "");
       })
       .catch((error) => {
         console.log("Error reading setting", error);
       });
     getPublicSetting("primaryColorDark")
       .then((color) => {
-        setPrimaryColorDark(color || "#39ACE7");
+        setPrimaryColorDark(color || "");
       })
       .catch((error) => {
         console.log("Error reading setting", error);
@@ -335,9 +232,23 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Publica os tokens do design system como custom properties. Roda antes do
+  // whitelabel de cor abaixo, para que a cor por tenant possa sobrescrever a
+  // marca sem afetar superfícies, texto, bordas e sinais de status.
+  useEffect(() => {
+    applyTokens(mode);
+  }, [mode]);
+
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty("--primaryColor", mode === "light" ? primaryColorLight : primaryColorDark);
+    const tenantColor = mode === "light" ? primaryColorLight : primaryColorDark;
+    root.style.setProperty("--primaryColor", tenantColor);
+    // Whitelabel: a cor do tenant substitui apenas a marca. Os sinais de
+    // conexão, entrega e falha permanecem constantes — são semântica de
+    // produto, não identidade de cliente.
+    if (tenantColor) {
+      root.style.setProperty("--brand-base", tenantColor);
+    }
   }, [primaryColorLight, primaryColorDark, mode]);
 
   useEffect(() => {

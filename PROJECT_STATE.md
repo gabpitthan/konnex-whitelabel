@@ -140,17 +140,28 @@ Antes de continuar o redesign, executar o P0 de confiabilidade:
 4. concluir e operar a reconciliação de Schedule/Campaign em PROCESSING;
 5. reduzir as demais vulnerabilidades por família e alcance.
 
-## Direção visual aprovada
+## Direção visual (ADR-0004, desde 2026-08-07)
 
-- Identidade: **Konnex Signal**.
-- Reformulação integral, não apenas cores.
-- Linguagem editorial, operacional e própria, baseada em conexão, fluxo, contexto e ação.
-- Evitar estética genérica de IA: gradientes roxo/azul, excesso de cards, glassmorphism, pills e ícones decorativos.
-- Responsividade é obrigatória em cada componente.
-- Preservar lógica, APIs, sockets, autenticação, permissões, banco e rotas durante o redesign.
-- A versão 1.5 foi considerada insuficiente: limpa, porém ainda estruturalmente semelhante ao Whaticket.
-- A meta é um novo CRM com arquitetura de informação, navegação e experiência próprias.
-- Rolagem e ações inacessíveis são regressões críticas e devem ser corrigidas antes da expansão visual.
-- A navegação 1.6 em duas camadas foi rejeitada. O padrão novo é um menu único com ícones e subgrupos.
-- A barra inferior mobile foi rejeitada e deve ser removida.
-- Tela branca deve sempre apresentar fallback recuperável e gerar erro observável no backend.
+A identidade **Konnex Signal** foi descontinuada. Duas tentativas (1.5 e 1.6)
+produziram resultado parcial e foram rejeitadas, porque a identidade existia só
+como princípios em prosa — e prosa não decide espaçamento, escala tipográfica
+nem par de cores. Ver `docs/decisions/ADR-0004-identidade-ui-ux.md`.
+
+- A identidade passa a ser derivada da skill `ui-ux-pro-max`.
+- O **design system versionado** no repositório é a fonte da verdade visual;
+  a skill é fonte de raciocínio, não de estilo copiado.
+- **Nenhuma tela muda antes do design system existir versionado.** Redesenhar
+  tela a tela sem tokens comuns foi a causa do resultado parcial anterior.
+- Cobertura é critério de aceite: redesign parcial é falha do lote. O inventário
+  de telas precisa estar explícito e fechado antes de começar.
+
+Restrições de execução que continuam valendo:
+
+- Preservar lógica, APIs, sockets, autenticação, permissões, banco e rotas.
+- Não migrar Material UI v4 para v5 no mesmo lote do redesign.
+- Responsividade obrigatória: desktop, tablet e mobile em cada tela.
+- Rolagem e ações inacessíveis são regressão crítica e bloqueiam expansão visual.
+- A navegação em duas camadas da 1.6 foi rejeitada; a barra inferior mobile
+  também. Ambas as rejeições continuam válidas como restrição de UX.
+- Tela branca deve sempre apresentar fallback recuperável e gerar erro
+  observável no backend.

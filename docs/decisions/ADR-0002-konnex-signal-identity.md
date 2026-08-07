@@ -1,9 +1,19 @@
 # ADR-0002 — Identidade Konnex Signal
 
 Data: 2026-07-28  
-Estado: aceito
+Estado: **substituído em 2026-08-07 pelo ADR-0004**
 
-## Decisão
+> **Este ADR não vale mais.** A identidade Konnex Signal foi descontinuada por
+> decisão de Gabriel em 2026-08-07: duas tentativas de aplicá-la (1.5 e 1.6)
+> produziram resultado parcial e foram rejeitadas. A identidade passou a ser
+> derivada da skill `ui-ux-pro-max`. Ver `ADR-0004-identidade-ui-ux.md`.
+>
+> As restrições de engenharia deste ADR (não misturar migração MUI com
+> redesign, não considerar página pronta sem os três breakpoints, não alterar
+> regra de negócio durante mudança visual) **sobrevivem** e foram reescritas no
+> ADR-0004 — são lições de execução, não preferência estética.
+
+## Decisão (histórica)
 
 Adotar **Konnex Signal** como identidade visual oficial da aplicação.
 

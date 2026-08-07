@@ -20,12 +20,12 @@ export default memo(({ data, isConnectable, id }) => {
 
   return (
     <div
-      style={{ backgroundColor: "#555", padding: "8px", borderRadius: "8px" }}
+      style={{ backgroundColor: "var(--surface-raised)", padding: "8px", borderRadius: "8px" }}
     >
       <Handle
         type="target"
         position="left"
-        style={{ background: "#0000FF" }}
+        style={{ background: "var(--brand-base)" }}
         onConnect={params => console.log("handle onConnect", params)}
         isConnectable={isConnectable}
       />
@@ -44,7 +44,7 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("duplicate");
           }}
-          sx={{ width: "12px", height: "12px", color: "#ffff" }}
+          sx={{ width: "12px", height: "12px", color: "var(--text-secondary)" }}
         />
 
         <Delete
@@ -52,16 +52,16 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("delete");
           }}
-          sx={{ width: "12px", height: "12px", color: "#ffff" }}
+          sx={{ width: "12px", height: "12px", color: "var(--text-secondary)" }}
         />
       </div>
       {/* <div style={{position: 'absolute', right: 5, top: 5, cursor: 'pointer'}}>
-        <Delete sx={{width: '12px', height: '12px', color: '#ffff'}}/>
+        <Delete sx={{width: '12px', height: '12px', color: 'var(--text-secondary)'}}/>
       </div> */}
       <div
         style={{
-          color: "#ededed",
-          fontSize: "16px",
+          color: "var(--text-primary)",
+          fontSize: "14px",
           flexDirection: "row",
           display: "flex"
         }}
@@ -74,9 +74,9 @@ export default memo(({ data, isConnectable, id }) => {
             marginTop: "4px"
           }}
         />
-        <div style={{ color: "#ededed", fontSize: "16px" }}>Video</div>
+        <div style={{ color: "var(--surface-sunken)", fontSize: "14px" }}>Video</div>
       </div>
-      <div style={{ color: "#ededed", fontSize: "12px", width: 180 }}>
+      <div style={{ color: "var(--surface-sunken)", fontSize: "12px", width: 180 }}>
         <video controls="controls" width="180px">
           <source src={`${link}/public/${data.url}`} type="video/mp4" />
           seu navegador não suporta HTML5
@@ -86,7 +86,7 @@ export default memo(({ data, isConnectable, id }) => {
         type="source"
         position="right"
         id="a"
-        style={{ background: "#0000FF" }}
+        style={{ background: "var(--brand-base)" }}
         isConnectable={isConnectable}
       />
     </div>

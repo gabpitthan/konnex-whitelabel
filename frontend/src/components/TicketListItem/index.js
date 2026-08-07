@@ -124,7 +124,7 @@ const useStyles = makeStyles((theme) => ({
         bottom: 30,
         backgroundColor: theme.palette.background.default,
         color: theme.palette.primary.main,
-        border: "1px solid #CCC",
+        border: "1px solid var(--border-input)",
         padding: 1,
         paddingLeft: 5,
         paddingRight: 5,
@@ -143,8 +143,8 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
     },
     tags: {
-        color: "#FFF",
-        border: "1px solid #CCC",
+        color: "var(--surface-raised)",
+        border: "1px solid var(--border-input)",
         padding: 0,
         paddingLeft: 5,
         paddingRight: 5,
@@ -164,8 +164,8 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
     },
     user: {
-        color: "#eee",
-        border: "1px solid #CCC",
+        color: "var(--surface-sunken)",
+        border: "1px solid var(--border-input)",
         padding: 0,
         paddingLeft: 5,
         paddingRight: 5,
@@ -179,8 +179,8 @@ const useStyles = makeStyles((theme) => ({
     },
 
     badge: {
-        backgroundColor: "#44b700",
-        color: "#44b700",
+        backgroundColor: "var(--signal-live)",
+        color: "var(--signal-live)",
         boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
         "&::after": {
             position: "absolute",

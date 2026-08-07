@@ -62,7 +62,7 @@ export default function removeEdge({
             className="edgebutton"
             onClick={() => data?.onDelete?.(id)}
           >
-            <Delete sx={{ width: "16px", height: "16px", color: "#0000FF" }} />
+            <Delete sx={{ width: "16px", height: "16px", color: "var(--brand-base)" }} />
           </button>
         </div>
       </foreignObject>

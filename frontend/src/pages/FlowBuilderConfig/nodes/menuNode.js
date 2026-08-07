@@ -17,12 +17,12 @@ export default memo(({ data, isConnectable, id }) => {
   return (
     <div
       style={{
-        backgroundColor: "#FAFBFF",
+        backgroundColor: "var(--surface-sunken)",
         padding: "8px",
         borderRadius: "8px",
         maxWidth: "155px",
-        boxShadow: "0px 3px 5px rgba(0,0,0,.05)",
-        border: "1px solid rgba(104, 58, 200, 0.25)",
+        boxShadow: "var(--shadow-sm)",
+        border: "1px solid var(--border-default)",
         width: 180
       }}
     >
@@ -30,7 +30,6 @@ export default memo(({ data, isConnectable, id }) => {
         type="target"
         position="left"
         style={{
-          background: "#0000FF",
           width: "18px",
           height: "18px",
           top: "20px",
@@ -42,7 +41,7 @@ export default memo(({ data, isConnectable, id }) => {
       >
         <ArrowForwardIos
           sx={{
-            color: "#ffff",
+            color: "var(--text-secondary)",
             width: "10px",
             height: "10px",
             marginLeft: "3.5px",
@@ -66,7 +65,7 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("duplicate");
           }}
-          sx={{ width: "12px", height: "12px", color: "#683AC8" }}
+          sx={{ width: "12px", height: "12px", color: "var(--brand-base)" }}
         />
 
         <Delete
@@ -74,13 +73,13 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("delete");
           }}
-          sx={{ width: "12px", height: "12px", color: "#683AC8" }}
+          sx={{ width: "12px", height: "12px", color: "var(--brand-base)" }}
         />
       </div>
       <div
         style={{
-          color: "#ededed",
-          fontSize: "16px",
+          color: "var(--text-primary)",
+          fontSize: "14px",
           flexDirection: "row",
           display: "flex"
         }}
@@ -91,15 +90,15 @@ export default memo(({ data, isConnectable, id }) => {
             height: "16px",
             marginRight: "4px",
             marginTop: "4px",
-            color: "#683AC8"
+            color: "var(--brand-base)"
           }}
         />
-        <div style={{ color: "#232323", fontSize: "16px" }}>Menu</div>
+        <div style={{ color: "var(--text-primary)", fontSize: "14px" }}>Menu</div>
       </div>
       <div>
         <div
           style={{
-            color: "#232323",
+            color: "var(--text-primary)",
             fontSize: "12px",
             height: "50px",
             overflow: "hidden",
@@ -125,7 +124,7 @@ export default memo(({ data, isConnectable, id }) => {
               fontSize: "10px",
               position: "relative",
               display: "flex",
-              color: "#232323",
+              color: "var(--text-primary)",
               justifyContent: "center",
               flexDirection: "column",
               alignSelf: "end"
@@ -139,7 +138,6 @@ export default memo(({ data, isConnectable, id }) => {
             id={"a" + option.number}
             style={{
               top: 74 + 23 * option.number,
-              background: "#0000FF",
               width: "18px",
               height: "18px",
               right: "-11px",
@@ -149,7 +147,7 @@ export default memo(({ data, isConnectable, id }) => {
           >
             <ArrowForwardIos
               sx={{
-                color: "#ffff",
+                color: "var(--text-secondary)",
                 width: "10px",
                 height: "10px",
                 marginLeft: "2.9px",

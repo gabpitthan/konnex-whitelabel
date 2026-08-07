@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
   },
   connectionTag: {
     background: "green",
-    color: "#FFF",
+    color: "var(--text-inverse)",
     marginRight: 1,
     padding: 1,
     fontWeight: 'bold',
@@ -182,7 +182,7 @@ const Kanban = () => {
                 Ver Ticket
               </Button>
               <span style={{ marginRight: '8px' }} />
-              {ticket?.user && (<Badge style={{ backgroundColor: "#000000" }} className={classes.connectionTag}>{ticket.user?.name.toUpperCase()}</Badge>)}
+              {ticket?.user && (<Badge style={{ backgroundColor: "var(--text-primary)" }} className={classes.connectionTag}>{ticket.user?.name.toUpperCase()}</Badge>)}
             </div>
           ),
           title: <>
@@ -222,7 +222,7 @@ const Kanban = () => {
                 </Button>
                 <span style={{ marginRight: '8px' }} />
                 <p>
-                  {ticket?.user && (<Badge style={{ backgroundColor: "#000000" }} className={classes.connectionTag}>{ticket.user?.name.toUpperCase()}</Badge>)}
+                  {ticket?.user && (<Badge style={{ backgroundColor: "var(--text-primary)" }} className={classes.connectionTag}>{ticket.user?.name.toUpperCase()}</Badge>)}
                 </p>
               </div>
             ),

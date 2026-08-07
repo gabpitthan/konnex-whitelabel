@@ -11,11 +11,11 @@ export default memo(({ data, isConnectable, id }) => {
   const storageItems = useNodeStorage();
 
   return (
-    <div style={{backgroundColor: '#555', padding: '8px', borderRadius: '8px'}} >
+    <div style={{backgroundColor: 'var(--surface-raised)', padding: '8px', borderRadius: '8px'}} >
       <Handle
         type="target"
         position="left"
-        style={{ background: "#0000FF" }}
+        style={{ background: "var(--brand-base)" }}
         onConnect={(params) => console.log("handle onConnect", params)}
         isConnectable={isConnectable}
       />
@@ -34,7 +34,7 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("duplicate");
           }}
-          sx={{ width: "12px", height: "12px", color: "#ffff" }}
+          sx={{ width: "12px", height: "12px", color: "var(--text-secondary)" }}
         />
 
         <Delete
@@ -42,26 +42,26 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("delete");
           }}
-          sx={{ width: "12px", height: "12px", color: "#ffff" }}
+          sx={{ width: "12px", height: "12px", color: "var(--text-secondary)" }}
         />
       </div>
       {/* <div style={{position: 'absolute', right: 5, top: 5, cursor: 'pointer'}}>
-        <Delete sx={{width: '12px', height: '12px', color: '#ffff'}}/>
+        <Delete sx={{width: '12px', height: '12px', color: 'var(--text-secondary)'}}/>
       </div> */}
-      <div style={{color: '#ededed', fontSize: '16px', flexDirection: 'row', display: 'flex'}}>
+      <div style={{color: 'var(--surface-sunken)', fontSize: '16px', flexDirection: 'row', display: 'flex'}}>
         <Image sx={{width: '16px', height: '16px', marginRight: '4px', marginTop: '4px'}}/>
-        <div style={{color: '#ededed', fontSize: '16px'}}>
+        <div style={{color: 'var(--surface-sunken)', fontSize: '16px'}}>
         Imagem
         </div>
       </div>
-      <div style={{color: '#ededed', fontSize: '12px', width: 180}}>
+      <div style={{color: 'var(--surface-sunken)', fontSize: '12px', width: 180}}>
         <img src={`${link}/public/${data.url}`} style={{width: '180px'}} />
       </div>
       <Handle
         type="source"
         position="right"
         id="a"
-        style={{ background: "#0000FF" }}
+        style={{ background: "var(--brand-base)" }}
         isConnectable={isConnectable}
       />
     </div>

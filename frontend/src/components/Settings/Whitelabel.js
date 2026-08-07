@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
   cardAvatar: {
     fontSize: "55px",
     color: grey[500],
-    backgroundColor: "#ffffff",
+    backgroundColor: "var(--surface-raised)",
     width: theme.spacing(7),
     height: theme.spacing(7),
   },

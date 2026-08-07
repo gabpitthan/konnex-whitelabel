@@ -14,13 +14,12 @@ export default memo(({ data, isConnectable, id }) => {
 
   return (
     <div
-      style={{ backgroundColor: "#555", padding: "8px", borderRadius: "8px" }}
+      style={{ backgroundColor: "var(--surface-raised)", padding: "8px", borderRadius: "8px" }}
     >
       <Handle
         type="target"
         position="left"
         style={{
-          background: "#0000FF",
           width: "18px",
           height: "18px",
           top: "20px",
@@ -32,7 +31,7 @@ export default memo(({ data, isConnectable, id }) => {
       >
         <ArrowForwardIos
           sx={{
-            color: "#ffff",
+            color: "var(--text-secondary)",
             width: "10px",
             height: "10px",
             marginLeft: "3.5px",
@@ -56,7 +55,7 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("duplicate");
           }}
-          sx={{ width: "12px", height: "12px", color: "#ffff" }}
+          sx={{ width: "12px", height: "12px", color: "var(--text-secondary)" }}
         />
 
         <Delete
@@ -64,13 +63,13 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("delete");
           }}
-          sx={{ width: "12px", height: "12px", color: "#ffff" }}
+          sx={{ width: "12px", height: "12px", color: "var(--text-secondary)" }}
         />
       </div>
       <div
         style={{
-          color: "#ededed",
-          fontSize: "16px",
+          color: "var(--text-primary)",
+          fontSize: "14px",
           flexDirection: "row",
           display: "flex"
         }}
@@ -83,9 +82,9 @@ export default memo(({ data, isConnectable, id }) => {
             marginTop: "4px"
           }}
         />
-        <div style={{ color: "#ededed", fontSize: "16px" }}>Mensagem</div>
+        <div style={{ color: "var(--surface-sunken)", fontSize: "14px" }}>Mensagem</div>
       </div>
-      <div style={{ color: "#ededed", fontSize: "12px", width: 180 }}>
+      <div style={{ color: "var(--surface-sunken)", fontSize: "12px", width: 180 }}>
         {data.label}
       </div>
       <Handle
@@ -93,7 +92,6 @@ export default memo(({ data, isConnectable, id }) => {
         position="right"
         id="a"
         style={{
-          background: "#0000FF",
           width: "18px",
           height: "18px",
           top: "70%",
@@ -104,7 +102,7 @@ export default memo(({ data, isConnectable, id }) => {
       >
         <ArrowForwardIos
           sx={{
-            color: "#ffff",
+            color: "var(--text-secondary)",
             width: "10px",
             height: "10px",
             marginLeft: "2.9px",

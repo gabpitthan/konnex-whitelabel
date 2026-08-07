@@ -107,7 +107,7 @@ const ButtonPreview = ({ titulo, descricao, textoBotao, secoes = [], rodape, tic
             </div>
     
             <div style={{ textAlign: 'center' }}>
-                <Divider style={{ margin: '5px 0', height: '2px', backgroundColor: '#e0e0e0' }} />
+                <Divider style={{ margin: '5px 0', height: '2px', backgroundColor: 'var(--surface-sunken)' }} />
             </div>
     
             {secoes.length > 0 ? (

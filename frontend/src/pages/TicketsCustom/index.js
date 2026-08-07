@@ -45,18 +45,38 @@ const useStyles = makeStyles((theme) => ({
 		flexGrow: 1,
 	},
 	welcomeMsg: {
-		background: theme.palette.tabHeaderBackground,
+		background: "var(--surface-page)",
 		display: "flex",
-		justifyContent: "space-evenly",
+		justifyContent: "center",
 		alignItems: "center",
 		height: "100%",
 		textAlign: "center",
+		border: "none",
+	},
+	welcomeInner: {
+		display: "flex",
+		flexDirection: "column",
+		gap: "var(--space-3)",
+		maxWidth: "42ch",
+		padding: "var(--space-7)",
+	},
+	welcomeTitle: {
+		margin: 0,
+		fontSize: "var(--text-base)",
+		fontWeight: 600,
+		color: "var(--text-primary)",
+	},
+	welcomeHint: {
+		margin: 0,
+		fontSize: "var(--text-sm)",
+		color: "var(--text-secondary)",
+		lineHeight: "var(--leading-relaxed)",
 	},
 	dragger: {
 		width: "5px",
 		cursor: "ew-resize",
 		padding: "4px 0 0",
-		borderTop: "1px solid #ddd",
+		borderTop: "1px solid var(--border-default)",
 		position: "absolute",
 		top: 0,
 		right: 0,
@@ -149,12 +169,19 @@ const TicketsCustom = () => {
 						) : (
 							<Hidden only={["sm", "xs"]}>
 								<Paper square variant="outlined" className={classes.welcomeMsg}>
-									<span>
-										<center>
-											<img className={classes.logo} width="50%" alt="" />
-										</center>
-										{i18n.t("chat.noTicketMessage")}
-									</span>								</Paper>
+									{/* Estado vazio orienta o próximo passo. A versão anterior
+									    exibia o logo a 50% da largura, que dominava a tela sem
+									    dizer o que fazer. */}
+									<div className={classes.welcomeInner}>
+										<p className={classes.welcomeTitle}>
+											{i18n.t("chat.noTicketMessage")}
+										</p>
+										<p className={classes.welcomeHint}>
+											Escolha um atendimento na lista à esquerda para ver o
+											histórico e responder.
+										</p>
+									</div>
+								</Paper>
 							</Hidden>
 						)}
 					</div>

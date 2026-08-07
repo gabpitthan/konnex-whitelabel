@@ -1,8 +1,71 @@
+/**
+ * Canvas do construtor de fluxos.
+ *
+ * O fundo era `#0b0f1c` com pontos ciano translúcidos — preto-azulado com
+ * malha neon. Além de ignorar o tema (ficava escuro mesmo no modo claro), era
+ * o visual futurista que o brief proíbe, e fazia o construtor parecer outro
+ * produto dentro do mesmo sistema.
+ *
+ * Agora acompanha o tema pelos tokens e a malha é um ponto neutro discreto,
+ * cuja função é dar referência de alinhamento — não decorar.
+ */
 
 .flow-canvas-container {
-  background-color: #0b0f1c;
-  background-image: radial-gradient(#00f0ff22 1px, transparent 1px);
+  background-color: var(--surface-sunken);
+  background-image: radial-gradient(var(--border-default) 1px, transparent 1px);
   background-size: 20px 20px;
   width: 100%;
   height: 100%;
+}
+
+/* Controles e minimapa do react-flow vêm com visual próprio do pacote; aqui
+   são alinhados às superfícies e bordas do sistema. */
+.flow-canvas-container .react-flow__controls {
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.flow-canvas-container .react-flow__controls-button {
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--border-subtle);
+  fill: var(--text-secondary);
+}
+
+.flow-canvas-container .react-flow__controls-button:hover {
+  background: var(--surface-hover);
+}
+
+.flow-canvas-container .react-flow__minimap {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.flow-canvas-container .react-flow__edge-path {
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+
+.flow-canvas-container .react-flow__edge.selected .react-flow__edge-path,
+.flow-canvas-container .react-flow__edge:hover .react-flow__edge-path {
+  stroke: var(--brand-base);
+}
+
+.flow-canvas-container .react-flow__handle {
+  background: var(--surface-raised);
+  border: 1.5px solid var(--border-strong);
+  width: 9px;
+  height: 9px;
+}
+
+.flow-canvas-container .react-flow__handle:hover {
+  border-color: var(--brand-base);
+}
+
+.flow-canvas-container .react-flow__node.selected > * {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+  border-radius: var(--radius-md);
 }

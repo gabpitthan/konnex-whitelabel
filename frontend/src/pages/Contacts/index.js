@@ -517,8 +517,7 @@ const Contacts = () => {
                         {(popupState) => (
                             <React.Fragment>
                                 <Button
-                                    variant="contained"
-                                    color="primary"
+                                    variant="outlined"
                                     {...bindTrigger(popupState)}
                                 >
                                     Importar / Exportar
@@ -603,16 +602,12 @@ const Contacts = () => {
                             <TableCell>
                                 {i18n.t("contacts.table.name")}
                             </TableCell>
-                            <TableCell align="center">
-                                {i18n.t("contacts.table.whatsapp")}
-                            </TableCell>
+                            <TableCell align="center">Número</TableCell>
                             <TableCell align="center">
                                 {i18n.t("contacts.table.email")}
                             </TableCell>
-                            <TableCell align="center">
-                                {i18n.t("contacts.table.whatsapp")}
-                            </TableCell>
-                            <TableCell align="center">{"Status"}</TableCell>
+                            <TableCell align="center">Conexão</TableCell>
+                            <TableCell align="center">Situação</TableCell>
                             <TableCell align="center">
                                 {i18n.t("contacts.table.actions")}
                             </TableCell>
@@ -644,16 +639,16 @@ const Contacts = () => {
                                         <TableCell align="center">
                                             {contact.email}
                                         </TableCell>
-                                        <TableCell>{contact?.whatsapp?.name}</TableCell>
+                                        <TableCell align="center">{contact?.whatsapp?.name || "—"}</TableCell>
                                         <TableCell align="center">
                                             {contact.active ? (
                                                 <CheckCircleIcon
-                                                    style={{ color: "green" }}
+                                                    style={{ color: "var(--signal-live)" }}
                                                     fontSize="small"
                                                 />
                                             ) : (
                                                 <CancelIcon
-                                                    style={{ color: "red" }}
+                                                    style={{ color: "var(--signal-fail)" }}
                                                     fontSize="small"
                                                 />
                                             )}
@@ -667,9 +662,9 @@ const Contacts = () => {
                                                     setNewTicketModalOpen(true);
                                                 }}
                                             >
-                                                {contact.channel === "whatsapp" && (<WhatsApp style={{ color: "green" }} />)}
-                                                {contact.channel === "instagram" && (<Instagram style={{ color: "purple" }} />)}
-                                                {contact.channel === "facebook" && (<Facebook style={{ color: "blue" }} />)}
+                                                {contact.channel === "whatsapp" && (<WhatsApp style={{ color: "var(--signal-live)" }} />)}
+                                                {contact.channel === "instagram" && (<Instagram style={{ color: "var(--text-muted)" }} />)}
+                                                {contact.channel === "facebook" && (<Facebook style={{ color: "var(--text-muted)" }} />)}
                                             </IconButton>
 
                                             <IconButton

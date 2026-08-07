@@ -22,18 +22,17 @@ export default memo(({ data, isConnectable, id }) => {
   return (
     <div
       style={{
-        backgroundColor: "#FEFAFA",
+        backgroundColor: "var(--surface-sunken)",
         padding: "8px",
         borderRadius: "8px",
-        border: "1px solid rgba(236, 88, 88, 0.25)",
-        boxShadow: "rgba(0, 0, 0, 0.05) 0px 3px 5px",
+        border: "1px solid var(--border-default)",
+        boxShadow: "var(--shadow-sm)",
       }}
     >
       <Handle
         type="target"
         position="left"
         style={{
-          background: "#0000FF",
           width: "18px",
           height: "18px",
           top: "20px",
@@ -45,7 +44,7 @@ export default memo(({ data, isConnectable, id }) => {
       >
         <ArrowForwardIos
           sx={{
-            color: "#ffff",
+            color: "var(--text-secondary)",
             width: "10px",
             height: "10px",
             marginLeft: "3.5px",
@@ -69,7 +68,7 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("duplicate");
           }}
-          sx={{ width: "12px", height: "12px", color: "#EC5858" }}
+          sx={{ width: "12px", height: "12px", color: "var(--signal-fail)" }}
         />
 
         <Delete
@@ -77,13 +76,13 @@ export default memo(({ data, isConnectable, id }) => {
             storageItems.setNodesStorage(id);
             storageItems.setAct("delete");
           }}
-          sx={{ width: "12px", height: "12px", color: "#EC5858" }}
+          sx={{ width: "12px", height: "12px", color: "var(--signal-fail)" }}
         />
       </div>
       <div
         style={{
-          color: "#ededed",
-          fontSize: "16px",
+          color: "var(--text-primary)",
+          fontSize: "14px",
           flexDirection: "row",
           display: "flex",
         }}
@@ -94,12 +93,12 @@ export default memo(({ data, isConnectable, id }) => {
             height: "16px",
             marginRight: "4px",
             marginTop: "4px",
-            color: "#EC5858",
+            color: "var(--signal-fail)",
           }}
         />
-        <div style={{ color: "#232323", fontSize: "16px" }}>Pergunta</div>
+        <div style={{ color: "var(--text-primary)", fontSize: "14px" }}>Pergunta</div>
       </div>
-      <div style={{ color: "#232323", fontSize: "12px", width: 180 }}>
+      <div style={{ color: "var(--text-primary)", fontSize: "12px", width: 180 }}>
          <div style={{ gap: "5px", padding: "6px" }}>
                 <div
                   style={{
@@ -109,7 +108,7 @@ export default memo(({ data, isConnectable, id }) => {
                     justifyContent: "center"
                   }}
                 >
-                  <BallotIcon sx={{ color: "#EC5858" }} />
+                  <BallotIcon sx={{ color: "var(--signal-fail)" }} />
                 </div>
                 <Typography
                   textAlign={"center"}
@@ -129,7 +128,6 @@ export default memo(({ data, isConnectable, id }) => {
         position="right"
         id="a"
         style={{
-          background: "#0000FF",
           width: "18px",
           height: "18px",
           top: "90%",
@@ -140,7 +138,7 @@ export default memo(({ data, isConnectable, id }) => {
       >
         <ArrowForwardIos
           sx={{
-            color: "#ffff",
+            color: "var(--text-secondary)",
             width: "10px",
             height: "10px",
             marginLeft: "2.9px",

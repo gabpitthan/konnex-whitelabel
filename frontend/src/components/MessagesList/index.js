@@ -101,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     fontSize: "3em",
     border: "5px dashed #333",
-    color: '#333',
+    color: 'var(--text-primary)',
     display: "flex",
     justifyContent: "center",
     alignItems: "center"
@@ -131,8 +131,8 @@ const useStyles = makeStyles((theme) => ({
     },
 
     whiteSpace: "pre-wrap",
-    backgroundColor: theme.mode === 'light' ? "#ffffff" : "#202c33",
-    color: theme.mode === 'light' ? "#303030" : "#ffffff",
+    backgroundColor: theme.mode === 'light' ? "var(--surface-raised)" : "#202c33",
+    color: theme.mode === 'light' ? "#303030" : "var(--surface-raised)",
     alignSelf: "flex-start",
     borderTopLeftRadius: 0,
     borderTopRightRadius: 8,
@@ -184,8 +184,8 @@ const useStyles = makeStyles((theme) => ({
       right: 0,
     },
     whiteSpace: "pre-wrap",
-    backgroundColor: theme.mode === 'light' ? "#dcf8c6" : "#005c4b",
-    color: theme.mode === 'light' ? "#303030" : "#ffffff",
+    backgroundColor: theme.mode === 'light' ? "var(--surface-selected)" : "#005c4b",
+    color: theme.mode === 'light' ? "#303030" : "var(--surface-raised)",
     alignSelf: "flex-end",
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
@@ -252,7 +252,7 @@ const useStyles = makeStyles((theme) => ({
   messageActionsButton: {
     display: "none",
     position: "relative",
-    color: "#999",
+    color: "var(--text-muted)",
     zIndex: 1,
     backgroundColor: "inherit",
     opacity: "90%",
@@ -292,7 +292,7 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     bottom: 0,
     right: 5,
-    color: "#999",
+    color: "var(--text-muted)",
   },
 
   forwardMessage: {
@@ -301,7 +301,7 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     top: 0,
     left: 5,
-    color: "#999",
+    color: "var(--text-muted)",
     display: "flex",
     alignItems: "center"
   },

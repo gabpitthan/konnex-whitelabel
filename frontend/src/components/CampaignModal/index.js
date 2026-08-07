@@ -781,7 +781,7 @@ useEffect(() => {
                       variant="fullWidth"
                       centered
                       style={{
-                        background: "#f2f2f2",
+                        background: "var(--surface-sunken)",
                         border: "1px solid #e6e6e6",
                         borderRadius: 2,
                       }}

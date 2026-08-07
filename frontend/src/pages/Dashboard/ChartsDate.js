@@ -72,7 +72,7 @@ export const ChartsDate = () => {
         datasets: [{
             data: ticketsData.data.map(item => item.total),
             backgroundColor: "rgba(22,133,111,.72)",
-            hoverBackgroundColor: "#16856f",
+            hoverBackgroundColor: "var(--signal-live)",
             borderRadius: 3,
             borderSkipped: false,
             maxBarThickness: 34,

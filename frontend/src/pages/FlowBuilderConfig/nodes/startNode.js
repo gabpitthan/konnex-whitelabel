@@ -7,17 +7,17 @@ export default memo(({ data, isConnectable }) => {
   return (
     <div
       style={{
-        backgroundColor: "#F9FDF9",
+        backgroundColor: "var(--surface-sunken)",
         padding: "8px",
         borderRadius: "8px",
-        boxShadow: "rgba(0, 0, 0, 0.05) 0px 3px 5px",
-        border: '1px solid rgba(58, 186, 56, 0.25)'
+        boxShadow: "var(--shadow-sm)",
+        border: '1px solid var(--signal-live)'
       }}
     >
       <div
         style={{
-          color: "#ededed",
-          fontSize: "16px",
+          color: "var(--text-primary)",
+          fontSize: "14px",
           flexDirection: "row",
           display: "flex"
         }}
@@ -28,14 +28,14 @@ export default memo(({ data, isConnectable }) => {
             height: "16px",
             marginRight: "4px",
             marginTop: "4px",
-            color: "#3aba38"
+            color: "var(--signal-live)"
           }}
         />
-        <div style={{ color: "#232323", fontSize: "16px" }}>
+        <div style={{ color: "var(--text-primary)", fontSize: "14px" }}>
           Inicio do fluxo
         </div>
       </div>
-      <div style={{ color: "#727272", fontSize: "12px" }}>
+      <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>
         Este bloco marca o inicio do seu fluxo!
       </div>
       <Handle
@@ -43,7 +43,6 @@ export default memo(({ data, isConnectable }) => {
         position="right"
         id="a"
         style={{
-          background: "#0000FF",
           width: "18px",
           height: "18px",
           top: "70%",
@@ -54,7 +53,7 @@ export default memo(({ data, isConnectable }) => {
       >
         <ArrowForwardIos
           sx={{
-            color: "#ffff",
+            color: "var(--text-secondary)",
             width: "10px",
             height: "10px",
             marginLeft: "2.9px",

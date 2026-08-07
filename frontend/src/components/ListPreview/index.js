@@ -92,7 +92,7 @@ const ListPreview = ({ titulo, descricao, textoBotao, secoes, rodape, ticketId }
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Divider style={{ margin: '5px 0', height: '2px', backgroundColor: '#e0e0e0' }} />
+        <Divider style={{ margin: '5px 0', height: '2px', backgroundColor: 'var(--surface-sunken)' }} />
         <div
           onClick={abrirModal} // Ao clicar no Divider, o modal é aberto
           style={{
@@ -101,7 +101,7 @@ const ListPreview = ({ titulo, descricao, textoBotao, secoes, rodape, ticketId }
             justifyContent: 'center', // Centraliza o conteúdo horizontalmente
             cursor: 'pointer',
             padding: '3px',
-            backgroundColor: '#fff', // cor do botão
+            backgroundColor: 'var(--surface-raised)', // cor do botão
             color: 'black',
             borderRadius: '4px',
             margin: '3px 0', // Espaço acima e abaixo do botão

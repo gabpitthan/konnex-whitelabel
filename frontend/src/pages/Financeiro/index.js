@@ -124,17 +124,17 @@ const useStyles = makeStyles((theme) => ({
   },
   chipPaid: {
     backgroundColor: theme.palette.success.main,
-    color: "#fff",
+    color: "var(--text-inverse)",
     fontWeight: "bold",
   },
   chipPending: {
     backgroundColor: theme.palette.warning.main,
-    color: "#fff",
+    color: "var(--text-inverse)",
     fontWeight: "bold",
   },
   chipOverdue: {
     backgroundColor: theme.palette.error.main,
-    color: "#fff",
+    color: "var(--text-inverse)",
     fontWeight: "bold",
   },
   avatarIcon: {
@@ -146,7 +146,7 @@ const useStyles = makeStyles((theme) => ({
     textTransform: "none",
     fontWeight: "bold",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-    color: "#fff",
+    color: "var(--text-inverse)",
     background: `linear-gradient(45deg, ${theme.palette.secondary.main} 30%, ${theme.palette.secondary.light} 90%)`,
     "&:hover": {
       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",

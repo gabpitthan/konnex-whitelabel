@@ -251,7 +251,7 @@ const CampaignsPhrase = () => {
                   sx={{
                   padding: "8px",
                   backgroundColor: theme.palette.primary.main,
-                  color: "#fff",
+                  color: "var(--text-primary)",
                  borderRadius: 4,
                  marginTop: 0.5,
                 "&:hover": {
@@ -264,7 +264,7 @@ const CampaignsPhrase = () => {
                     <Stack
                       justifyContent={"center"}
                       height={"100%"}
-                      style={{ color: "#ededed" }}
+                      style={{ color: "var(--text-secondary)" }}
                     >
                       <Stack direction={"row"}>
                         <TextFields />
@@ -274,7 +274,7 @@ const CampaignsPhrase = () => {
                       </Stack>
                     </Stack>
                   </Grid>
-                  <Grid item xs={4} align="center" style={{ color: "#ededed" }}>
+                  <Grid item xs={4} align="center" style={{ color: "var(--text-secondary)" }}>
                     <Stack justifyContent={"center"} height={"100%"}>
                       {flow.status ? "Ativo" : "Desativado"}
                     </Stack>
@@ -287,7 +287,7 @@ const CampaignsPhrase = () => {
                         setModalOpenPhrase(true);
                       }}
                     >
-                      <EditIcon style={{ color: "#ededed" }} />
+                      <EditIcon style={{ color: "var(--text-secondary)" }} />
                     </IconButton>
                     <Can
                       role={user.profile}
@@ -300,7 +300,7 @@ const CampaignsPhrase = () => {
                             setDeletingContact(flow);
                           }}
                         >
-                          <DeleteOutlineIcon style={{ color: "#ededed" }} />
+                          <DeleteOutlineIcon style={{ color: "var(--text-secondary)" }} />
                         </IconButton>
                       )}
                     />

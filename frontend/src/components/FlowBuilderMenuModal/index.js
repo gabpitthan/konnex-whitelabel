@@ -62,14 +62,14 @@ const useStyles = makeStyles(theme => ({
 
 const selectFieldStyles = {
   ".MuiOutlinedInput-notchedOutline": {
-    borderColor: "#909090"
+    borderColor: "var(--border-strong)"
   },
   "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#000000",
+    borderColor: "var(--border-strong)",
     borderWidth: "thin"
   },
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#0000FF",
+    borderColor: "var(--border-input)",
     borderWidth: "thin"
   }
 };

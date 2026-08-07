@@ -26,11 +26,11 @@ const useStyles = makeStyles((theme) => ({
         boxShadow: "none !important",
     },
     icons: {
-        color: "#fff",
+        color: "var(--text-inverse)",
     },
     customBadge: {
         backgroundColor: "#f44336",
-        color: "#fff",
+        color: "var(--text-inverse)",
     },
 }));
 

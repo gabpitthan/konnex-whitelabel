@@ -77,7 +77,7 @@ export function TagsKanbanContainer({ ticket }) {
             <Chip
                 style={{
                     backgroundColor: selectedTag.color,
-                    color: "#FFF",
+                    color: "var(--text-inverse)",
                     marginRight: 1,
                     padding: 1,
                     fontWeight: 'bold',

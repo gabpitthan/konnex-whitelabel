@@ -78,7 +78,7 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     bottom: 63,
     width: 40,
-    borderTop: "1px solid #e8e8e8",
+    borderTop: "1px solid var(--border-subtle)",
     zIndex:1
   },
 }));

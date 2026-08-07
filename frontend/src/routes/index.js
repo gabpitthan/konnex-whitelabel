@@ -7,6 +7,7 @@ import Dashboard from "../pages/Dashboard";
 import TicketResponsiveContainer from "../pages/TicketResponsiveContainer";
 import Signup from "../pages/Signup";
 import Login from "../pages/Login";
+import DesignSystemPage from "../pages/DesignSystem";
 import Connections from "../pages/Connections";
 import SettingsCustom from "../pages/SettingsCustom";
 import Financeiro from "../pages/Financeiro";
@@ -77,6 +78,7 @@ const Routes = () => {
 
                 <Route exact path="/companies" component={Companies} isPrivate />
                 <Route exact path="/" component={Dashboard} isPrivate />
+                <Route exact path="/design-system" component={DesignSystemPage} isPrivate />
                 <Route exact path="/tickets/:ticketId?" component={TicketResponsiveContainer} isPrivate />
                 <Route exact path="/connections" component={Connections} isPrivate />
                 <Route exact path="/quick-messages" component={QuickMessages} isPrivate />

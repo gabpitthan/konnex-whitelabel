@@ -185,7 +185,7 @@ const AuthShell = ({
           </h1>
           <p className={classes.narrativeCopy}>{description}</p>
         </div>
-        <div className={classes.footer}>Konnex Signal Workspace</div>
+        <div className={classes.footer}>Konnex</div>
       </section>
       <section className={classes.content}>
         <div className={classes.inner}>

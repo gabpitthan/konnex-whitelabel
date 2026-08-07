@@ -1,5 +1,111 @@
 # Tarefa ativa
 
+## Versão 1.33 — design system próprio (fundação do redesign)
+
+Estado: planejado, não iniciado
+
+### 1. Objetivo do usuário
+
+Reformular o UI/UX da aplicação inteira. Duas tentativas anteriores (1.5 e 1.6)
+foram rejeitadas por ficarem parciais e estruturalmente semelhantes ao Whaticket
+original. Este lote entrega a **fundação** que faltou nas duas: um design system
+versionado, independente de Material UI, que torna a cobertura mensurável.
+
+### 2. Baseline (medido em 2026-08-07, não estimado)
+
+- 44 páginas, 148 componentes, 39 rotas declaradas.
+- 320 arquivos `.js`/`.jsx`, 72.267 linhas.
+- 211 arquivos importam `@material-ui/core` (v4); 39 importam `@mui/material` (v5).
+- O tema é criado com `createTheme` do **v4**, em `frontend/src/App.js:63`.
+- **Não existe nenhum arquivo de design token.** Confirmado por busca.
+- Identidade: ADR-0004 (a Konnex Signal do ADR-0002 foi descontinuada).
+
+Diagnóstico: como 84% do código e o próprio tema são v4, qualquer redesign feito
+"pelo tema" só alcança cor e tipografia, preservando a estrutura. Foi isso que
+produziu o resultado parcial, e não falta de esforço nos lotes anteriores.
+
+### 3. Resultado observável esperado
+
+Um diretório `frontend/src/design-system/` versionado, com tokens e primitivos
+que renderizam numa tela-piloto real, sem depender de Material UI, e sem
+quebrar nenhuma das 44 telas ainda não migradas.
+
+### 4. Critérios de aceite
+
+- `tokens.css` com cor, espaçamento, tipografia, raio, sombra, z-index e
+  duração de transição, em custom properties, com tema claro e escuro.
+- Primitivos sem dependência de MUI: `Button`, `Input`, `Select`, `Card`,
+  `Table`, `Badge`, `StatusDot`, `Avatar`, `Dialog`, `Tooltip`.
+- Densidade operacional aplicada conforme a consulta à skill: grid de 12
+  colunas, `gap` 8px, `padding` 12px, fonte de 12–14px, cabeçalho fixo em
+  tabela — e **não** a recomendação solta da skill (que sugeriu tipografia de
+  landing page de luxo quando consultada sem domínio).
+- Contraste mínimo 4.5:1 verificado, foco visível no teclado,
+  `prefers-reduced-motion` respeitado.
+- Uma tela-piloto migrada ponta a ponta, funcionando em desktop, tablet e mobile.
+- Nenhuma tela não migrada apresenta regressão visual ou funcional.
+
+### 5. Superfícies afetadas
+
+`frontend/src/design-system/` (novo), `frontend/src/App.js` (provider dos
+tokens), e apenas os arquivos da tela-piloto. Backend: nenhum.
+
+### 6. Riscos e fronteiras
+
+- Coexistência de três sistemas de estilo (v4, v5, design system próprio)
+  durante a transição. Mitigação: os tokens são a única fonte de cor; o tema v4
+  passa a **ler** dos tokens em vez de definir valores próprios, evitando
+  divergência entre tela migrada e não migrada.
+- Não altera regra de negócio, API, socket, autenticação, permissão, rota ou
+  banco. Nenhum dado de tenant é tocado.
+- Não migra v4 para v5. A decisão de 2026-08-07 é substituir por consequência,
+  tela a tela, não por lote de migração.
+
+### 7. Estratégia de teste
+
+- Renderização dos primitivos com teste de contraste automatizado.
+- Navegador real autenticado na tela-piloto: desktop, tablet e mobile, com
+  console e requisições inspecionados.
+- Verificação explícita de três telas **não** migradas, para provar ausência de
+  regressão por vazamento de estilo global.
+
+### 8. Rollback
+
+O design system é aditivo: remover o import do provider e reverter a tela-piloto
+restaura o estado anterior. Sem migration, sem mudança de dados, sem alteração
+de contrato de API.
+
+### 9. Fora deste lote
+
+- As outras 43 telas (vão para o lote seguinte, começando pela jornada de
+  atendimento: Login, Tickets, Chat, Conexões, Dashboard).
+- Migração Material UI v4 para v5.
+- Qualquer mudança de backend.
+- FE-001 (vulnerabilidades npm do frontend).
+
+### 10. Fila retomada depois do redesign
+
+Decisão de Gabriel em 2026-08-07: o redesign vem primeiro. Os itens abaixo estão
+abertos e verificados como abertos, não esquecidos.
+
+1. Fechar o lote do LID — falta a prova em produção com mensagem real.
+2. Mídia (imagem, áudio, documento) e grupos no WhatsApp.
+3. Isolamento multiempresa (SEC-001) — nunca testado; existe uma só empresa.
+4. SMTP — reset de senha e convite de usuário estão quebrados.
+5. Grade de planos para o modelo sem cobrança escolhido em 2026-08-07.
+6. Higiene pré-cliente: remover o seed `Empresa 1` e o admin semeado.
+7. Substituir `scripts/smoke-test.sh` por smoke de jornada autenticada real.
+8. Observabilidade: Sentry inerte, `/client-errors` não persiste, log não
+   estruturado, sem request ID, sem métricas, sem alerta.
+
+### Dependência de numeração
+
+`VERSION` ainda é **1.31**. O lote do LID está implantado mas não fechado, por
+falta da prova em produção. Se ele fechar antes, este lote é a 1.33; se não, ele
+assume a 1.32 e o LID é documentado junto. Conferir `VERSION` antes de abrir.
+
+---
+
 ## Versão 1.31 — egress seguro do webhook e remoção de `request`
 
 Estado: publicada

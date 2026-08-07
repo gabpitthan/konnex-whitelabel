@@ -168,7 +168,7 @@ export default function CheckoutPage(props) {
                   </div>
                 </div>
                 {paymentText && (
-  <div style={{ backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '8px', marginTop: '10px' }}>
+  <div style={{ backgroundColor: 'var(--surface-sunken)', padding: '10px', borderRadius: '8px', marginTop: '10px' }}>
     <Typography variant="h5" align="center" style={{ color: '#ff5722', fontWeight: 'bold', fontFamily: 'cursive' }}>
       {paymentText}
     </Typography>

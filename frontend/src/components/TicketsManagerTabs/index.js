@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(0.5),
     marginLeft: theme.spacing(0.5),
     marginRight: theme.spacing(0.5),
-    // backgroundColor: "#eee",
+    // backgroundColor: "var(--surface-sunken)",
     // backgroundColor: theme.palette.tabHeaderBackground,
   },
 
@@ -82,13 +82,11 @@ const useStyles = makeStyles((theme) => ({
     minWidth: "auto",
     width: "auto",
     padding: theme.spacing(0.5, 1),
-    borderRadius: 8,
-    transition: "0.3s",
-    borderColor: "#aaa",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    marginRight: theme.spacing(0.5),
-    marginLeft: theme.spacing(0.5),
+    borderRadius: 0,
+    border: "none",
+    transition: "color var(--duration-fast) var(--ease-standard)",
+    marginRight: theme.spacing(1),
+    marginLeft: 0,
 
     [theme.breakpoints.down("lg")]: {
       fontSize: "0.9rem",
@@ -105,11 +103,11 @@ const useStyles = makeStyles((theme) => ({
     },
 
     "&:hover": {
-      backgroundColor: "rgba(0, 0, 0, 0.1)",
+      color: "var(--text-primary)",
     },
 
     // "&$selected": {
-    //   color: "#FFF",
+    //   color: "var(--surface-raised)",
     //   backgroundColor: theme.palette.primary.main,
     // },
   },
@@ -121,10 +119,10 @@ const useStyles = makeStyles((theme) => ({
   },
 
   tabIndicator: {
-    height: 6,
+    height: 2,
     bottom: 0,
-    borderRadius: "0 0 8px 8px",
-    backgroundColor: theme.mode === "light" ? theme.palette.primary.main : "#FFF",
+    borderRadius: 0,
+    backgroundColor: theme.mode === "light" ? theme.palette.primary.main : "var(--surface-raised)",
   },
   tabsBadge: {
     top: "105%",
@@ -133,19 +131,16 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "nowrap",
     borderRadius: "12px",
     padding: "0 8px",
-    backgroundColor: theme.mode === "light" ? theme.palette.primary.main : "#FFF",
-    color: theme.mode === "light" ? "#FFF" : theme.palette.primary.main,
+    backgroundColor: theme.mode === "light" ? theme.palette.primary.main : "var(--surface-raised)",
+    color: theme.mode === "light" ? "var(--surface-raised)" : theme.palette.primary.main,
   },
   ticketOptionsBox: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    // background: "#fafafa",
-    background: theme.palette.optionsBackground,
-    borderRadius: 8,
-    borderColor: "#aaa",
-    borderWidth: "1px",
-    borderStyle: "solid",
+    background: "transparent",
+    borderRadius: 0,
+    border: "none",
     marginTop: theme.spacing(0.5),
     marginBottom: theme.spacing(1),
     marginLeft: theme.spacing(1),
@@ -155,32 +150,33 @@ const useStyles = makeStyles((theme) => ({
 
   serachInputWrapper: {
     flex: 1,
-    // background: "#fff",
-    height: 40,
-    background: theme.palette.total,
+    height: "var(--input-height)",
+    background: "var(--surface-raised)",
     display: "flex",
-    borderRadius: 40,
-    padding: 4,
-    borderColor: "#aaa",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    marginTop: theme.spacing(0.5),
-    marginBottom: theme.spacing(0.5),
-    marginLeft: theme.spacing(0.5),
-    marginRight: theme.spacing(0.5),
+    alignItems: "center",
+    borderRadius: "var(--radius-md)",
+    padding: "0 var(--space-3)",
+    border: "1px solid var(--border-input)",
+    margin: "var(--space-4) var(--space-4) var(--space-3)",
+    "&:focus-within": {
+      borderColor: "var(--border-focus)",
+      boxShadow: "var(--ring-focus)",
+    },
   },
 
   searchIcon: {
-    color: "grey",
-    marginLeft: 6,
-    marginRight: 6,
+    color: "var(--text-muted)",
+    marginRight: "var(--space-3)",
     alignSelf: "center",
+    "& .MuiSvgIcon-root": { fontSize: 17 },
   },
 
   searchInput: {
     flex: 1,
     border: "none",
-    borderRadius: 30,
+    background: "transparent",
+    fontSize: "var(--text-sm)",
+    color: "var(--text-primary)",
   },
 
   badge: {
@@ -189,8 +185,8 @@ const useStyles = makeStyles((theme) => ({
 
   customBadge: {
     right: "-10px",
-    backgroundColor: "#f44336",
-    color: "#fff",
+    backgroundColor: "var(--signal-fail)",
+    color: "var(--surface-raised)",
   },
 
   show: {
@@ -242,7 +238,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   yesButton: {
-    backgroundColor: "#FFF",
+    backgroundColor: "var(--surface-raised)",
     color: "rgba(0, 100, 0, 1)",
     padding: "4px 4px",
     fontSize: "1em",
@@ -251,12 +247,12 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(1),
     "&:hover": {
       backgroundColor: "darkGreen",
-      color: "#FFF",
+      color: "var(--surface-raised)",
     },
     borderRadius: 30,
   },
   noButton: {
-    backgroundColor: "#FFF",
+    backgroundColor: "var(--surface-raised)",
     color: "rgba(139, 0, 0, 1)",
     padding: "4px 4px",
     fontSize: "1em",
@@ -264,36 +260,36 @@ const useStyles = makeStyles((theme) => ({
     textTransform: "uppercase",
     "&:hover": {
       backgroundColor: "darkRed",
-      color: "#FFF",
+      color: "var(--surface-raised)",
     },
     borderRadius: 30,
   },
   filterIcon: {
     marginRight: 6,
     alignSelf: "center",
-    color: theme.mode === "light" ? "#0872b9" : "#FFF",
+    color: theme.mode === "light" ? "var(--brand-base)" : "var(--surface-raised)",
     cursor: "pointer",
   },
   button: {
     height: 30,
     width: 30,
-    border: "2px solid",
-    borderColor: "#aaa",
-    borderRadius: 8,
-    marginRight: 8,
+    border: "1px solid transparent",
+    borderRadius: "var(--radius-md)",
+    marginRight: "var(--space-2)",
     "&:hover": {
-      borderColor: theme.mode === "light" ? theme.palette.primary.main : "#FFF",
+      background: "var(--surface-hover)",
+      borderColor: "var(--border-subtle)",
     },
   },
   icon: {
-    color: "#aaa",
+    color: "var(--text-muted)",
     "&:hover": {
-      color: theme.mode === "light" ? theme.palette.primary.main : "#FFF",
+      color: theme.mode === "light" ? theme.palette.primary.main : "var(--surface-raised)",
     },
   },
   buttonOpen: {
     "& $icon": {
-      color: theme.mode === "light" ? theme.palette.primary.main : "#FFF",
+      color: theme.mode === "light" ? theme.palette.primary.main : "var(--surface-raised)",
     },
   },
 }));
@@ -644,13 +640,7 @@ const TicketsManagerTabs = () => {
               yes={() => (
                 <Badge
                   color="primary"
-                  invisible={
-                    !isHoveredAll ||
-                    isHoveredNew ||
-                    isHoveredResolve ||
-                    isHoveredOpen ||
-                    isHoveredClosed
-                  }
+                  invisible={!isHoveredAll}
                   badgeContent={"Todos"}
                   classes={{ badge: classes.tabsBadge }}
                 >
@@ -741,7 +731,7 @@ const TicketsManagerTabs = () => {
                   className={classes.button}
                   onClick={handleSnackbarOpen}
                 >
-                  <PlaylistAddCheckOutlined style={{ color: theme.mode === "light" ? "green" : "#FFF" }} />
+                  <PlaylistAddCheckOutlined style={{ color: theme.mode === "light" ? "green" : "var(--surface-raised)" }} />
                 </IconButton>
               </Badge>
             )}
@@ -749,12 +739,7 @@ const TicketsManagerTabs = () => {
               // color="primary"
               invisible={
                 !(
-                  tab === "open" &&
-                  !isHoveredAll &&
-                  !isHoveredNew &&
-                  !isHoveredResolve &&
-                  !isHoveredClosed &&
-                  !isHoveredSort
+                  false
                 ) && !isHoveredOpen
               }
               badgeContent={i18n.t("tickets.inbox.open")}
@@ -793,12 +778,12 @@ const TicketsManagerTabs = () => {
                     color: isHoveredOpen
                       ? theme.mode === "light"
                         ? theme.palette.primary.main
-                        : "#FFF"
+                        : "var(--surface-raised)"
                       : tab === "open"
                         ? theme.mode === "light"
                           ? theme.palette.primary.main
-                          : "#FFF"
-                        : "#aaa",
+                          : "var(--surface-raised)"
+                        : "var(--text-muted)",
                   }}
                 />
               </IconButton>
@@ -852,12 +837,12 @@ const TicketsManagerTabs = () => {
                     color: isHoveredClosed
                       ? theme.mode === "light"
                         ? theme.palette.primary.main
-                        : "#FFF"
+                        : "var(--surface-raised)"
                       : tab === "closed"
                         ? theme.mode === "light"
                           ? theme.palette.primary.main
-                          : "#FFF"
-                        : "#aaa",
+                          : "var(--surface-raised)"
+                        : "var(--text-muted)",
                   }}
                 />
               </IconButton>
@@ -891,16 +876,16 @@ const TicketsManagerTabs = () => {
                       color: sortTickets
                         ? theme.mode === "light"
                           ? theme.palette.primary.main
-                          : "#FFF"
-                        : "#aaa",
+                          : "var(--surface-raised)"
+                        : "var(--text-muted)",
                     }} />
                   ) : (
                     <TextRotationDown style={{
                       color: sortTickets
                         ? theme.mode === "light"
                           ? theme.palette.primary.main
-                          : "#FFF"
-                        : "#aaa",
+                          : "var(--surface-raised)"
+                        : "var(--text-muted)",
                     }} />
                   )}
                 </ToggleButton>

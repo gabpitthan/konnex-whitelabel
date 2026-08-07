@@ -97,7 +97,7 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     padding: theme.spacing(1),
     position: "relative",
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "var(--surface-sunken)",
     overflowY: "scroll",
     ...theme.scrollbarStyles,
   },
@@ -175,7 +175,7 @@ export const FlowBuilderConfig = () => {
   const [modalAddOpenAI, setModalAddOpenAI] = useState(null);
   const [modalAddQuestion, setModalAddQuestion] = useState(null);
 
-  const connectionLineStyle = { stroke: "#2b2b2b", strokeWidth: "6px" };
+  const connectionLineStyle = { stroke: "var(--text-primary)", strokeWidth: "6px" };
 
   const addNode = (type, data) => {
     const posY = nodes[nodes.length - 1].position.y;
@@ -480,7 +480,7 @@ export const FlowBuilderConfig = () => {
           y: finalY,
         },
         selected: false,
-        style: { backgroundColor: "#555555", padding: 0, borderRadius: 8 },
+        style: { backgroundColor: "var(--text-secondary)", padding: 0, borderRadius: 8 },
       };
       setNodes((old) => [...old, nodeNew]);
       storageItems.setNodesStorage("");
@@ -523,7 +523,7 @@ export const FlowBuilderConfig = () => {
       ),
     [setEdges]
   );
-  
+
 
   const saveFlow = async () => {
     await api
@@ -582,12 +582,12 @@ export const FlowBuilderConfig = () => {
         if (item.id === node.id) {
           return {
             ...item,
-            style: { backgroundColor: "#0000FF", padding: 1, borderRadius: 8 },
+            style: { backgroundColor: "var(--brand-base)", padding: 1, borderRadius: 8 },
           };
         }
         return {
           ...item,
-          style: { backgroundColor: "#13111C", padding: 0, borderRadius: 8 },
+          style: { backgroundColor: "var(--surface-raised)", padding: 0, borderRadius: 8 },
         };
       })
     );
@@ -610,7 +610,7 @@ export const FlowBuilderConfig = () => {
       )
     );
   };
-  
+
 
   const updateNode = (dataAlter) => {
     setNodes((old) =>
@@ -633,7 +633,7 @@ export const FlowBuilderConfig = () => {
       icon: (
         <RocketLaunch
           sx={{
-            color: "#3ABA38",
+            color: "var(--signal-live)",
           }}
         />
       ),
@@ -644,7 +644,7 @@ export const FlowBuilderConfig = () => {
       icon: (
         <LibraryBooks
           sx={{
-            color: "#EC5858",
+            color: "var(--signal-fail)",
           }}
         />
       ),
@@ -655,7 +655,7 @@ export const FlowBuilderConfig = () => {
       icon: (
         <DynamicFeed
           sx={{
-            color: "#683AC8",
+            color: "var(--brand-base)",
           }}
         />
       ),
@@ -666,7 +666,7 @@ export const FlowBuilderConfig = () => {
       icon: (
         <CallSplit
           sx={{
-            color: "#1FBADC",
+            color: "var(--signal-info)",
           }}
         />
       ),
@@ -677,7 +677,7 @@ export const FlowBuilderConfig = () => {
       icon: (
         <AccessTime
           sx={{
-            color: "#F7953B",
+            color: "var(--signal-wait)",
           }}
         />
       ),
@@ -688,7 +688,7 @@ export const FlowBuilderConfig = () => {
       icon: (
         <ConfirmationNumber
           sx={{
-            color: "#F7953B",
+            color: "var(--signal-wait)",
           }}
         />
       ),
@@ -702,7 +702,7 @@ export const FlowBuilderConfig = () => {
           sx={{
             width: 24,
             height: 24,
-            color: "#3aba38",
+            color: "var(--signal-live)",
           }}
           src={typebotIcon}
           alt="icon"
@@ -715,7 +715,7 @@ export const FlowBuilderConfig = () => {
       icon: (
         <SiOpenai
           sx={{
-            color: "#F7953B",
+            color: "var(--signal-wait)",
           }}
         />
       ),
@@ -726,7 +726,7 @@ export const FlowBuilderConfig = () => {
       icon: (
         <BallotIcon
           sx={{
-            color: "#F7953B",
+            color: "var(--signal-wait)",
           }}
         />
       ),
@@ -859,6 +859,15 @@ export const FlowBuilderConfig = () => {
 
       <MainHeader>
         <Title>Desenhe seu fluxo</Title>
+        <MainHeaderButtonsWrapper>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => saveFlow()}
+          >
+            Salvar fluxo
+          </Button>
+        </MainHeaderButtonsWrapper>
       </MainHeader>
       {!loading && (
         <Paper
@@ -874,9 +883,13 @@ export const FlowBuilderConfig = () => {
                 top: 16,
                 left: 16,
                 ".MuiSpeedDial-fab": {
+                  width: 40,
+                  height: 40,
+                  minHeight: 40,
+                  boxShadow: "var(--shadow-sm)",
                   backgroundColor: colorPrimary(),
                   "&:hover": {
-                    backgroundColor: colorPrimary(),
+                    backgroundColor: "var(--brand-hover)",
                   },
                 },
               }}
@@ -899,28 +912,19 @@ export const FlowBuilderConfig = () => {
             </SpeedDial>
           </Stack>
           <Stack
-            sx={{
-              position: "absolute",
-              justifyContent: "center",
-              flexDirection: "row",
-              width: "100%",
-            }}
+            direction={"row"}
+            alignItems={"center"}
+            justifyContent={"flex-end"}
+            sx={{ gap: "var(--space-4)", padding: "0 0 var(--space-4)" }}
           >
             <Typography
-              style={{ color: "#010101", textShadow: "#010101 1px 0 10px" }}
+              sx={{
+                fontSize: "var(--text-sm)",
+                color: "var(--text-muted)",
+              }}
             >
-              Não se esqueça de salvar seu fluxo!
+              Alterações só valem depois de salvar.
             </Typography>
-          </Stack>
-          <Stack direction={"row"} justifyContent={"end"}>
-            <Button
-              sx={{ textTransform: "none" }}
-              variant="contained"
-              color="primary"
-              onClick={() => saveFlow()}
-            >
-              Salvar
-            </Button>
           </Stack>
 
           <Stack
@@ -946,6 +950,9 @@ export const FlowBuilderConfig = () => {
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
       fitView
+      fitViewOptions={{ maxZoom: 1, padding: 0.25 }}
+      minZoom={0.2}
+      maxZoom={1.5}
       className="react-flow"
       defaultEdgeOptions={{
         animated: true,
@@ -954,13 +961,13 @@ export const FlowBuilderConfig = () => {
     >
       <Controls />
       <MiniMap />
-      <Background variant="dots" gap={12} size={-1} />
+      <Background variant="dots" gap={16} size={1} color="var(--border-default)" />
     </ReactFlow>
   </div>
 
             <Stack
               style={{
-                backgroundColor: "#FAFAFA",
+                backgroundColor: "var(--surface-sunken)",
                 height: "20px",
                 width: "58px",
                 position: "absolute",
@@ -971,7 +978,7 @@ export const FlowBuilderConfig = () => {
             />
             {/* <Stack
                 style={{
-                  backgroundColor: "#1B1B1B",
+                  backgroundColor: "var(--surface-raised)",
                   height: "70%",
                   width: "150px",
                   position: "absolute",
@@ -983,18 +990,18 @@ export const FlowBuilderConfig = () => {
                 }}
                 spacing={1}
               >
-                <Typography style={{ color: "#ffffff", textAlign: "center" }}>
+                <Typography style={{ color: "var(--surface-raised)", textAlign: "center" }}>
                   Adicionar
                 </Typography>
                 <Button
                   onClick={() => addNode("start")}
                   variant="contained"
                   style={{
-                    backgroundColor: "#3ABA38",
-                    color: "#ffffff",
+                    backgroundColor: "var(--signal-live)",
+                    color: "var(--surface-raised)",
                     padding: 8,
                     "&:hover": {
-                      backgroundColor: "#3e3b7f"
+                      backgroundColor: "var(--brand-hover)"
                     },
                     textTransform: "none"
                   }}
@@ -1012,8 +1019,8 @@ export const FlowBuilderConfig = () => {
                   onClick={() => setModalAddText("create")}
                   variant="contained"
                   style={{
-                    backgroundColor: "#6865A5",
-                    color: "#ffffff",
+                    backgroundColor: "var(--brand-base)",
+                    color: "var(--surface-raised)",
                     padding: 8,
                     textTransform: "none"
                   }}
@@ -1031,8 +1038,8 @@ export const FlowBuilderConfig = () => {
                   onClick={() => setModalAddInterval("create")}
                   variant="contained"
                   style={{
-                    backgroundColor: "#F7953B",
-                    color: "#ffffff",
+                    backgroundColor: "var(--signal-wait)",
+                    color: "var(--surface-raised)",
                     padding: 8,
                     textTransform: "none"
                   }}
@@ -1051,8 +1058,8 @@ export const FlowBuilderConfig = () => {
                   variant="contained"
                   disabled
                   style={{
-                    backgroundColor: "#524d4d",
-                    color: "#cccaed",
+                    backgroundColor: "var(--surface-sunken)",
+                    color: "var(--text-disabled)",
                     padding: 8,
                     textTransform: "none"
                   }}
@@ -1070,8 +1077,8 @@ export const FlowBuilderConfig = () => {
                   onClick={() => setModalAddMenu("create")}
                   variant="contained"
                   style={{
-                    backgroundColor: "#683AC8",
-                    color: "#ffffff",
+                    backgroundColor: "var(--brand-base)",
+                    color: "var(--surface-raised)",
                     padding: 8,
                     textTransform: "none"
                   }}
@@ -1089,8 +1096,8 @@ export const FlowBuilderConfig = () => {
                   onClick={() => setModalAddAudio("create")}
                   variant="contained"
                   style={{
-                    backgroundColor: "#6865A5",
-                    color: "#ffffff",
+                    backgroundColor: "var(--brand-base)",
+                    color: "var(--surface-raised)",
                     padding: 8,
                     textTransform: "none"
                   }}
@@ -1108,8 +1115,8 @@ export const FlowBuilderConfig = () => {
                   onClick={() => setModalAddVideo("create")}
                   variant="contained"
                   style={{
-                    backgroundColor: "#6865A5",
-                    color: "#ffffff",
+                    backgroundColor: "var(--brand-base)",
+                    color: "var(--surface-raised)",
                     padding: 8,
                     textTransform: "none"
                   }}
@@ -1127,8 +1134,8 @@ export const FlowBuilderConfig = () => {
                   onClick={() => setModalAddImg("create")}
                   variant="contained"
                   style={{
-                    backgroundColor: "#6865A5",
-                    color: "#ffffff",
+                    backgroundColor: "var(--brand-base)",
+                    color: "var(--surface-raised)",
                     padding: 8,
                     textTransform: "none"
                   }}
@@ -1146,8 +1153,8 @@ export const FlowBuilderConfig = () => {
                   onClick={() => setModalAddRandomizer("create")}
                   variant="contained"
                   style={{
-                    backgroundColor: "#1FBADC",
-                    color: "#ffffff",
+                    backgroundColor: "var(--signal-info)",
+                    color: "var(--surface-raised)",
                     padding: 8,
                     textTransform: "none"
                   }}
@@ -1165,8 +1172,8 @@ export const FlowBuilderConfig = () => {
                   onClick={() => setModalAddSingleBlock("create")}
                   variant="contained"
                   style={{
-                    backgroundColor: "#EC5858",
-                    color: "#ffffff",
+                    backgroundColor: "var(--signal-fail)",
+                    color: "var(--surface-raised)",
                     padding: 8,
                     textTransform: "none"
                   }}

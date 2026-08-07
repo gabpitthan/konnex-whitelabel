@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
   },
   actions: {
     padding: 2,
-    border: "1px solid #CCC",
+    border: "1px solid var(--border-input)",
     boxShadow: "1px 1px 5px #CCC",
     marginTop: 2,
     display: "flex",
@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
   },
   importOptions: {
     padding: 2,
-    border: "1px solid #CCC",
+    border: "1px solid var(--border-input)",
     boxShadow: "1px 1px 5px #CCC",
     marginTop: 2,
     marginBottom: 2,
@@ -411,7 +411,7 @@ const ContactImport = () => {
               borderRadius: 20,
               maxWidth: 500,
               margin: "20px auto",
-              border: "3px dotted #ddd",
+              border: "3px dotted var(--border-default)",
               padding: 20,
               display: "flex",
               justifyContent: "center",

@@ -69,10 +69,10 @@ const useStyles = makeStyles(theme => ({
     justifyContent: "center"
   },
   tooltip: {
-    backgroundColor: "#f5f5f9",
+    backgroundColor: "var(--surface-sunken)",
     color: "rgba(0, 0, 0, 0.87)",
     fontSize: theme.typography.pxToRem(14),
-    border: "1px solid #dadde9",
+    border: "1px solid var(--border-default)",
     maxWidth: 450
   },
   tooltipPopper: {
@@ -501,29 +501,29 @@ const WhatsAppModalCompany = ({
                   <TableHead
                     className={classes.TableHead}
                   >
-                    <TableRow style={{ color: "#fff" }}>
-                      <TableCell style={{ color: "#fff" }} align="center">
+                    <TableRow style={{ color: "var(--text-inverse)" }}>
+                      <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                         Channel
                       </TableCell>
-                      <TableCell style={{ color: "#fff" }} align="center">
+                      <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                         {i18n.t("connections.table.name")}
                       </TableCell>
-                      <TableCell style={{ color: "#fff" }} align="center">
+                      <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                         {i18n.t("connections.table.status")}
                       </TableCell>
                       {user.profile === "admin" && (
-                        <TableCell style={{ color: "#fff" }} align="center">
+                        <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                           {i18n.t("connections.table.session")}
                         </TableCell>
                       )}
-                      <TableCell style={{ color: "#fff" }} align="center">
+                      <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                         {i18n.t("connections.table.lastUpdate")}
                       </TableCell>
-                      <TableCell style={{ color: "#fff" }} align="center">
+                      <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                         {i18n.t("connections.table.default")}
                       </TableCell>
                       {user.profile === "admin" && (
-                        <TableCell style={{ color: "#fff" }} align="center">
+                        <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                           {i18n.t("connections.table.actions")}
                         </TableCell>
                       )}

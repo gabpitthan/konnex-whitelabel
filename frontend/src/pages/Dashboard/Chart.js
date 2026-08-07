@@ -108,7 +108,7 @@ const Chart = ({ dateStartTicket, dateEndTicket, queueTicket }) => {
 					<Line
 						type="monotone"
 						dataKey="amount"
-						stroke="#8884d8"
+						stroke="var(--brand-base)"
 						strokeWidth={2}
 					// fill={theme.palette.primary.main}
 					/>

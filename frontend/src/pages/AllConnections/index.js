@@ -70,10 +70,10 @@ const useStyles = makeStyles(theme => ({
     justifyContent: "center"
   },
   tooltip: {
-    backgroundColor: "#f5f5f9",
+    backgroundColor: "var(--surface-sunken)",
     color: "rgba(0, 0, 0, 0.87)",
     fontSize: theme.typography.pxToRem(14),
-    border: "1px solid #dadde9",
+    border: "1px solid var(--border-default)",
     maxWidth: 450
   },
   tooltipPopper: {
@@ -521,21 +521,21 @@ const AllConnections = () => {
               <Paper >
                 <Table size="small">
                   <TableHead className={classes.TableHead}>
-                    <TableRow style={{ color: "#fff" }}>
-                      <TableCell style={{ color: "#fff" }} align="center">
+                    <TableRow style={{ color: "var(--text-inverse)" }}>
+                      <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                         {i18n.t("Cliente")}
                       </TableCell>
-                      <TableCell style={{ color: "#fff" }} align="center">
+                      <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                         {i18n.t("Conexões conectadas")}
                       </TableCell>
-                      <TableCell style={{ color: "#fff" }} align="center">
+                      <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                         {i18n.t("Conexões desconectadas")}
                       </TableCell>
-                      <TableCell style={{ color: "#fff" }} align="center">
+                      <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                         {i18n.t("Total de Conexões")}
                       </TableCell>
                       {user.profile === "admin" && (
-                        <TableCell style={{ color: "#fff" }} align="center">
+                        <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                           {i18n.t("connections.table.actions")}
                         </TableCell>
                       )}
@@ -575,19 +575,19 @@ const AllConnections = () => {
                         )
                         )}
                         <TableRow className={classes.TableHead}>
-                          <TableCell style={{ color: "#fff" }} align="center">{i18n.t("Total")}</TableCell>
-                          <TableCell style={{ color: "#fff" }} align="center">
+                          <TableCell style={{ color: "var(--text-inverse)" }} align="center">{i18n.t("Total")}</TableCell>
+                          <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                             {whats?.length &&
                               whats.filter((item) => item?.status === 'CONNECTED').length}
                           </TableCell>
-                          <TableCell style={{ color: "#fff" }} align="center">
+                          <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                             {whats?.length &&
                               whats.filter((item) => item?.status !== 'CONNECTED').length}
                           </TableCell>
-                          <TableCell style={{ color: "#fff" }} align="center">
+                          <TableCell style={{ color: "var(--text-inverse)" }} align="center">
                             {whats?.length && whats.length}
                           </TableCell>
-                          {user.profile === "admin" && <TableCell style={{ color: "#fff" }} align="center"></TableCell>}
+                          {user.profile === "admin" && <TableCell style={{ color: "var(--text-inverse)" }} align="center"></TableCell>}
                         </TableRow>
                       </>
                     )}

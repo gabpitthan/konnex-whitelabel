@@ -1,9 +1,13 @@
-/* cor quando passa o mouse por cima */
+/* Botões de período do painel.
+   Antes usavam cinza-escuro fixo (rgb(71,71,71)), herdado de um tema escuro
+   que não existe mais — ficavam pretos sobre superfície clara. */
+.MuiButtonBase-root.buttonHover {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+}
+
 .MuiButtonBase-root.buttonHover:hover {
-    background: rgb(36, 36, 36)
-  }
-  
-  /* cor enquanto não passa o mouse */
-  .MuiButtonBase-root.buttonHover {
-    background: rgb(71, 71, 71)
-  }
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}

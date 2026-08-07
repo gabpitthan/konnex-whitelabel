@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
   },
   connectionTag: {
     background: "green",
-    color: "#FFF",
+    color: "var(--text-inverse)",
     marginRight: 1,
     padding: 1,
     fontWeight: 'bold',
