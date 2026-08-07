@@ -1,4 +1,5 @@
 import { themes, staticTokens } from "./tokens";
+import { resolveBrand } from "./brand";
 
 /**
  * Overrides globais do Material UI v4, derivados dos tokens (ADR-0004).
@@ -11,9 +12,10 @@ import { themes, staticTokens } from "./tokens";
  * Regra do brief: um padrão por problema. Página que precisar de algo
  * diferente ajusta aqui, não cria estilo local.
  */
-const overridesFromTokens = (mode = "light") => {
+const overridesFromTokens = (mode = "light", tenantColor) => {
   const t = themes[mode] || themes.light;
   const s = staticTokens;
+  const brand = resolveBrand(mode, tenantColor);
 
   return {
     MuiCssBaseline: {
@@ -48,9 +50,9 @@ const overridesFromTokens = (mode = "light") => {
       },
       contained: { boxShadow: "none", "&:hover": { boxShadow: "none" } },
       containedPrimary: {
-        backgroundColor: t["brand-base"],
-        color: t["on-brand"],
-        "&:hover": { backgroundColor: t["brand-hover"], boxShadow: "none" },
+        backgroundColor: brand.base,
+        color: brand.onBrand,
+        "&:hover": { backgroundColor: brand.hover, boxShadow: "none" },
       },
       outlined: {
         borderColor: t["border-input"],
@@ -151,7 +153,7 @@ const overridesFromTokens = (mode = "light") => {
     },
     MuiTabs: {
       root: { minHeight: 40, borderBottom: `1px solid ${t["border-default"]}` },
-      indicator: { height: 2, backgroundColor: t["brand-base"] },
+      indicator: { height: 2, backgroundColor: brand.base },
     },
 
     MuiDialog: {

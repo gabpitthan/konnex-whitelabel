@@ -21,6 +21,7 @@ import {
   muiShapeFromTokens,
 } from "./design-system/muiThemeFromTokens";
 import overridesFromTokens, { muiPropsDefaults } from "./design-system/muiOverrides";
+import { resolveBrand } from "./design-system/brand";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,11 @@ const App = () => {
     [appLogoLight, appLogoDark, appLogoFavicon, appName, mode]
   );
 
+  // Cor de whitelabel do tenant, vazia quando ele não configurou nenhuma.
+  // Alimenta o tema do Material UI e as custom properties, para que a marca do
+  // cliente valha nas 44 telas e não só nas migradas.
+  const tenantColor = mode === "light" ? primaryColorLight : primaryColorDark;
+
   const theme = useMemo(
     () =>
       createTheme(
@@ -92,11 +98,11 @@ const App = () => {
           // (ADR-0004). Isso mantém as telas ainda não migradas visualmente
           // coerentes com as migradas, em vez de conviverem duas identidades
           // durante a transição.
-          palette: muiPaletteFromTokens(mode),
+          palette: muiPaletteFromTokens(mode, tenantColor),
           typography: muiTypographyFromTokens(),
           shape: muiShapeFromTokens(),
           props: muiPropsDefaults,
-          overrides: overridesFromTokens(mode),
+          overrides: overridesFromTokens(mode, tenantColor),
           mode,
           appLogoLight,
           appLogoDark,
@@ -117,7 +123,7 @@ const App = () => {
         },
         locale
       ),
-    [appLogoLight, appLogoDark, appLogoFavicon, appName, locale, mode, primaryColorDark, primaryColorLight]
+    [appLogoLight, appLogoDark, appLogoFavicon, appName, locale, mode, tenantColor, primaryColorDark, primaryColorLight]
   );
 
   // Detecta quando o navegador está pronto para mostrar o prompt de instalação do PWA
@@ -241,15 +247,22 @@ const App = () => {
 
   useEffect(() => {
     const root = document.documentElement;
-    const tenantColor = mode === "light" ? primaryColorLight : primaryColorDark;
-    root.style.setProperty("--primaryColor", tenantColor);
+    const brand = resolveBrand(mode, tenantColor);
+
+    root.style.setProperty("--primaryColor", brand.base);
     // Whitelabel: a cor do tenant substitui apenas a marca. Os sinais de
     // conexão, entrega e falha permanecem constantes — são semântica de
     // produto, não identidade de cliente.
-    if (tenantColor) {
-      root.style.setProperty("--brand-base", tenantColor);
-    }
-  }, [primaryColorLight, primaryColorDark, mode]);
+    //
+    // A escala inteira é reescrita, não só a base: com apenas `--brand-base`
+    // trocada, o hover e o estado ativo continuariam no azul do token e o botão
+    // mudaria de cor ao passar o mouse.
+    root.style.setProperty("--brand-base", brand.base);
+    root.style.setProperty("--brand-hover", brand.hover);
+    root.style.setProperty("--brand-active", brand.active);
+    root.style.setProperty("--brand-soft", brand.soft);
+    root.style.setProperty("--on-brand", brand.onBrand);
+  }, [tenantColor, mode]);
 
   useEffect(() => {
     async function fetchVersionData() {

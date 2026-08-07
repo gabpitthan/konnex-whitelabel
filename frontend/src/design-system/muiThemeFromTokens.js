@@ -1,4 +1,5 @@
 import { themes, staticTokens } from "./tokens";
+import { resolveBrand } from "./brand";
 
 /**
  * Constrói a fatia de tema do Material UI v4 a partir dos tokens.
@@ -12,12 +13,15 @@ import { themes, staticTokens } from "./tokens";
  * Alimentando o tema v4 daqui, uma tela ainda não migrada já herda a nova
  * identidade em cor e tipografia, mesmo sem ninguém tocar no código dela.
  */
-export const muiPaletteFromTokens = (mode = "light") => {
+export const muiPaletteFromTokens = (mode = "light", tenantColor) => {
   const t = themes[mode] || themes.light;
+  // A cor do tenant precisa chegar ao `primary` do MUI: é ele que pinta botão,
+  // aba, link e ícone nas telas ainda não migradas, ou seja, quase todas.
+  const brand = resolveBrand(mode, tenantColor);
 
   return {
     type: mode,
-    primary: { main: t["brand-base"], contrastText: t["on-brand"] },
+    primary: { main: brand.base, contrastText: brand.onBrand },
     // `secondary` é neutro, não verde. O código legado usa `color="secondary"`
     // em dezenas de ícones de ação; apontá-lo para um sinal pintava a
     // aplicação inteira de verde e roubava o significado do sinal de conexão.
@@ -38,12 +42,13 @@ export const muiPaletteFromTokens = (mode = "light") => {
     divider: t["border-subtle"],
 
     // Chaves não padronizadas que o código legado consome direto do tema.
-    // Mantidas para não quebrar telas ainda não migradas.
-    textPrimary: t["text-brand"],
-    borderPrimary: t["border-focus"],
+    // Mantidas para não quebrar telas ainda não migradas. Estas três eram a cor
+    // do tenant antes do design system, então seguem a marca quando há tenant.
+    textPrimary: brand.isTenant ? brand.base : t["text-brand"],
+    borderPrimary: brand.isTenant ? brand.base : t["border-focus"],
     dark: { main: t["text-primary"] },
     light: { main: t["surface-sunken"] },
-    fontColor: t["text-brand"],
+    fontColor: brand.isTenant ? brand.base : t["text-brand"],
     tabHeaderBackground: t["surface-sunken"],
     optionsBackground: t["surface-sunken"],
     fancyBackground: t["surface-page"],

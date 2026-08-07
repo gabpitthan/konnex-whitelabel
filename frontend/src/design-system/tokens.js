@@ -150,6 +150,7 @@ const typography = {
   "text-lg": "17px",
   "text-xl": "20px",
   "text-2xl": "24px",
+  "text-3xl": "28px",
   "text-metric": "28px",
 
   "leading-tight": "1.25",
