@@ -9,8 +9,8 @@ funcionalidades.
 1. Pesquise issues e pull requests existentes.
 2. Para mudanças relevantes, abra uma issue descrevendo problema, impacto e
    evidência; não publique dados reais.
-3. Leia `AGENTS.md`, `docs/DEVELOPMENT_WORKFLOW.md`,
-   `docs/DEFINITION_OF_DONE.md` e `docs/project/CURRENT.md`.
+3. Leia `CLAUDE.md` (bootloader do ENGINEERING OS e definição de pronto),
+   `docs/DEVELOPMENT_WORKFLOW.md` e `docs/project/CURRENT.md`.
 4. Baseie tuning, cache ou índices em medição reproduzível, não em suposição.
 
 ## Desenvolvimento

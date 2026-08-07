@@ -127,7 +127,7 @@ scripts/quality-gate.sh
 Mudanças de banco exigem backup, restauração isolada, `up/down/up`, prova com
 dado sintético e plano de rollback. Mudanças de interface exigem navegação
 desktop/mobile, console/rede e estados de erro/vazio/loading. A definição
-completa está em [DEFINITION_OF_DONE.md](./docs/DEFINITION_OF_DONE.md).
+completa está em [CLAUDE.md](./CLAUDE.md), seção "Definição de pronto".
 
 ## Organização do repositório
 

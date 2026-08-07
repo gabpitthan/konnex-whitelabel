@@ -78,4 +78,4 @@ bash -n "$PROJECT_DIR/scripts/postgres-observability-report.sh"
 docker compose build backend frontend
 
 echo "Gate de compilação aprovado."
-echo "A entrega ainda exige o gate de runtime descrito em docs/DEFINITION_OF_DONE.md: navegador autenticado, console/rede, responsividade, observabilidade e smoke."
+echo "A entrega ainda exige o gate de runtime descrito em CLAUDE.md (secao "Definicao de pronto"): navegador autenticado, console/rede, responsividade, observabilidade e smoke."

@@ -2,7 +2,7 @@
 
 Este documento permite ao usuário trabalhar por pedidos simples, como “corrija o login” ou “adicione filtros”.
 
-O protocolo completo e vinculante está em `docs/JARVIS_ENGINEERING_SYSTEM.md`. Este arquivo resume o fluxo; em divergência, prevalece o protocolo Jarvis.
+O protocolo completo e vinculante é o ENGINEERING OS em `.engineering/jarvis/`, carregado pelo `CLAUDE.md`. Este arquivo resume o fluxo; em divergência, prevalece o ENGINEERING OS.
 
 ## Ciclo automático
 

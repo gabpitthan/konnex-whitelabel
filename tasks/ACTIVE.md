@@ -950,7 +950,7 @@ Transformar a aplicação em um novo CRM, eliminando a arquitetura visual e de u
 
 ## Nova diretriz permanente
 
-Operar como um time completo por meio de `docs/JARVIS_ENGINEERING_SYSTEM.md`. Antes de novas evoluções, tratar falhas P0 confirmadas de Socket.IO, multi-tenancy e sessões WhatsApp.
+Operar como um time completo por meio do ENGINEERING OS (`.engineering/jarvis/`, ver `CLAUDE.md`). Antes de novas evoluções, tratar falhas P0 confirmadas de Socket.IO, multi-tenancy e sessões WhatsApp.
 
 ## Feedback 1.7
 

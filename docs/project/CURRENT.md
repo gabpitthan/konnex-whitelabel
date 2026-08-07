@@ -247,7 +247,7 @@ abertas, atrás dos itens acima por decisão de prioridade.
 - Problemas: `docs/project/ISSUES.md`
 - Testes: `docs/project/TEST_MATRIX.md`
 - Operação: `docs/project/RUNBOOK.md`
-- Sistema Jarvis: `docs/JARVIS_ENGINEERING_SYSTEM.md`
+- Engenharia (autoridade): `CLAUDE.md` → `.engineering/jarvis/` (ENGINEERING OS)
 - Pesquisa: `docs/research/WHATICKET_RELIABILITY_2026.md`
 - Backlog de confiabilidade: `docs/project/RELIABILITY_BACKLOG.md`
 - Decisões: `docs/decisions/`

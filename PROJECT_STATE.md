@@ -119,17 +119,17 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 - Arquitetura: `docs/project/ARCHITECTURE.md`
 - Operação: `docs/project/RUNBOOK.md`
 - Workflow Codex: `docs/DEVELOPMENT_WORKFLOW.md`
-- Sistema Jarvis: `docs/JARVIS_ENGINEERING_SYSTEM.md`
+- Engenharia (autoridade): `CLAUDE.md` → `.engineering/jarvis/` (ENGINEERING OS)
 - Pesquisa Whaticket/Baileys: `docs/research/WHATICKET_RELIABILITY_2026.md`
 - Backlog de confiabilidade: `docs/project/RELIABILITY_BACKLOG.md`
-- Definição de pronto: `docs/DEFINITION_OF_DONE.md`
+- Definição de pronto: `CLAUDE.md`, seção "Definição de pronto"
 - Tarefa ativa: `tasks/ACTIVE.md`
 - Decisões: `docs/decisions/`
 - Histórico: `CHANGELOG.md` e `docs/versions/`
 
 ## Governança
 
-- Regras permanentes: `AGENTS.md`.
+- Regras permanentes: `CLAUDE.md` (fatos do projeto) + `.engineering/jarvis/` (política de engenharia).
 - Fonte da versão: `VERSION`.
 - Cada lote funcional incrementa uma subversão e sincroniza frontend/backend.
 - Cada subversão tem `docs/versions/X.Y/README.md`.
@@ -139,7 +139,7 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
 
 ## Continuidade
 
-Toda nova sessão deve ler `AGENTS.md`, este índice e `docs/project/CURRENT.md`. Toda entrega relevante deve atualizar apenas as fontes afetadas, removendo estados obsoletos em vez de acumular contradições.
+Toda nova sessão deve ler `CLAUDE.md`, este índice e `docs/project/CURRENT.md`. Toda entrega relevante deve atualizar apenas as fontes afetadas, removendo estados obsoletos em vez de acumular contradições.
 
 ## Prioridade de engenharia atual
 
