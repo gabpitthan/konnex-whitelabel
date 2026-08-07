@@ -5,3 +5,7 @@ backend/node_modules/
 backend/dist/
 frontend/node_modules/
 frontend/build/
+
+# ENGINEERING OS / JARVIS: symlink local para /home/claudeuser/jarvis-programador.
+# A politica e versionada em gabpitthan/jarvis-programador, nao aqui.
+.engineering/

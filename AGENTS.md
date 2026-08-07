@@ -7,12 +7,12 @@ Antes de qualquer alteração:
 3. Tratar este projeto como uma plataforma multiempresa: toda leitura e mutação de dados de tenant deve incluir `companyId`.
 4. Não modificar nem reiniciar outros projetos do servidor.
 5. Registrar a tarefa atual em `tasks/ACTIVE.md` quando houver implementação.
-6. Aplicar o sistema operacional em `docs/JARVIS_ENGINEERING_SYSTEM.md`.
+6. Aplicar o ENGINEERING OS em `.engineering/jarvis/` (ver o JARVIS BOOT no fim deste arquivo e a precedência em `CLAUDE.md`). `docs/JARVIS_ENGINEERING_SYSTEM.md` continua como detalhe operacional do projeto, mas não é mais a autoridade em divergência.
 
 ## Operação autônoma
 
 - Interpretar prompts simples e descobrir sozinho os componentes, rotas, banco, riscos e testes envolvidos.
-- Para tarefas grandes, usar subagentes com escopos independentes: engenharia, QA, segurança/multitenancy, operações ou UX. O agente principal sempre integra e valida.
+- Para tarefas grandes, a topologia (SOLO / ASSISTED / SWARM) é decidida pelo ENGINEERING OS via `modules/orchestration.md`, não por uma lista fixa de subagentes — os antigos foram isolados em 2026-08-07. Os papéis continuam existindo como funções (engenharia, QA, segurança/multitenancy, operações, UX) em `runtime/ROLE_REGISTRY.md`; auditores permanecem somente-leitura na primeira passagem. O orquestrador sempre integra e valida.
 - Trabalhar em ciclos finitos: reproduzir → diagnosticar → corrigir → testar → revisar. Após três tentativas sem progresso, documentar evidências e o bloqueio real.
 - Não pedir ao usuário decisões técnicas rotineiras que possam ser determinadas pelo código e pela arquitetura.
 - Não ampliar o escopo para ações externas irreversíveis, dados reais de clientes ou outros projetos.
@@ -113,3 +113,18 @@ Quando o usuário disser que a versão está pronta:
 - Cada lote aprovado só termina após push para `main` de
   `gabpitthan/konnex-whitelabel` e verificação do SHA remoto. Este deve
   permanecer o único repositório público da conta salvo nova ordem explícita.
+
+# JARVIS BOOT
+
+Este repositório usa o ENGINEERING OS / JARVIS.
+
+Antes de qualquer tarefa:
+
+1. leia `.engineering/jarvis/JARVIS_CORE.md` por completo e execute o BOOT definido nele;
+2. carregue `.engineering/jarvis/ENGINEERING_OS_INDEX.md`;
+3. classifique a task T0–T4 e selecione módulos por `.engineering/jarvis/runtime/MODULE_ROUTER.md`;
+4. para T2+, faça o lookup dirigido da Spec segundo `.engineering/jarvis/runtime/SPEC_LOOKUP_PROTOCOL.md` e preencha o Policy Coverage antes de mudança material;
+5. decida SOLO / ASSISTED / SWARM conforme a topologia da task e as capabilities reais;
+6. verifique o resultado real antes de declarar DONE.
+
+Não duplique a política do ENGINEERING OS neste arquivo. Ele é bootloader.
