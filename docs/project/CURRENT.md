@@ -1,13 +1,42 @@
 # Estado atual e handoff
 
-Atualizado em: 2026-08-03
-Versão ativa: 1.31 (publicada)
+Atualizado em: 2026-08-07
+Versão ativa: 1.32 (em validação de produção)
 
 ## Em foco
 
-Programa P0/P1 de integridade e escala. A 1.31 remove `request` do webhook
-configurável e o conduz pelo egress SSRF-safe já validado. Audit, gate 59/217,
-builds, deploy, smoke e restart foram aprovados.
+**1.32 — identidade de contato (LID).** É bloqueador de venda: contato que
+escreve para o CRM entrava sem telefone utilizável, não deduplicava com a base
+importada e quebrava campanha, relatório e integração.
+
+A primeira correção cobriu só o caminho da mensagem e **não bastou** — com ela
+no ar desde 00:47, a produção criou `100236483629289@lid` às 06:54, pelo handler
+`contacts.update`. A segunda parte fecha esse caminho e mais dois
+(`verifyRecentCampaign`, `typebotListener`). Ver `docs/versions/1.32/README.md`.
+
+Prova que falta: uma mensagem recebida de uma conta com LID deve cair no contato
+do telefone, e nenhum contato novo pode surgir por troca de foto de perfil.
+
+## Prioridade declarada
+
+Produto funcionando e clientes primeiro; melhorias e segurança depois. Rodar
+`scripts/product-state.sh` antes de escolher qualquer lote — o baseline de
+produto, não `ROADMAP.md`/`ISSUES.md`, decide a prioridade.
+
+## Redesign de UI/UX (aberto, ainda não é versão)
+
+Design system versionado em `frontend/src/design-system/` (ADR-0004). A alavanca
+são os overrides globais do MUI v4 derivados dos tokens: padronizam as 44 telas
+de uma vez, sem tocar nos 211 arquivos que usam v4.
+
+Entregue: tokens com 28/28 pares aprovados em WCAG AA, overrides globais,
+navegação reescrita, primitivos, i18n em pt por padrão, `styles/styles.js`
+neutralizado como segunda paleta, cor de whitelabel do tenant devolvida ao tema.
+
+Falta para virar versão: **nenhuma tela real usa os primitivos** — só a vitrine
+em `/design-system` —, então o critério de aceite da tela-piloto não está
+cumprido. Restam ~414 cores hardcoded (eram 708). Dashboard e Tickets/Chat não
+foram tratados.
 
 ## Estado operacional
 
@@ -170,9 +199,25 @@ builds, deploy, smoke e restart foram aprovados.
 
 ## Próximo passo
 
-Selecionar a próxima família vulnerável alcançável. Em paralelo, coordenar a
-rotação do cliente API e o canário WhatsApp real sem liberar cluster
-prematuramente.
+1. Provar a 1.32 em produção: mensagem recebida de conta com LID deve cair no
+   contato do telefone, e troca de foto de perfil não pode criar contato novo.
+2. Fechar o redesign com uma tela real migrada para os primitivos — hoje só a
+   vitrine os consome, e sem isso a cobertura não é mensurável.
+3. Jornada WhatsApp que falta: mídia (imagem, áudio, documento) e grupos.
+4. Isolamento multiempresa (SEC-001): existe uma só empresa em produção. Criar
+   uma segunda por signup e provar que nenhuma enxerga dado da outra. É o
+   pré-requisito real para vender multiempresa.
+5. SMTP: `MAIL_HOST/USER/PASS/FROM` vazios, então "esqueci minha senha" e
+   convite de usuário não funcionam.
+6. Higiene pré-cliente: o seed `Empresa 1` e o admin semeado precisam sair.
+7. Substituir `scripts/smoke-test.sh`, que só faz `curl /version` + `curl --head`
+   — exatamente o "HTTP 200 não prova nada" que o `CLAUDE.md` proíbe, e que
+   também não detectaria um bundle mais velho que o código.
+8. Observabilidade: `SENTRY_DSN` vazio, `/client-errors` não persiste, log sem
+   request ID, sem métricas e sem alerta.
+
+A rotação do cliente API e as famílias de vulnerabilidade restantes continuam
+abertas, atrás dos itens acima por decisão de prioridade.
 
 ## Fontes
 

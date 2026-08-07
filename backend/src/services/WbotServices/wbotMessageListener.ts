@@ -26,7 +26,7 @@ import {
   generateWAMessageFromContent
 } from "@whiskeysockets/baileys";
 import type { WAMessageKey } from "@whiskeysockets/baileys";
-import { resolvePhoneJid } from "../../helpers/ResolveContactJid";
+import { resolvePhoneJid, isUnresolvedLid } from "../../helpers/ResolveContactJid";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -35,6 +35,7 @@ import CreateMessageService from "../MessageServices/CreateMessageService";
 import PersistFencedMessageService from "../MessageServices/PersistFencedMessageService";
 import logger from "../../utils/logger";
 import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateContactService";
+import FindWhatsappContactByJidService from "../ContactServices/FindWhatsappContactByJidService";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import { debounce } from "../../helpers/Debounce";
@@ -5087,7 +5088,17 @@ const verifyRecentCampaign = async (
     return;
   }
   if (!message.key.fromMe) {
-    const number = message.key.remoteJid.replace(/\D/g, "");
+    // A campanha foi disparada para o telefone. Se a resposta chega por LID e
+    // os digitos do LID forem usados aqui, a confirmacao nunca casa e a
+    // campanha trava sem erro visivel.
+    const identity = resolvePhoneJid(
+      message.key.remoteJid,
+      message.key as WAMessageKey
+    );
+
+    if (isUnresolvedLid(identity)) return;
+
+    const number = (identity || message.key.remoteJid).replace(/\D/g, "");
     const campaignShipping = await ConfirmCampaignShippingService({
       companyId,
       number
@@ -5334,27 +5345,50 @@ const wbotUserJid = wbot?.user?.id;
   //   console.log(events)
   // })
 
+  // Troca de foto de perfil. O Baileys 6.7.22 emite este evento apenas como
+  // `{ id, imgUrl }` (`Socket/messages-recv.js`): sem `senderPn`, sem `jid`,
+  // sem nome. Numa conta com LID o `id` e `<numero>@lid`, e nao ha como
+  // descobrir o telefone a partir dele.
+  //
+  // A versao anterior criava contato aqui com `name` e `number` iguais aos
+  // digitos do JID. Isso inventava contato para quem nunca falou com o CRM, com
+  // nome numerico, e no caso do LID gravava uma identidade que nunca deduplica
+  // com a base importada — foi o que produziu `100236483629289@lid` em
+  // producao. Trocar a foto de perfil nao e motivo para criar contato: este
+  // handler passa a so atualizar quem ja existe no tenant.
   wbot.ev.on("contacts.update", (contacts: any) => {
     contacts.forEach(async (contact: any) => {
       if (!contact?.id) return;
+      if (typeof contact.imgUrl === "undefined") return;
 
-      if (typeof contact.imgUrl !== "undefined") {
+      try {
+        const existing = await FindWhatsappContactByJidService(
+          contact.id,
+          companyId
+        );
+
+        if (!existing) return;
+
         const newUrl =
           contact.imgUrl === ""
             ? ""
             : await wbot!.profilePictureUrl(contact.id!).catch(() => null);
-        const contactData = {
-          name: contact.id.replace(/\D/g, ""),
-          number: contact.id.replace(/\D/g, ""),
-          isGroup: contact.id.includes("@g.us") ? true : false,
-          companyId: companyId,
-          remoteJid: contact.id,
+
+        // Nome e numero vem do contato ja gravado, nao do JID: o JID sobrescreveria
+        // o nome real por uma sequencia de digitos.
+        await CreateOrUpdateContactService({
+          name: existing.name,
+          number: existing.number,
+          isGroup: existing.isGroup,
+          companyId,
+          remoteJid: existing.remoteJid || contact.id,
           profilePicUrl: newUrl,
           whatsappId: wbot.id,
-          wbot: wbot
-        };
-
-        await CreateOrUpdateContactService(contactData);
+          wbot
+        });
+      } catch (err) {
+        Sentry.captureException(err);
+        logger.error(`Error updating contact picture. Err: ${err}`);
       }
     });
   });

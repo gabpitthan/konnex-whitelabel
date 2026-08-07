@@ -13,7 +13,9 @@
 | WA-002 | Crítico | parcial | Auth state e lifecycle possuem lease/fencing; falta propagar o fence às transações de domínio e completar o registry de disposers. |
 | JOB-001 | Alto | parcial | Retenção/telemetria/shutdown e claim de Schedule chegaram; campanha e mensagem avulsa ainda precisam idempotência por efeito externo. |
 | DB-001 | Alto | confirmado | Existem queries interpoladas e fluxos críticos sem garantia explícita de transação/afterCommit. |
-| WA-003 | Alto | planejado | Baileys 6.x está sem suporte; v7 exige laboratório por breaking changes de LID, ESM, auth e protobuf. |
+| WA-003 | Alto | mitigado | A identidade LID foi resolvida na 1.32 lendo `key.senderPn`/`participantPn` do próprio 6.7.22, sem esperar a v7. O upgrade para v7 continua pendente por suporte, e exige laboratório (ESM, auth, protobuf). |
+| WA-005 | Alto | aberto | Contatos 2 e 3 de produção já estão gravados com LID no campo `number`. Não há migration de merge: mesclar contato automaticamente é arriscado. Reavaliar quando houver base acumulada. |
+| WA-006 | Médio | aberto | `ImportContactsService` (importação da agenda do telefone) e `groups.update` ainda derivam `number` direto do id. Não exercitados em produção. |
 | RT-001 | Médio | aberto | Mais de cem emissores usam namespaces numéricos e dependem temporariamente da normalização central para `/workspace-N`. |
 | TEST-001 | Médio | aberto | QA Socket.IO runtime ainda é temporário; falta incorporá-lo como E2E permanente com dois tenants isolados. |
 | WA-004 | Alto | mitigado | `server-cluster.ts` falha explicitamente; escala horizontal aguarda CAS transacional nas mutações de domínio. |

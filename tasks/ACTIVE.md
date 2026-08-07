@@ -1,8 +1,56 @@
 # Tarefa ativa
 
-## Versão 1.33 — design system próprio (fundação do redesign)
+## Versão 1.32 — identidade de contato quando o WhatsApp entrega LID
 
-Estado: planejado, não iniciado
+Estado: código completo, aguardando prova em produção
+
+### Pedido e por que este lote
+
+`scripts/product-state.sh` mostrou 2 de 3 contatos gravados com LID no lugar do
+telefone. É bloqueador de venda: contato que escreve para o CRM entra sem
+telefone utilizável, nunca deduplica com a base importada e quebra campanha,
+relatório e integração externa.
+
+### O que a primeira tentativa errou
+
+Cobriu só `getContactMessage`/`getSenderMessage`. Implantada às 00:47 de
+2026-08-07; às 06:54, com ela no ar, a produção criou `100236483629289@lid` por
+outro caminho — o handler `contacts.update`, que criava contato a partir de
+troca de foto de perfil com nome e número iguais aos dígitos do JID.
+
+A lição é sobre o gate, não sobre o código: "correção implantada" foi tratada
+como conclusão sem que ninguém reconsultasse o dado de produção.
+
+### Resultado observável esperado
+
+- mensagem recebida de conta com LID cai no contato do telefone;
+- troca de foto de perfil não cria contato novo;
+- `product-state.sh` para de crescer no contador de contatos LID.
+
+### Superfícies afetadas
+
+`helpers/ResolveContactJid.ts`, `services/ContactServices/FindWhatsappContactByJidService.ts`,
+`wbotMessageListener.ts` (`getContactMessage`, `getSenderMessage`,
+`contacts.update`, `verifyRecentCampaign`) e `typebotListener.ts`.
+Sem migration, sem mudança de schema, índice, cache ou dado.
+
+### Estratégia de teste
+
+16 testes nos dois specs, ambos no `quality-gate.sh`; `tsc --noEmit` limpo.
+A prova final é de produção e não pode ser substituída por teste.
+
+### Fora deste lote
+
+- merge dos contatos LID já gravados (WA-005): mesclar automaticamente é
+  arriscado e não há base acumulada;
+- grupos e `ImportContactsService` (WA-006);
+- upgrade do Baileys para v7.
+
+---
+
+## Redesign de UI/UX — aberto, ainda não é versão
+
+Estado: fundação entregue, critério de aceite não cumprido
 
 ### 1. Objetivo do usuário
 
@@ -44,6 +92,26 @@ quebrar nenhuma das 44 telas ainda não migradas.
   `prefers-reduced-motion` respeitado.
 - Uma tela-piloto migrada ponta a ponta, funcionando em desktop, tablet e mobile.
 - Nenhuma tela não migrada apresenta regressão visual ou funcional.
+
+### 4b. Estado dos critérios em 2026-08-07
+
+| Critério | Estado |
+|---|---|
+| Tokens com tema claro e escuro | cumprido, em `design-system/tokens.js` |
+| Primitivos sem MUI | cumprido no código; `Dialog` e `Tooltip` não existem |
+| Densidade operacional | cumprido nos overrides globais do MUI |
+| Contraste 4.5:1 verificado | cumprido, 28/28 por teste automatizado |
+| **Tela-piloto migrada ponta a ponta** | **não cumprido** |
+| Nenhuma regressão em tela não migrada | não verificado em navegador desde o último lote de edições |
+
+O critério da tela-piloto é o que impede este lote de virar versão. Os primitivos
+existem e são consumidos **apenas** pela vitrine em `pages/DesignSystem` —
+nenhuma tela real os usa, e `PageHeader` não é importado por nenhuma página. Sem
+isso a cobertura do redesign não é mensurável, que era exatamente a razão de o
+design system existir.
+
+Ainda restam ~414 cores hardcoded no frontend (eram 708). Dashboard e
+Tickets/Chat não foram tratados.
 
 ### 5. Superfícies afetadas
 

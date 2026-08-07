@@ -49,6 +49,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/services/ApiServices/__tests__/ResolveApiCredentialService.spec.ts \
   src/services/ApiServices/__tests__/SerializeApiWhatsappService.spec.ts \
   src/services/ContactServices/__tests__/UpsertWhatsappContactService.spec.ts \
+  src/services/ContactServices/__tests__/FindWhatsappContactByJidService.spec.ts \
   src/services/CampaignService/__tests__/CampaignDispatchStateServices.spec.ts \
   src/services/CampaignService/__tests__/CampaignQueueContract.spec.ts \
   src/services/CampaignService/__tests__/CampaignTenantContract.spec.ts \

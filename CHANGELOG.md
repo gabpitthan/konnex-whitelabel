@@ -2,6 +2,40 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.32] — 2026-08-07 — em validação de produção
+
+### Entregue no código
+
+- `helpers/ResolveContactJid.ts` resolve o telefone real a partir de
+  `key.senderPn` / `key.participantPn` quando o remetente chega como LID;
+- integrado em `getContactMessage` e `getSenderMessage`;
+- `contacts.update` deixa de criar contato e só atualiza a foto de quem já
+  existe no tenant, via `FindWhatsappContactByJidService`;
+- `verifyRecentCampaign` e `typebotListener` resolvem o remetente antes de casar
+  confirmação de campanha e antes de montar o destino `${number}@c.us`.
+
+### Evidência atual
+
+O problema é de produção, não hipotético: a mesma pessoa virou dois contatos com
+tickets separados — `558896090796` pelo painel e `210986577449008@lid` ao
+receber. A primeira correção, só do caminho da mensagem, foi implantada às 00:47
+e às 06:54 a produção ainda criou `100236483629289@lid`, por outro caminho. Foi
+esse terceiro registro que revelou o handler `contacts.update`, que criava
+contato a partir de troca de foto de perfil com nome e número iguais aos dígitos
+do JID.
+
+16 testes aprovados nos dois specs, `tsc --noEmit` limpo, ambos incluídos no
+`quality-gate.sh`.
+
+### Limite e rollback
+
+Não exige Baileys 7: o 6.7.22 já entrega o telefone na chave da mensagem. O que
+ele não tem é armazenamento de mapeamento LID↔telefone, então os caminhos que
+recebem só o JID não resolvem nada — e a decisão correta neles é não criar
+identidade, não inventá-la. Sem migration de merge para os LIDs já gravados.
+Grupos e `ImportContactsService` ficam fora. Rollback é a imagem anterior, sem
+reversão de dados.
+
 ## [1.31] — 2026-08-03 — publicada
 
 ### Entregue no código

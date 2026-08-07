@@ -2,6 +2,11 @@ import { externalRestrictedJsonClient } from "../../libs/httpClients";
 import Ticket from "../../models/Ticket";
 import QueueIntegrations from "../../models/QueueIntegrations";
 import { WASocket, delay, proto } from "@whiskeysockets/baileys";
+import type { WAMessageKey } from "@whiskeysockets/baileys";
+import {
+    resolvePhoneJid,
+    isUnresolvedLid
+} from "../../helpers/ResolveContactJid";
 import { getBodyMessage } from "../WbotServices/wbotMessageListener";
 import logger from "../../utils/logger";
 import { isNil } from "lodash";
@@ -40,7 +45,19 @@ const typebotListener = async ({
         typebotRestartMessage
     } = typebot;
 
-    const number = msg.key.remoteJid.replace(/\D/g, '');
+    // `number` vira destino em `${number}@c.us` mais abaixo. Numa conta com LID
+    // os digitos de `remoteJid` nao sao um telefone, e a resposta do bot sairia
+    // endereçada a um numero que nao existe.
+    const identity = resolvePhoneJid(msg.key.remoteJid, msg.key as WAMessageKey);
+
+    if (isUnresolvedLid(identity)) {
+        logger.warn(
+            "Typebot ignorado: remetente sem telefone resolvido (LID)."
+        );
+        return;
+    }
+
+    const number = (identity || msg.key.remoteJid).replace(/\D/g, '');
 
     let body = getBodyMessage(msg);
 
