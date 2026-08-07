@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img alt="Versão 1.35" src="https://img.shields.io/badge/vers%C3%A3o-1.35-123d37"></a>
+  <a href="./CHANGELOG.md"><img alt="Versão 1.36" src="https://img.shields.io/badge/vers%C3%A3o-1.36-123d37"></a>
   <a href="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml"><img alt="Quality Gate" src="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml/badge.svg"></a>
   <a href="./backend/Dockerfile"><img alt="Node.js 20" src="https://img.shields.io/badge/Node.js-20-337a5b?logo=node.js&amp;logoColor=white"></a>
   <a href="./compose.yaml"><img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&amp;logoColor=white"></a>
@@ -117,17 +117,31 @@ e as [decisões registradas](./docs/decisions/).
 ```bash
 git clone https://github.com/gabpitthan/konnex-whitelabel.git
 cd konnex-whitelabel
-cp .env.example .env
+./instalar.sh
 ```
 
-Preencha todos os valores `CHANGE_ME` do `.env`. Gere segredos independentes e
-longos; nunca reutilize tokens de produção nem versione o arquivo.
+O instalador faz **quatro perguntas** — domínio do painel, domínio da API,
+e-mail e senha do administrador — e gera o resto: os dez segredos criptográficos,
+o `.env` com permissão `600` e um `Caddyfile` para HTTPS automático.
+
+Antes de subir ele confere Docker, memória, disco e portas. Depois de subir,
+verifica de verdade: versão da API, banco e Redis conectados, painel
+respondendo e **login do administrador funcionando**. Se o login falhar, ele
+falha — em vez de dizer "instalado" com o banco vazio.
+
+Faltam dois passos manuais, que dependem de DNS: apontar os dois domínios para
+o servidor e ativar o Caddy com o arquivo já gerado.
+
+Instalação manual, se preferir controlar cada variável:
 
 ```bash
+cp .env.example .env      # preencha os CHANGE_ME
 docker compose config --quiet
-docker compose up --build -d
-docker compose ps
+RUN_DB_SEEDS=true docker compose up --build -d
 ```
+
+A aplicação **não sobe** com segredo ausente ou com valor de exemplo, e a
+mensagem de erro ensina a gerar um forte.
 
 Por padrão, o painel fica em `http://127.0.0.1:8090` e a API em
 `http://127.0.0.1:3007`. PostgreSQL e Redis permanecem apenas na rede interna

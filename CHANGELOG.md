@@ -2,6 +2,28 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.36] — 2026-08-08 — instalador de um comando
+
+### Adicionado
+
+- `instalar.sh` — quatro perguntas (domínio do painel, domínio da API, e-mail e
+  senha do admin) e o resto é gerado: dez segredos criptográficos, `.env` com
+  permissão 600 e um `Caddyfile` para HTTPS automático. Confere Docker,
+  memória, disco e portas antes de subir.
+- Verificação real ao final: versão da API, banco e Redis conectados, painel
+  respondendo e **login do administrador funcionando**.
+
+### Corrigido
+
+- `compose.yaml` não repassava `RUN_DB_SEEDS` ao container. O entrypoint do
+  backend depende dessa variável para criar empresa, plano, usuário e settings
+  iniciais — sem ela a instalação terminava com o banco **vazio** e ninguém
+  conseguia entrar. Encontrado executando o instalador de ponta a ponta numa
+  cópia isolada; o texto na tela dizia "CRM instalado".
+
+Este defeito é a razão de o instalador terminar tentando um login de verdade em
+vez de conferir apenas se o serviço respondeu.
+
 ## [1.35] — 2026-08-07 — implantada e verificada
 
 Lote voltado a preparar o produto para ser **vendido como código-fonte** e

@@ -72,6 +72,11 @@ services:
       DB_DIALECT: postgres
       REDIS_URI: redis://:${REDIS_PASS}@redis:6379
       REDIS_URI_ACK: ""
+      # O entrypoint do backend só roda os seeds quando esta variável chega ao
+      # container. Sem esta linha, `export RUN_DB_SEEDS=true` no shell não tinha
+      # efeito: a instalação terminava com o banco vazio e ninguém conseguia
+      # entrar. Descoberto executando o instalador de ponta a ponta.
+      RUN_DB_SEEDS: ${RUN_DB_SEEDS:-false}
       CHROME_BIN: /usr/bin/chromium
       PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
     ports:
