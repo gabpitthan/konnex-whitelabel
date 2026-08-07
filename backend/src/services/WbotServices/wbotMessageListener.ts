@@ -25,6 +25,8 @@ import {
   generateWAMessageContent,
   generateWAMessageFromContent
 } from "@whiskeysockets/baileys";
+import type { WAMessageKey } from "@whiskeysockets/baileys";
+import { resolvePhoneJid } from "../../helpers/ResolveContactJid";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -523,19 +525,23 @@ const getSenderMessage = (
   const senderId =
     msg.participant || msg.key.participant || msg.key.remoteJid || undefined;
 
-  return senderId && jidNormalizedUser(senderId);
+  // Contas com LID entregam `<id>@lid` aqui; o telefone real vem na chave.
+  return senderId && resolvePhoneJid(senderId, msg.key as WAMessageKey);
 };
 
 const getContactMessage = async (msg: proto.IWebMessageInfo, wbot: Session) => {
   const isGroup = msg.key.remoteJid.includes("g.us");
-  const rawNumber = msg.key.remoteJid.replace(/\D/g, "");
+  const identity = isGroup
+    ? getSenderMessage(msg, wbot)
+    : resolvePhoneJid(msg.key.remoteJid, msg.key as WAMessageKey);
+  const rawNumber = (identity || msg.key.remoteJid).replace(/\D/g, "");
   return isGroup
     ? {
-        id: getSenderMessage(msg, wbot),
+        id: identity,
         name: msg.pushName
       }
     : {
-        id: msg.key.remoteJid,
+        id: identity,
         name: msg.key.fromMe ? rawNumber : msg.pushName
       };
 };

@@ -21,6 +21,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/database/migrations/__tests__/alignCampaignPendingIndex.spec.ts \
   src/database/migrations/__tests__/createDispatchReconciliationAudits.spec.ts \
   src/helpers/__tests__/useMultiFileAuthState.spec.ts \
+  src/helpers/__tests__/ResolveContactJid.spec.ts \
   src/jobs/__tests__/handleMessageAckQueue.spec.ts \
   src/jobs/__tests__/handleMessageQueue.spec.ts \
   src/libs/__tests__/redisPattern.spec.ts \
