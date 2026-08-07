@@ -2,7 +2,22 @@
 
 ## Versão 1.32 — identidade de contato quando o WhatsApp entrega LID
 
-Estado: código completo, aguardando prova em produção
+Estado: implantada em produção às 14:00 de 2026-08-07, aguardando tráfego real
+
+### Deploy (2026-08-07 14:00)
+
+Gate aprovado, imagens reconstruídas, `docker compose up -d --force-recreate`.
+Runtime verificado: `/version` 1.32, `/health/ready` 200, frontend 200,
+`FindWhatsappContactByJidService.js` presente no `dist/` em execução,
+`contacts.update` compilado retorna cedo sem criar contato, zero migrations
+pendentes, WhatsApp voltou a `CONNECTED` sozinho, bundle novo
+(`main.b191c00f.js`), login limpo em 1440×900 claro/escuro e 390×844 — sem erro
+de console, pageerror, request falho ou overflow horizontal.
+
+**Achado do dia:** a segunda parte estava commitada desde 13:15 e nunca havia
+sido construída. Produção rodava a imagem de 00:47 e respondia 1.31. "Commitado"
+não é "no ar": conferir `docker image inspect` e o `dist/` em execução antes de
+declarar um lote implantado.
 
 ### Pedido e por que este lote
 

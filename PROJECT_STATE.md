@@ -104,7 +104,11 @@ Modernizar e desenvolver a plataforma whitelabel de atendimento com WhatsApp e F
   (`contacts.update` de foto de perfil) deixaram de criar contato. O lote teve
   duas partes porque a primeira, já implantada, não impediu a produção de criar
   `100236483629289@lid` seis horas depois — a prova de produção é que revelou o
-  segundo caminho, não o teste.
+  segundo caminho, não o teste. A segunda parte foi implantada em 2026-08-07 às
+  14:00, depois de o estado real do runtime mostrar que ela estava commitada
+  desde 13:15 mas nunca construída: produção respondia 1.31 com a imagem de
+  00:47. Encerramento de lote passa a exigir conferir a imagem em execução, não
+  apenas o commit.
 
 ## Memória estruturada
 

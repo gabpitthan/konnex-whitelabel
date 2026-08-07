@@ -14,8 +14,27 @@ no ar desde 00:47, a produção criou `100236483629289@lid` às 06:54, pelo hand
 `contacts.update`. A segunda parte fecha esse caminho e mais dois
 (`verifyRecentCampaign`, `typebotListener`). Ver `docs/versions/1.32/README.md`.
 
-Prova que falta: uma mensagem recebida de uma conta com LID deve cair no contato
-do telefone, e nenhum contato novo pode surgir por troca de foto de perfil.
+**Implantada em 2026-08-07 às 14:00.** A segunda parte ficou commitada às 13:15 e
+**não foi construída nem implantada** até então: o backend em produção rodava a
+imagem de 00:47 (`/version` respondia 1.31, `dist/` sem
+`FindWhatsappContactByJidService`), e o bundle do frontend era de 12:02, anterior
+aos commits de design system e cor de marca. Ou seja, durante quase uma hora o
+handler que cria contato LID continuou ativo em produção com a correção "pronta"
+no repositório. É a mesma falha de gate registrada em `CLAUDE.md`: código
+commitado tratado como código no ar. **Verificar imagem em execução, e não só o
+commit, faz parte do encerramento de lote.**
+
+Verificado após o deploy: `/version` 1.32, `/health/ready` 200,
+`FindWhatsappContactByJidService.js` presente no `dist/` em execução, o
+`contacts.update` compilado retorna cedo quando o contato não existe, zero
+migrations pendentes, conexão WhatsApp voltou a `CONNECTED` sozinha após o
+restart (auth state v2 sobreviveu ao recreate do Redis) e o bundle servido passou
+a ser `main.b191c00f.js`, com o validador hex de `brand.js` presente.
+
+Prova que ainda falta, e que só o tráfego real produz: uma mensagem recebida de
+uma conta com LID deve cair no contato do telefone, e nenhum contato novo pode
+surgir por troca de foto de perfil. Baseline no momento do deploy: contatos 1
+(`558896090796`), 2 (`210986577449008@lid`) e 3 (`100236483629289@lid`).
 
 ## Prioridade declarada
 
@@ -201,6 +220,8 @@ foram tratados.
 
 1. Provar a 1.32 em produção: mensagem recebida de conta com LID deve cair no
    contato do telefone, e troca de foto de perfil não pode criar contato novo.
+   O código está no ar desde 14:00; falta o tráfego real. Depende de Gabriel
+   enviar uma mensagem de uma conta com LID para `558896397849`.
 2. Fechar o redesign com uma tela real migrada para os primitivos — hoje só a
    vitrine os consome, e sem isso a cobertura não é mensurável.
 3. Jornada WhatsApp que falta: mídia (imagem, áudio, documento) e grupos.
