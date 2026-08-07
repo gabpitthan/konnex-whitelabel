@@ -334,12 +334,11 @@ export const remove = async (
 };
 
 export const list = async (req: Request, res: Response): Promise<Response> => {
-  const { companyId } = req.query;
-  const { companyId: userCompanyId } = req.user;
+  // `companyId` da query permitia listar nome e e-mail dos usuários de qualquer
+  // empresa com um login comum. O tenant vem do token, sem exceção.
+  const { companyId } = req.user;
 
-  const users = await SimpleListService({
-    companyId: companyId ? +companyId : userCompanyId
-  });
+  const users = await SimpleListService({ companyId });
 
   return res.status(200).json(users);
 };

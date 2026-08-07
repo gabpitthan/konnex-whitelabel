@@ -7,7 +7,6 @@ import TicketsQueuesService from "../services/TicketServices/TicketsQueuesServic
 type IndexQuery = {
   initialDate: string;
   finalDate: string;
-  companyId: number | any;
 };
 
 type IndexQueryPainel = {
@@ -29,9 +28,13 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json(dashboardData);
 };
 
+// O tenant vem do token assinado, nunca da query. Aceitar `companyId` do cliente
+// permitia a qualquer chamador ler o relatório de qualquer empresa — e, como as
+// rotas destes dois handlers estavam sem `isAuth`, sem sequer estar autenticado.
 export const reportsUsers = async (req: Request, res: Response): Promise<Response> => {
 
-  const { initialDate, finalDate, companyId } = req.query as IndexQuery
+  const { initialDate, finalDate } = req.query as IndexQuery
+  const { companyId } = req.user;
 
   const { data } = await TicketsAttendance({ initialDate, finalDate, companyId });
 
@@ -41,7 +44,8 @@ export const reportsUsers = async (req: Request, res: Response): Promise<Respons
 
 export const reportsDay = async (req: Request, res: Response): Promise<Response> => {
 
-  const { initialDate, finalDate, companyId } = req.query as IndexQuery
+  const { initialDate, finalDate } = req.query as IndexQuery
+  const { companyId } = req.user;
 
   const { count, data } = await TicketsDayService({ initialDate, finalDate, companyId });
 

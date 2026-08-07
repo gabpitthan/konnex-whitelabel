@@ -37,6 +37,7 @@ docker run --rm whitelabel-whaticket-backend-test \
   src/middleware/__tests__/apiRateLimit.spec.ts \
   src/middleware/__tests__/tokenAuth.spec.ts \
   src/routes/__tests__/routeMountContract.spec.ts \
+  src/routes/__tests__/tenantAuthContract.spec.ts \
   src/routes/__tests__/bullBoardRemovalContract.spec.ts \
   src/routes/__tests__/dispatchReconciliationContract.spec.ts \
   src/services/ApiServices/__tests__/RecordApiUsageService.spec.ts \

@@ -3,7 +3,8 @@
 | ID | Severidade | Estado | Problema |
 |---|---|---|---|
 | ENG-001 | Alto | parcial | Há 46 suítes/178 testes no gate versionado e integrações Redis 7; a cobertura integral do CRM continua pendente. |
-| SEC-001 | Crítico | aberto | Isolamento multiempresa ainda não foi auditado/testado integralmente. |
+| SEC-001 | Crítico | parcial | A 1.33 fechou o que era comprovadamente explorável: duas rotas de relatório sem `isAuth` lendo `companyId` da query (leitura anônima de qualquer empresa), `/invoices/list` sem `isAuth`, `UserController.list` aceitando `companyId` do cliente, e três endpoints da API externa dependendo de um `COMPANY_TOKEN` global. Contrato de regressão no gate. **Continua aberto:** o teste negativo real entre duas empresas — depende de criar uma segunda empresa, e a produção tem uma só. |
+| SEC-002 | Alto | aberto | `apiCompanyRoutes` (criar/listar/remover empresas, planos, faturas, usuário por e-mail) é autenticado por um único `COMPANY_TOKEN` estático do ambiente: sem rotação, sem limite de taxa, sem auditoria. É a API de administração da plataforma e é intencionalmente cross-tenant, mas o segredo único é ponto de falha. Quem comprar o código herda esse desenho. |
 | WA-001 | Alto | parcial | QR funciona; envio, recebimento, mídia e reconexão aguardam teste real. |
 | FE-001 | Alto | aberto | Frontend possui 105 vulnerabilidades npm reportadas no build. |
 | BE-001 | Alto | parcial | Axios corrigido na 1.24, Bull Board removido na 1.30 e `request` removido na 1.31; imagem runtime caiu a 67/4 críticas. Outras famílias legadas permanecem. |

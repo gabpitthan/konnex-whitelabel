@@ -1,9 +1,24 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-08-07
-Versão ativa: 1.32 (em validação de produção)
+Versão ativa: 1.33 (implantada e verificada)
 
 ## Em foco
+
+**1.33 — vazamento entre empresas, fechado.** `/dashboard/ticketsUsers` e
+`/dashboard/ticketsDay` respondiam **sem autenticação** e liam `companyId` da
+query: qualquer pessoa na internet obtinha nome dos usuários e volume de
+atendimento de qualquer empresa. Comprovado contra a produção (HTTP 200 com
+dados reais) antes da correção, e fechado depois (401 nas mesmas requisições).
+
+Junto: `/invoices/list` sem `isAuth`; `UserController.list` aceitando
+`companyId` da query; e três endpoints da API externa saindo do `COMPANY_TOKEN`
+global para a credencial por empresa. Regressão de classe em
+`routes/__tests__/tenantAuthContract.spec.ts`, dentro do `quality-gate.sh`.
+
+Ver `docs/versions/1.33/README.md`.
+
+## Anterior
 
 **1.32 — identidade de contato (LID).** É bloqueador de venda: contato que
 escreve para o CRM entrava sem telefone utilizável, não deduplicava com a base

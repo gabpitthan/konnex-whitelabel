@@ -2,6 +2,34 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.33] — 2026-08-07 — implantada e verificada
+
+### Corrigido — P0, autenticação e isolamento multiempresa
+
+- `/dashboard/ticketsUsers` e `/dashboard/ticketsDay` estavam **sem `isAuth`**.
+  Com `companyId` vindo da query, qualquer pessoa na internet lia nome dos
+  usuários e volume de atendimento de qualquer empresa, sem token. Comprovado
+  contra a produção antes da correção (HTTP 200 com dados reais).
+- `/invoices/list` estava sem `isAuth`.
+- `UserController.list` aceitava `companyId` da query: um usuário logado
+  listava nome, e-mail e filas dos usuários de outra empresa.
+- `/api/contacts`, `/api/contacts-count` e `/api/messagesRange` saíram do
+  `COMPANY_TOKEN` global — um único segredo que permitia ler contatos e
+  mensagens de qualquer empresa — e passaram a usar a credencial por empresa,
+  revogável (`tokenAuth`).
+
+### Regressão
+
+- `src/routes/__tests__/tenantAuthContract.spec.ts` no `quality-gate.sh`: exige
+  autenticação em toda rota (com lista explícita de públicas) e proíbe qualquer
+  controller de ler `companyId` de `req.query`/`req.body`. Cobre a classe do
+  defeito, não as quatro instâncias corrigidas.
+
+### Não fecha
+
+SEC-001 continua aberto: o teste negativo real entre duas empresas depende de
+existir uma segunda empresa, e a produção tem uma só.
+
 ## [1.32] — 2026-08-07 — em validação de produção
 
 ### Entregue no código
