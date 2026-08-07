@@ -27,7 +27,7 @@ const UpdateUserService = async ({
   id,
   companyId
 }: Request): Promise<ScheduledMessages | undefined> => {
-  const schedule = await ShowService(id);
+  const schedule = await ShowService(id, companyId);
 
   const schema = Yup.object().shape({
     data_mensagem_programada: Yup.date().required(),

@@ -66,8 +66,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { tagId } = req.params;
+  const { companyId } = req.user;
 
-  const tag = await ShowService(tagId);
+  const tag = await ShowService(tagId, companyId);
 
   return res.status(200).json(tag);
 };
@@ -87,7 +88,7 @@ export const update = async (
   const tagData = req.body;
   const { companyId } = req.user;
 
-  const tag = await UpdateService({ tagData, id: tagId });
+  const tag = await UpdateService({ tagData, id: tagId, companyId });
 
   const io = getIO();
   io.of(String(companyId))
@@ -106,7 +107,7 @@ export const remove = async (
   const { tagId } = req.params;
   const { companyId } = req.user;
 
-  await DeleteService(tagId);
+  await DeleteService(tagId, companyId);
 
   const io = getIO();
   io.of(String(companyId))
@@ -163,7 +164,7 @@ export const removeContactTag = async (
     }
   });
 
-  const tag = await ShowService(tagId);
+  const tag = await ShowService(tagId, companyId);
 
   const io = getIO();
   io.of(String(companyId))

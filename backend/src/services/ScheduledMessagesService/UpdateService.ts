@@ -29,6 +29,7 @@ interface ScheduleData {
 interface Request {
   scheduleData: ScheduleData;
   id: string | number;
+  companyId: number;
   mediaPath: string | null,
   mediaName: string | null,
 }
@@ -36,10 +37,11 @@ interface Request {
 const UpdateUserService = async ({
   scheduleData,
   id,
+  companyId,
   mediaPath,
   mediaName,
 }: Request): Promise<ScheduledMessages | undefined> => {
-  const schedule = await ShowService(id);
+  const schedule = await ShowService(id, companyId);
 
   const {
     data_mensagem_programada,

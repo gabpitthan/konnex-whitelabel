@@ -6,6 +6,7 @@ interface Data {
   message: string;
   userId: number | string;
   id?: number | string;
+  companyId: number;
   geral: boolean;
   mediaPath?: string | null;
   visao: boolean;
@@ -13,12 +14,15 @@ interface Data {
 }
 
 const UpdateService = async (data: Data): Promise<QuickMessage> => {
-  const { id, shortcode, message, userId, geral, mediaPath, visao } = data;
+  const { id, shortcode, message, userId, companyId, geral, mediaPath, visao } = data;
 
-  const record = await QuickMessage.findByPk(id);
+  // Escopado pelo tenant: `findByPk(id)` alcançava o registro de outra empresa.
+  // A checagem de permissão logo abaixo é sobre o usuário dentro da empresa —
+  // não substitui o escopo, porque só roda depois de o registro ser encontrado.
+  const record = await QuickMessage.findOne({ where: { id, companyId } });
 
   if (!record) {
-    throw new AppError("ERR_NO_TICKETNOTE_FOUND", 404);
+    throw new AppError("ERR_NO_QUICKMESSAGE_FOUND", 404);
   }
 
   if (!record.geral && record.visao && record.userId !== userId) {

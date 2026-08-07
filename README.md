@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img alt="Versão 1.33" src="https://img.shields.io/badge/vers%C3%A3o-1.33-123d37"></a>
+  <a href="./CHANGELOG.md"><img alt="Versão 1.34" src="https://img.shields.io/badge/vers%C3%A3o-1.34-123d37"></a>
   <a href="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml"><img alt="Quality Gate" src="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml/badge.svg"></a>
   <a href="./backend/Dockerfile"><img alt="Node.js 20" src="https://img.shields.io/badge/Node.js-20-337a5b?logo=node.js&amp;logoColor=white"></a>
   <a href="./compose.yaml"><img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&amp;logoColor=white"></a>
@@ -38,8 +38,8 @@ código.
 
 ## Estado do projeto
 
-- **Publicada:** versão `1.33`, com 62 suítes / 236 testes, builds, deploy e
-  verificação em produção aprovados.
+- **Publicada:** versão `1.34`, com builds, deploy e verificação em produção
+  aprovados.
 - **Entrega recente:** fechamento de vazamento entre empresas — duas rotas de
   relatório respondiam sem autenticação e liam `companyId` da query, e três
   endpoints da API externa dependiam de um token global em vez da credencial
@@ -48,9 +48,14 @@ código.
   WhatsApp entrega LID, em todos os caminhos que criavam contato.
 - **Operação real ainda necessária:** mídia, grupos e reconexão com conta
   canário. Envio, recebimento, ACK e reconexão pós-restart já foram provados.
-- **Isolamento multiempresa (SEC-001):** a superfície foi reduzida na 1.33, mas
-  o teste negativo real entre duas empresas continua pendente — a produção tem
-  uma só. É o pré-requisito declarado para vender multiempresa.
+- **Isolamento multiempresa (SEC-001):** testado com **duas empresas reais** na
+  1.34. Leitura estava protegida; escrita e exclusão não estavam e foram
+  fechadas. `scripts/tenant-isolation-test.sh` é a regressão viva — cria uma
+  empresa-alvo descartável, ataca, e se limpa.
+- **Code health:** os quatro gates do ENGINEERING OS (carga, cobertura,
+  complexidade, dependências) rodam por `scripts/code-health.sh`. Carga e grafo
+  de dependências ainda não têm ferramenta instalada e são reportados como
+  NAO MEDIDO — gate não medido nunca conta como aprovado.
 - **Escala horizontal:** permanece bloqueada por desenho onde o fencing ainda
   não alcançou todas as mutações de domínio.
 
@@ -127,7 +132,15 @@ configuração Docker, testes P0 e builds reproduzíveis:
 ```bash
 scripts/preflight.sh
 scripts/quality-gate.sh
+scripts/code-health.sh          # carga, cobertura, complexidade, dependências
+scripts/tenant-isolation-test.sh # ataque real entre duas empresas
 ```
+
+`code-health.sh` mede o que a base tem ferramenta para medir e reporta
+`NAO MEDIDO` com o motivo para o resto: **gate não medido nunca conta como
+aprovado**. `tenant-isolation-test.sh` cria uma empresa-alvo descartável, tenta
+ler, alterar e apagar os dados dela a partir de outra empresa, e se limpa —
+rodar a cada lote que toque autorização, serviço de domínio ou rota autenticada.
 
 Mudanças de banco exigem backup, restauração isolada, `up/down/up`, prova com
 dado sintético e plano de rollback. Mudanças de interface exigem navegação

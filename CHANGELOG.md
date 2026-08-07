@@ -2,6 +2,37 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.34] — 2026-08-07 — implantada e verificada
+
+### Corrigido — P0, isolamento multiempresa (SEC-001)
+
+Primeiro teste real com **duas empresas**: uma tentando ler, alterar e apagar os
+dados da outra. Leitura estava protegida em 20 superfícies; escrita e exclusão
+não estavam.
+
+- `DELETE /tickets/:id` apagava o ticket de outra empresa **e o histórico de
+  mensagens por cascata**. `DeleteTicketService` recebia `companyId` e não o
+  usava; no controller havia uma verificação de tenant comentada.
+- `quick-messages` e `contact-lists`: leitura, alteração e exclusão de registro
+  de outra empresa por ID.
+- Escopo de tenant aplicado na consulta em `TicketServices`, `QuickMessage`,
+  `ContactList`, `ContactListItem`, `Tag`, `Chat`, `QueueOption` (via `Queue`) e
+  `ScheduledMessages`.
+
+### Regressão
+
+- Quarta asserção em `tenantAuthContract.spec.ts`: todo `ShowService`,
+  `UpdateService` e `DeleteService` precisa mencionar `companyId`, com exceção
+  declarada para conteúdo de plataforma.
+- `isolamento-completo.sh`: ataque real entre duas empresas, com empresa-alvo
+  descartável.
+
+### Custo registrado
+
+Provar exclusão indevida destrói o dado: o ticket 1 da produção e suas mensagens
+foram perdidos durante a prova. Era dado de teste. Por isso o teste definitivo
+não usa mais a empresa de produção como alvo.
+
 ## [1.33] — 2026-08-07 — implantada e verificada
 
 ### Corrigido — P0, autenticação e isolamento multiempresa

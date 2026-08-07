@@ -30,8 +30,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { queueOptionId } = req.params;
+  const { companyId } = req.user;
 
-  const queueOption = await ShowService(queueOptionId);
+  const queueOption = await ShowService(queueOptionId, companyId);
 
   return res.status(200).json(queueOption);
 };
@@ -42,8 +43,9 @@ export const update = async (
 ): Promise<Response> => {
   const { queueOptionId } = req.params
   const queueOptionData = req.body;
+  const { companyId } = req.user;
 
-  const queueOption = await UpdateService(queueOptionId, queueOptionData);
+  const queueOption = await UpdateService(queueOptionId, queueOptionData, companyId);
 
   return res.status(200).json(queueOption);
 };
@@ -53,8 +55,9 @@ export const remove = async (
   res: Response
 ): Promise<Response> => {
   const { queueOptionId } = req.params
+  const { companyId } = req.user;
 
-  await DeleteService(queueOptionId);
+  await DeleteService(queueOptionId, companyId);
 
   return res.status(200).json({ message: "Option Delected" });
 };

@@ -4,13 +4,16 @@ import User from "../../models/User";
 
 interface ChatData {
   id: number;
+  companyId: number;
   title?: string;
   users?: any[];
 }
 
 export default async function UpdateService(data: ChatData) {
-  const { users } = data;
-  const record = await Chat.findByPk(data.id, {
+  const { users, companyId } = data;
+  // Escopado pelo tenant: `findByPk` alcancava o chat interno de outra empresa.
+  const record = await Chat.findOne({
+    where: { id: data.id, companyId },
     include: [{ model: ChatUser, as: "users" }]
   });
   const { ownerId } = record;

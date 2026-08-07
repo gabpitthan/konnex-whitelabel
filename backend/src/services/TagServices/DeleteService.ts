@@ -1,10 +1,14 @@
 import Tag from "../../models/Tag";
 import AppError from "../../errors/AppError";
 
-const DeleteService = async (id: string | number): Promise<void> => {
-  const tag = await Tag.findOne({
-    where: { id }
-  });
+/**
+ * Consulta escopada pelo tenant. Sem `companyId` no `where`, qualquer usuario
+ * autenticado alcancava o registro de outra empresa por ID — comprovado em
+ * 2026-08-07 com duas empresas reais (leitura, alteracao e exclusao).
+ */
+const DeleteService = async (id: string | number,
+  companyId: number): Promise<void> => {
+  const tag = await Tag.findOne({ where: { id, companyId } });
 
   if (!tag) {
     throw new AppError("ERR_NO_TAG_FOUND", 404);

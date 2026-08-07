@@ -18,13 +18,17 @@ interface TagData {
 interface Request {
   tagData: TagData;
   id: string | number;
+  companyId: number;
 }
 
 const UpdateUserService = async ({
   tagData,
-  id
+  id,
+  companyId
 }: Request): Promise<Tag | undefined> => {
-  const tag = await ShowService(id);
+  // `ShowService` agora exige o tenant: a alteração só alcança tag da própria
+  // empresa.
+  const tag = await ShowService(id, companyId);
 
   const schema = Yup.object().shape({
     name: Yup.string().min(3)

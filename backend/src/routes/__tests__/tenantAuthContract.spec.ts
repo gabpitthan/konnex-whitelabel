@@ -150,4 +150,52 @@ describe("contrato de origem do tenant", () => {
 
     expect(infratores).toEqual([]);
   });
+
+  /**
+   * Segunda metade do mesmo defeito. A rota pode exigir `isAuth` e o controller
+   * pode pegar o `companyId` do token — e ainda assim vazar, se o serviço
+   * buscar o registro só por ID.
+   *
+   * Foi o que aconteceu em 2026-08-07: com duas empresas reais, a empresa B
+   * leu, alterou e apagou mensagem rápida e lista de contatos da empresa C, e
+   * apagou um ticket da empresa A junto com o histórico de mensagens, por
+   * cascata. Em todos os casos a rota estava autenticada; o serviço é que
+   * chamava `findByPk(id)`.
+   */
+  const SERVICOS_DIR = resolve(__dirname, "../../services");
+
+  /**
+   * Serviços de recurso compartilhado entre empresas por decisão de produto
+   * (conteúdo da plataforma, não dado de cliente). Continuam auditáveis, mas
+   * não são vazamento entre tenants.
+   */
+  const COMPARTILHADOS_POR_DESIGN = [
+    "AnnouncementService",
+    "HelpServices",
+    "PartnerServices"
+  ];
+
+  it("serviços Show/Update/Delete escopam a consulta pelo tenant", () => {
+    const semEscopo: string[] = [];
+
+    const visita = (dir: string) => {
+      for (const entrada of readdirSync(dir, { withFileTypes: true })) {
+        const caminho = join(dir, entrada.name);
+        if (entrada.isDirectory()) {
+          if (entrada.name !== "__tests__") visita(caminho);
+          continue;
+        }
+        if (!/^(Show|Update|Delete)Service\.ts$/.test(entrada.name)) continue;
+        if (COMPARTILHADOS_POR_DESIGN.some(s => caminho.includes(s))) continue;
+
+        const fonte = readFileSync(caminho, "utf8");
+        if (!fonte.includes("companyId")) {
+          semEscopo.push(caminho.split("/services/")[1]);
+        }
+      }
+    };
+    visita(SERVICOS_DIR);
+
+    expect(semEscopo).toEqual([]);
+  });
 });

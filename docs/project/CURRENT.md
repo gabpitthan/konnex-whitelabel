@@ -1,9 +1,26 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-08-07
-Versão ativa: 1.33 (implantada e verificada)
+Versão ativa: 1.34 (implantada e verificada)
 
 ## Em foco
+
+**1.34 — SEC-001 provado com duas empresas.** Primeiro teste real de isolamento
+multiempresa do projeto. Leitura estava protegida; **escrita e exclusão não**:
+a empresa B apagou um ticket da empresa A (com as mensagens, por cascata) e
+leu, alterou e apagou mensagem rápida e lista de contatos de uma terceira.
+
+Todas as rotas exigiam autenticação e todos os controllers tinham o `companyId`
+em mãos — o defeito estava nos serviços, que buscavam por ID sem escopo. Escopo
+aplicado em 9 famílias; regressão estática mais ataque real.
+
+Custo registrado: o ticket 1 da produção e suas mensagens foram destruídos ao
+provar a falha. Era dado de teste. O teste definitivo passou a usar empresa-alvo
+descartável.
+
+Ver `docs/versions/1.34/README.md`.
+
+## Anterior — 1.33
 
 **1.33 — vazamento entre empresas, fechado.** `/dashboard/ticketsUsers` e
 `/dashboard/ticketsDay` respondiam **sem autenticação** e liam `companyId` da

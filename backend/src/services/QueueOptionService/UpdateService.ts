@@ -9,12 +9,17 @@ interface QueueData {
   parentId?: string;
 }
 
+/**
+ * Escopado pelo tenant via ShowService — ver o contrato em
+ * routes/__tests__/tenantAuthContract.spec.ts.
+ */
 const UpdateService = async (
   queueOptionId: number | string,
-  queueOptionData: QueueData
+  queueOptionData: QueueData,
+  companyId: number
 ): Promise<QueueOption> => {
 
-  const queueOption = await ShowService(queueOptionId);
+  const queueOption = await ShowService(queueOptionId, companyId);
 
   await queueOption.update(queueOptionData);
 

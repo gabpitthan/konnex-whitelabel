@@ -67,7 +67,15 @@ Uma tarefa só está pronta quando as respostas aplicáveis forem "sim":
 - Toda leitura/escrita/cache/job/socket de dado de tenant escopada por `companyId`, validada **no backend**.
 - Um lote funcional = exatamente uma subversão em `VERSION` (hoje `1.32`), incrementada antes do commit, com entrada em `CHANGELOG.md` e README em `docs/versions/X.Y/`. Não incrementar por leitura, diagnóstico sem mudança ou atualização só de documentação. O número principal só muda quando Gabriel declarar a versão pronta.
 - Versão exibida no frontend, endpoint `/version`, `package.json` e `VERSION` sempre sincronizados.
-- Encerramento: `scripts/preflight.sh` → `scripts/quality-gate.sh` → (em deploy) `scripts/smoke-test.sh` → autoavaliação 0–2 acima.
+- Encerramento: `scripts/preflight.sh` → `scripts/quality-gate.sh` → `scripts/code-health.sh` → (em deploy) `scripts/smoke-test.sh` → autoavaliação 0–2 acima.
+- **Code health (os quatro gates de `modules/code_health.md` do OS):** carga,
+  cobertura, complexidade ciclomática e grafo de dependências. `scripts/code-health.sh`
+  mede o que dá e reporta `NAO MEDIDO` com o motivo para o resto — gate não
+  medido nunca conta como aprovado. Baseline medido em 2026-08-07: **carga e
+  grafo sem ferramenta instalada**; complexidade com ao menos 20 funções acima
+  de 15 na base (pior caso 39, em `wbotMessageListener.ts`). Vale a catraca:
+  segurar a linha na superfície alterada, deixar o número do repositório
+  melhorar conforme o código for tocado — não corrigir o legado por decreto.
 - Build passar e HTTP 200 **não provam nada**. Rota autenticada exige navegador real: console, rede, desktop claro/escuro e mobile. **Este ambiente tem browser e screenshots** (Playwright, receita em `runtime/CAPABILITY_MATRIX.md`) — a verificação visual é obrigação do agente. Declarar UNVERIFIED só vale para o que realmente não foi verificado, nunca como atalho.
 - Commitado não é implantado. A prova sai de dentro da imagem em execução e do `dist/`, não do repositório.
 - Nunca ler, imprimir ou copiar `credentials.txt` / `.env`. O hook `block-secrets` nega de fato — se ele bloquear, mude a abordagem, não contorne.
