@@ -1,5 +1,19 @@
 # Definição de pronto e autoavaliação
 
+## Passagem 0 — valor (bloqueante, vem antes de tudo)
+
+Adicionada em 2026-08-07, depois que as versões 1.17–1.31 passaram nesta definição com nota alta enquanto a produção tinha 0 mensagens, 0 tickets e 0 contatos. As perguntas abaixo são sobre o **produto**, não sobre o lote — todas as demais seções deste documento avaliam apenas o lote, e foi essa lacuna que deixou 15 entregas seguidas serem aprovadas sem valor entregue.
+
+- `scripts/product-state.sh` foi executado **antes** de escolher este lote?
+- Qual jornada de cliente este lote destrava ou protege? Se a resposta for "nenhuma", por que ele foi priorizado à frente de uma que destrava?
+- As jornadas centrais continuam exercitáveis depois desta mudança — conectar número, receber mensagem, responder, criar empresa?
+- O lote toca código que **já executou em produção**, ou está endurecendo um caminho que nunca rodou? Se nunca rodou, provar que roda vem primeiro.
+- Existe evidência de tráfego real (`Messages`, `Tickets`, ACK) exercitando o caminho alterado, e não apenas teste sintético?
+
+Nota 0 em qualquer item desta passagem bloqueia a conclusão, exatamente como corretude e auth/tenant.
+
+## Passagens seguintes
+
 Uma tarefa só está pronta quando as respostas aplicáveis forem “sim”:
 
 - O comportamento pedido funciona de verdade, não apenas renderiza?
