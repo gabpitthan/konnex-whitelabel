@@ -2,6 +2,42 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.35] — 2026-08-07 — implantada e verificada
+
+Lote voltado a preparar o produto para ser **vendido como código-fonte** e
+instalado por terceiros.
+
+### Corrigido — planos não limitavam nada
+
+- As dez flags de funcionalidade do plano (`useCampaigns`, `useSchedules`,
+  `useInternalChat`, `useIntegrations`…) existiam na tabela e **nenhuma rota as
+  consultava**. Comprovado: empresa num plano com `useCampaigns: false` criou
+  campanha com HTTP 200. Só `users` e `connections` tinham limite real.
+- `middleware/requirePlanFeature.ts` aplicado em 44 rotas (campanhas, listas de
+  contato, itens de lista, agendamentos, chat interno, integrações), com
+  mensagem que o usuário final entende e falha fechado quando o plano não
+  resolve.
+- Consequência para quem revende: agora é possível vender planos diferenciados.
+  Antes, o cliente do plano barato alcançava tudo pela API.
+
+### Corrigido — instalação de terceiro nascia insegura
+
+- Cada segredo tinha valor embutido: `JWT_SECRET || "mysecret"`,
+  `JWT_REFRESH_SECRET || "myanothersecret"`, `REDIS_SECRET_KEY || "MULTI100"`,
+  `ADMIN_PASSWORD || "change-before-production"`, `VERIFY_TOKEN || "whaticket"`.
+  Esquecer o segredo do JWT não gerava falha visível — a aplicação subia e
+  qualquer pessoa que conhecesse o padrão público forjava token de qualquer
+  empresa.
+- `config/requiredSecrets.ts` aborta o boot com mensagem que ensina a resolver.
+  Valores embutidos removidos de `config/auth.ts` e `config/redis.ts`.
+
+### Adicionado
+
+- `LICENSE` — MIT, preservando o copyright do Whaticket (`canove`, 2020) e
+  registrando o trabalho derivado. A MIT autoriza a venda, mas **exige** o aviso
+  preservado; sem o arquivo, a licença que dá o direito de vender era a que
+  estava sendo descumprida.
+
 ## [1.34] — 2026-08-07 — implantada e verificada
 
 ### Corrigido — P0, isolamento multiempresa (SEC-001)

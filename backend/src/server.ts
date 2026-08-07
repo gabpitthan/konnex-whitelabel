@@ -1,4 +1,10 @@
 import 'dotenv/config';
+import validarSegredos from "./config/requiredSecrets";
+
+// Antes de qualquer import que leia configuração: uma instalação com segredo
+// de exemplo não deve subir. Ver config/requiredSecrets.ts.
+validarSegredos();
+
 import gracefulShutdown from "http-graceful-shutdown";
 import app from "./app";
 import cron from "node-cron";

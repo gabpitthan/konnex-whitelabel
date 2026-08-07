@@ -2,26 +2,27 @@ import express from "express";
 import isAuth from "../middleware/isAuth";
 
 import * as ContactListItemController from "../controllers/ContactListItemController";
+import requirePlanFeature from "../middleware/requirePlanFeature";
 
 const routes = express.Router();
 
 routes.get(
   "/contact-list-items/list",
-  isAuth,
+  isAuth, requirePlanFeature("useCampaigns"),
   ContactListItemController.findList
 );
 
-routes.get("/contact-list-items", isAuth, ContactListItemController.index);
+routes.get("/contact-list-items", isAuth, requirePlanFeature("useCampaigns"), ContactListItemController.index);
 
-routes.get("/contact-list-items/:id", isAuth, ContactListItemController.show);
+routes.get("/contact-list-items/:id", isAuth, requirePlanFeature("useCampaigns"), ContactListItemController.show);
 
-routes.post("/contact-list-items", isAuth, ContactListItemController.store);
+routes.post("/contact-list-items", isAuth, requirePlanFeature("useCampaigns"), ContactListItemController.store);
 
-routes.put("/contact-list-items/:id", isAuth, ContactListItemController.update);
+routes.put("/contact-list-items/:id", isAuth, requirePlanFeature("useCampaigns"), ContactListItemController.update);
 
 routes.delete(
   "/contact-list-items/:id",
-  isAuth,
+  isAuth, requirePlanFeature("useCampaigns"),
   ContactListItemController.remove
 );
 

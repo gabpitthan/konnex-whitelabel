@@ -1,4 +1,16 @@
+// A partir de 1.35 o código não tem valor embutido para segredo: o fallback
+// `JWT_SECRET || "mysecret"` era público e transformava um `.env` incompleto em
+// bypass de autenticação (ver `config/requiredSecrets.ts`). Um teste que assina
+// token passa a fornecer o seu próprio segredo, antes de importar a config.
+process.env.JWT_SECRET =
+  process.env.JWT_SECRET || "jest-only-secret-nunca-usar-fora-do-teste-0123456789";
+process.env.JWT_REFRESH_SECRET =
+  process.env.JWT_REFRESH_SECRET ||
+  "jest-only-refresh-nunca-usar-fora-do-teste-0123456789";
+
+// eslint-disable-next-line import/first
 import { sign } from "jsonwebtoken";
+// eslint-disable-next-line import/first
 import authConfig from "../../config/auth";
 import {
   namespaceCompanyId,

@@ -1,9 +1,27 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-08-07
-Versão ativa: 1.34 (implantada e verificada)
+Versão ativa: 1.35 (implantada e verificada)
 
 ## Em foco
+
+**1.35 — produto preparado para ser vendido como código-fonte.** Dois defeitos
+que só aparecem quando outra pessoa instala e revende:
+
+1. **As flags de plano eram decorativas.** Empresa num plano com
+   `useCampaigns: false` criava campanha com HTTP 200 — nenhuma rota consultava
+   as dez flags. Quem revende não conseguia vender planos diferenciados.
+   `requirePlanFeature` aplicado em 44 rotas.
+2. **Cada segredo tinha valor embutido** (`JWT_SECRET || "mysecret"`). Num `.env`
+   de 41 variáveis, esquecer o do JWT entregava a autenticação inteira em
+   silêncio. O boot agora aborta com mensagem que ensina a resolver.
+
+Mais o `LICENSE` que faltava: a MIT do Whaticket autoriza a venda, mas exige o
+aviso preservado — sem o arquivo, a licença que dá o direito era a descumprida.
+
+Ver `docs/versions/1.35/README.md`.
+
+## Anterior — 1.34
 
 **1.34 — SEC-001 provado com duas empresas.** Primeiro teste real de isolamento
 multiempresa do projeto. Leitura estava protegida; **escrita e exclusão não**:

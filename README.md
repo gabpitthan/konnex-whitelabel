@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img alt="Versão 1.34" src="https://img.shields.io/badge/vers%C3%A3o-1.34-123d37"></a>
+  <a href="./CHANGELOG.md"><img alt="Versão 1.35" src="https://img.shields.io/badge/vers%C3%A3o-1.35-123d37"></a>
   <a href="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml"><img alt="Quality Gate" src="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml/badge.svg"></a>
   <a href="./backend/Dockerfile"><img alt="Node.js 20" src="https://img.shields.io/badge/Node.js-20-337a5b?logo=node.js&amp;logoColor=white"></a>
   <a href="./compose.yaml"><img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&amp;logoColor=white"></a>
@@ -38,8 +38,8 @@ código.
 
 ## Estado do projeto
 
-- **Publicada:** versão `1.34`, com builds, deploy e verificação em produção
-  aprovados.
+- **Publicada:** versão `1.35`, com 62 suítes / 237 testes, builds, deploy e
+  verificação em produção aprovados.
 - **Entrega recente:** fechamento de vazamento entre empresas — duas rotas de
   relatório respondiam sem autenticação e liam `companyId` da query, e três
   endpoints da API externa dependiam de um token global em vez da credencial
@@ -52,6 +52,15 @@ código.
   1.34. Leitura estava protegida; escrita e exclusão não estavam e foram
   fechadas. `scripts/tenant-isolation-test.sh` é a regressão viva — cria uma
   empresa-alvo descartável, ataca, e se limpa.
+- **Planos:** as flags de funcionalidade do plano passam a ser impostas no
+  backend (1.35). Antes eram decorativas — uma empresa num plano sem campanhas
+  criava campanha com HTTP 200. Quem revende agora consegue vender planos
+  diferenciados.
+- **Instalação:** a aplicação não sobe com segredo ausente ou de exemplo. O
+  código herdado tinha `JWT_SECRET || "mysecret"`, e esquecer essa variável
+  entregava a autenticação inteira em silêncio.
+- **Licença:** MIT, preservando o copyright do Whaticket (`canove`, 2020). A MIT
+  autoriza a venda, mas exige o aviso preservado.
 - **Code health:** os quatro gates do ENGINEERING OS (carga, cobertura,
   complexidade, dependências) rodam por `scripts/code-health.sh`. Carga e grafo
   de dependências ainda não têm ferramenta instalada e são reportados como
