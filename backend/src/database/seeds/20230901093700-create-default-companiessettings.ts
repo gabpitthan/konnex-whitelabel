@@ -21,7 +21,8 @@ module.exports = {
             sendSignMessage: "enabled",
             sendFarewellWaitingTicket: "disabled",
             userRating: "disabled",
-            sendGreetingAccepted: "enabled",
+            // Ver CreateCompanyService: saudacao vazia nao deve ser enviada.
+            sendGreetingAccepted: "disabled",
             CheckMsgIsGroup: "enabled",
             sendQueuePosition: "enabled",
             scheduleType: "disabled",

@@ -85,7 +85,10 @@ const CreateCompanyService = async (
           sendSignMessage: "enabled",
           sendFarewellWaitingTicket: "disabled",
           userRating: "disabled",
-          sendGreetingAccepted: "enabled",
+          // Nasce desligada: ligada por padrao com a mensagem em branco,
+          // aceitar um ticket disparava uma mensagem vazia ao cliente.
+          // Ligue depois de escrever a saudacao.
+          sendGreetingAccepted: "disabled",
           CheckMsgIsGroup: "enabled",
           sendQueuePosition: "disabled",
           scheduleType: "disabled",

@@ -12,7 +12,7 @@ module.exports = {
       { key: "sendSignMessage", value: "enabled", companyId: "1" },
       { key: "sendFarewellWaitingTicket", value: "disabled", companyId: "1" },
       { key: "userRating", value: "disabled", companyId: "1" },
-      { key: "sendGreetingAccepted", value: "enabled", companyId: "1" },
+      { key: "sendGreetingAccepted", value: "disabled", companyId: "1" },
       { key: "CheckMsgIsGroup", value: "enabled", companyId: "1" },
       { key: "sendQueuePosition", value: "enabled", companyId: "1" },
       { key: "scheduleType", value: "disabled", companyId: "1" },

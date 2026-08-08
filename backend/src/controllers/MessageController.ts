@@ -728,6 +728,28 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const ticket = await ShowTicketService(ticketId, companyId);
 
+  // Mensagem sem conteúdo e sem mídia não é enviada.
+  //
+  // Comprovado em produção em 2026-08-08: ao aceitar um ticket, o sistema
+  // disparou uma mensagem de zero caractere para o cliente (Messages id 7). A
+  // causa é a saudação automática — `sendGreetingAccepted` nasce `enabled` em
+  // toda empresa nova e `greetingAcceptedMessage` nasce vazia, então o texto
+  // enviado era a string vazia.
+  //
+  // A guarda fica aqui, e não só na tela, porque o mesmo caminho é usado pela
+  // saudação, pelo chatbot, pelas campanhas e pela API externa. Corrigir apenas
+  // o botão deixaria as outras portas abertas.
+  const corpo = Array.isArray(body) ? body.join("") : body;
+  const semMidia = !medias || medias.length === 0;
+  const semTexto = corpo === undefined || corpo === null || String(corpo).trim() === "";
+
+  if (semMidia && semTexto && isNil(vCard)) {
+    throw new AppError(
+      "Não é possível enviar uma mensagem vazia. Se esta era a saudação automática, configure o texto em Configurações ou desative o envio.",
+      400
+    );
+  }
+
   if (ticket.channel === "whatsapp" && ticket.whatsappId) {
     await SetTicketMessagesAsRead(ticket);
   }

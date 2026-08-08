@@ -476,12 +476,19 @@ const TicketListItemCustom = ({ setTabOpen, ticket }) => {
             toastError(err);
         }
 
-        const msg = `${setting.greetingAcceptedMessage}`;
+        const msg = `${setting?.greetingAcceptedMessage ?? ""}`.trim();
+
+        // Saudação vazia não é enviada. `sendGreetingAccepted` nasce ligada em
+        // toda empresa nova e a mensagem nasce em branco: aceitar um ticket
+        // disparava uma mensagem de zero caractere para o cliente. Nada errado
+        // em não ter saudação configurada — errado é mandar o vazio.
+        if (!msg) return;
+
         const message = {
             read: 1,
             fromMe: true,
             mediaUrl: "",
-            body: `${msg.trim()}`,
+            body: msg,
         };
         try {
             await api.post(`/messages/${id}`, message);

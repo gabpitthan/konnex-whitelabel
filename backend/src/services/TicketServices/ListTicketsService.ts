@@ -74,7 +74,32 @@ const ListTicketsService = async ({
   const user = await ShowUserService(userId, companyId);
 
   const showTicketAllQueues = user.allHistoric === "enabled";
-  const showTicketWithoutQueue = user.allTicket === "enable";
+
+  /**
+   * Ticket sem fila precisa ser visível para alguém — senão a mensagem entra,
+   * o painel conta, e ninguém atende.
+   *
+   * O que acontecia: `allTicket` nasce como `disable` em toda empresa nova, e
+   * uma instalação recém-feita não tem fila nenhuma. Com `queueIds` vazio, o
+   * filtro virava `queueId IN ()` e não casava com nada — nem os tickets sem
+   * fila, nem qualquer outro. Comprovado em produção em 2026-08-08: mensagem
+   * recebida às 06:18 criou o ticket 3 (`pending`, `queueId` nulo), o dashboard
+   * contabilizou e a lista "Aguardando atendimento" ficou vazia.
+   *
+   * Duas saídas de segurança, ambas conservadoras:
+   *  - admin sempre alcança ticket sem fila. Quem administra a conta não pode
+   *    perder mensagem por causa de uma configuração que ele nem sabe que
+   *    existe;
+   *  - usuário sem nenhuma fila atribuída também alcança, porque a alternativa
+   *    é uma tela permanentemente vazia.
+   *
+   * Quem tem fila atribuída continua vendo apenas as suas, que é o
+   * comportamento esperado de distribuição por fila.
+   */
+  const showTicketWithoutQueue =
+    user.allTicket === "enable" ||
+    user.profile === "admin" ||
+    queueIds.length === 0;
   const showGroups = user.allowGroup === true;
   const showPendingNotification = await FindCompanySettingOneService({ companyId, column: "showNotificationPending" });
   const showNotificationPendingValue = showPendingNotification[0].showNotificationPending;

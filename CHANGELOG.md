@@ -2,6 +2,38 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.37] — 2026-08-08 — a instalação nova não funcionava nos dez primeiros minutos
+
+Origem: uso real. Três defeitos seguidos ao mandar uma mensagem para o número
+conectado. Nenhum é bug de lógica — os três são **padrões de primeira
+instalação** que tornam o produto inutilizável para quem acabou de instalar.
+
+### Corrigido
+
+- **Ticket invisível.** Mensagem recebida criava o ticket `pending` sem fila; o
+  dashboard contava e a lista "Aguardando" ficava vazia. `allTicket` nasce
+  `disable` e a instalação nova não tem fila, então o filtro virava
+  `queueId IN ()` e não casava com nada. Agora admin e usuário sem fila
+  alcançam ticket sem fila; quem tem fila continua vendo só as suas.
+- **Mensagem vazia enviada ao cliente.** Aceitar o ticket disparava a saudação
+  automática — ligada por padrão, com texto em branco. Saiu uma mensagem de zero
+  caractere para o contato real. `MessageController.store` passa a recusar
+  mensagem sem texto, mídia e vCard; o front não dispara saudação em branco; e
+  `sendGreetingAccepted` nasce `disabled` em `CreateCompanyService` e nos seeds.
+
+### Registrado, não corrigido
+
+- Aceitar um ticket sem fila pede "Selecionar setor", e são três vínculos que
+  nada indica serem necessários — fila, **conexão→fila** e usuário→fila. O que
+  faltava era o segundo. Vai para o instalador.
+- O mesmo cadastro se chama Filas, Setor, Setor/Fila e Departamento conforme a
+  tela.
+
+### De quebra
+
+A mensagem caiu no contato do telefone real e não criou contato LID novo: é a
+prova de produção da 1.32, que só o tráfego real poderia dar.
+
 ## [1.36] — 2026-08-08 — instalador de um comando
 
 ### Adicionado

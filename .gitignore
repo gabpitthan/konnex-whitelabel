@@ -9,3 +9,6 @@ frontend/build/
 # ENGINEERING OS / JARVIS: symlink local para /home/claudeuser/jarvis-programador.
 # A politica e versionada em gabpitthan/jarvis-programador, nao aqui.
 .engineering/
+
+# Grafo de conhecimento: dado derivado, reconstruível.
+graphify-out/
