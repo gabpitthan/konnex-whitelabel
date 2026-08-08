@@ -2,6 +2,29 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.38] — 2026-08-08 — dois serviços deixaram de depender de um controller
+
+Primeira ação sobre o núcleo emaranhado medido pelo grafo (HEALTH-003).
+
+### Mudado
+
+- `sendMessageFlow` saiu de `controllers/MessageController.ts` para
+  `services/MessageServices/SendMessageFlowService.ts`. `ActionsWebhookService`
+  e `DispatchWebHookService` passaram a importar de lá. Movimentação literal:
+  mesmo corpo, mesma assinatura, comportamento inalterado.
+
+### Medido, e honesto
+
+Das 328 dependências internas do núcleo, **9 sobem de camada** — são elas que
+fecham o ciclo. Este lote cortou 2. **O núcleo não diminuiu** (133 → 134): ciclo
+só abre quando a última aresta de retorno cai, então cortar parte não produz
+efeito visível. A melhoria é de camada, não de acoplamento.
+
+As 7 restantes estão listadas em `docs/versions/1.38/README.md`. Três exigem
+decisão de arquitetura — `libs/wbot.ts` chama `StartWhatsAppSession` e
+`ImportWhatsAppMessageService` em runtime, e inverter isso muda o fluxo de
+controle da sessão do WhatsApp.
+
 ## [1.37] — 2026-08-08 — a instalação nova não funcionava nos dez primeiros minutos
 
 Origem: uso real. Três defeitos seguidos ao mandar uma mensagem para o número

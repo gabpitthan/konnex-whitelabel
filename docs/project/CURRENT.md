@@ -1,7 +1,7 @@
 # Estado atual e handoff
 
 Atualizado em: 2026-08-07
-Versão ativa: 1.37 (implantada e verificada)
+Versão ativa: 1.38 (implantada e verificada)
 
 ## Em foco
 

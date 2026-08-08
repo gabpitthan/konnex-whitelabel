@@ -1,4 +1,4 @@
-import { sendMessageFlow } from "../../controllers/MessageController";
+import { sendMessageFlow } from "../MessageServices/SendMessageFlowService";
 import { WebhookModel } from "../../models/Webhook";
 import { FlowBuilderModel } from "../../models/FlowBuilder";
 import { randomString } from "../../utils/randomCode";

@@ -1,6 +1,6 @@
 import AppError from "../../errors/AppError";
 import { WebhookModel } from "../../models/Webhook";
-import { sendMessageFlow } from "../../controllers/MessageController";
+import { sendMessageFlow } from "../MessageServices/SendMessageFlowService";
 import { IConnections, INodes } from "./DispatchWebHookService";
 import { Request, Response } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
