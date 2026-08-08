@@ -9,7 +9,7 @@ import CreateContactService from "../ContactServices/CreateContactService";
 import Contact from "../../models/Contact";
 import CreateTicketService from "../TicketServices/CreateTicketService";
 import CreateTicketServiceWebhook from "../TicketServices/CreateTicketServiceWebhook";
-import { SendMessage } from "../../helpers/SendMessage";
+import { SendMessage } from "../MessageServices/SendMessage";
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import Ticket from "../../models/Ticket";
 import fs from "fs";

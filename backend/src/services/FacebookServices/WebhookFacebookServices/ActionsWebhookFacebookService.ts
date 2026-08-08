@@ -19,7 +19,7 @@ import FindOrCreateATicketTrakingService from "../../TicketServices/FindOrCreate
 import ShowQueueService from "../../QueueService/ShowQueueService";
 import ffmpeg from "fluent-ffmpeg";
 import { fi } from "date-fns/locale";
-import queue from "../../../libs/queue";
+import queue from "../../../jobs/bullQueues";
 const os = require("os");
 
 let ffmpegPath;

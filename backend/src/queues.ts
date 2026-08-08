@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node";
 import BullQueue from "bull";
-import { MessageData, SendMessage } from "./helpers/SendMessage";
+import { MessageData, SendMessage } from "./services/MessageServices/SendMessage";
 import Whatsapp from "./models/Whatsapp";
 import logger from "./utils/logger";
 import moment from "moment";

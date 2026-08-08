@@ -12,7 +12,7 @@ import { closeIO, initIO } from "./libs/socket";
 import logger from "./utils/logger";
 import { StartAllWhatsAppsSessions } from "./services/WbotServices/StartAllWhatsAppsSessions";
 import Company from "./models/Company";
-import BullQueue from './libs/queue';
+import BullQueue from './jobs/bullQueues';
 
 import { closeApplicationQueues, startQueueProcess } from "./queues";
 import {
@@ -20,8 +20,19 @@ import {
   completeApplicationShutdown
 } from "./libs/shutdownState";
 import { shutdownWbots } from "./libs/wbot";
+import { registrarGanchosDeSessao } from "./libs/sessionHooks";
+import { StartWhatsAppSession } from "./services/WbotServices/StartWhatsAppSession";
+import ImportWhatsAppMessageService from "./services/WhatsappService/ImportWhatsAppMessageService";
 import cacheLayer from "./libs/cache";
 // import { ScheduledMessagesJob, ScheduleMessagesGenerateJob, ScheduleMessagesEnvioJob, ScheduleMessagesEnvioForaHorarioJob } from "./wbotScheduledMessages";
+
+// Ponto de composição: liga as implementações reais aos ganchos que
+// `libs/wbot.ts` declara. Precisa acontecer ANTES de qualquer sessão iniciar —
+// gancho ausente significa sessão que não reconecta, e o registro avisa alto.
+registrarGanchosDeSessao({
+  iniciarSessao: StartWhatsAppSession,
+  importarMensagens: ImportWhatsAppMessageService
+});
 
 const server = app.listen(process.env.PORT, async () => {
   try {

@@ -1,7 +1,7 @@
 import User from "../../models/User";
 import AppError from "../../errors/AppError";
 import Ticket from "../../models/Ticket";
-import UpdateDeletedUserOpenTicketsStatus from "../../helpers/UpdateDeletedUserOpenTicketsStatus";
+import UpdateDeletedUserOpenTicketsStatus from "../TicketServices/UpdateDeletedUserOpenTicketsStatus";
 
 const DeleteUserService = async (
   id: string | number,

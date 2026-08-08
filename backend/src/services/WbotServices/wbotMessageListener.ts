@@ -3,6 +3,7 @@ import { promisify } from "util";
 import { readFile, writeFile } from "fs";
 import fs from "fs";
 import * as Sentry from "@sentry/node";
+import { getTypeMessage, isValidMsg } from "../../helpers/WhatsappMessageType";
 import { isNil, isNull } from "lodash";
 import { REDIS_URI_MSG_CONN } from "../../config/redis";
 
@@ -82,7 +83,7 @@ import typebotListener from "../TypebotServices/typebotListener";
 import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import pino from "pino";
-import BullQueues from "../../libs/queue";
+import BullQueues from "../../jobs/bullQueues";
 import { Transform } from "stream";
 import { msgDB } from "../../libs/wbot";
 import {CheckSettings1, CheckCompanySetting} from "../../helpers/CheckSettings";
@@ -218,16 +219,6 @@ const contactsArrayMessageGet = (msg: any) => {
   return finalContacts;
 };
 
-const getTypeMessage = (msg: proto.IWebMessageInfo): string => {
-  const msgType = getContentType(msg.message);
-  if (msg.message?.extendedTextMessage && msg.message?.extendedTextMessage?.contextInfo && msg.message?.extendedTextMessage?.contextInfo?.externalAdReply) {
-    return 'adMetaPreview'; // Adicionado para tratar mensagens de anúncios;
-  }
-  if (msg.message?.viewOnceMessageV2) {
-    return "viewOnceMessageV2";
-  }
-  return msgType;
-};
 const getAd = (msg: any): string => {
   if (
     msg.key.fromMe &&
@@ -1214,63 +1205,6 @@ export const verifyMessage = async (
   }
 };
 
-const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
-  if (msg.key.remoteJid === "status@broadcast") return false;
-  try {
-    const msgType = getTypeMessage(msg);
-    if (!msgType) {
-      return;
-    }
-
-    const ifType =
-      msgType === "conversation" ||
-      msgType === "extendedTextMessage" ||
-      msgType === "audioMessage" ||
-      msgType === "videoMessage" ||
-      msgType === "ptvMessage" ||
-      msgType === "imageMessage" ||
-      msgType === "documentMessage" ||
-      msgType === "stickerMessage" ||
-      msgType === "buttonsResponseMessage" ||
-      msgType === "buttonsMessage" ||
-      msgType === "messageContextInfo" ||
-      msgType === "locationMessage" ||
-      msgType === "liveLocationMessage" ||
-      msgType === "contactMessage" ||
-      msgType === "voiceMessage" ||
-      msgType === "mediaMessage" ||
-      msgType === "contactsArrayMessage" ||
-      msgType === "reactionMessage" ||
-      msgType === "ephemeralMessage" ||
-      msgType === "protocolMessage" ||
-      msgType === "listResponseMessage" ||
-      msgType === "listMessage" ||
-      msgType === "interactiveMessage" ||
-      msgType === "pollCreationMessageV3" ||
-      msgType === "viewOnceMessage" ||
-      msgType === "documentWithCaptionMessage" ||
-      msgType === "viewOnceMessageV2" ||
-      msgType === "editedMessage" ||
-      msgType === "advertisingMessage" ||
-      msgType === "highlyStructuredMessage" ||
-      msgType === "eventMessage" ||
-      msgType === "adMetaPreview"; // Adicionado para tratar mensagens de anúncios
-
-    if (!ifType) {
-      logger.warn({
-        event: "whatsapp_invalid_message_type",
-        messageType: msgType || "unknown"
-      });
-      Sentry.captureException(new Error("Novo Tipo de Mensagem em isValidMsg"));
-    }
-
-    return !!ifType;
-  } catch (error) {
-    Sentry.captureException(
-      new Error("WHATSAPP_MESSAGE_VALIDATION_FAILED_SANITIZED")
-    );
-  }
-};
 
 const sendDialogflowAwswer = async (
   wbot: Session,

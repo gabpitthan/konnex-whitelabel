@@ -2,6 +2,45 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.39] — 2026-08-08 — o núcleo emaranhado aberto: 133 → 26 arquivos
+
+| | antes | depois |
+|---|---|---|
+| Maior componente cíclico | 133 arquivos | **26** |
+| Arquivos sem nenhum ciclo | 470 | **589** |
+| Arestas subindo de camada | 9 | **0 reais** |
+
+### Mudado
+
+- `libs/sessionHooks.ts` (novo): `libs/wbot.ts` deixa de chamar
+  `StartWhatsAppSession` e `ImportWhatsAppMessageService` diretamente e passa a
+  depender de assinaturas que ele mesmo declara. `server.ts` — já o ponto de
+  composição — fornece as implementações. Gancho ausente emite
+  `session_hook_not_registered`: sessão que não reconecta em silêncio seria o
+  pior modo de falha possível.
+- `helpers/WhatsappMessageType.ts` (novo): `getTypeMessage` e `isValidMsg` saem
+  de um arquivo de 5.400 linhas. São puras — sem estado, banco ou sessão.
+- `libs/queue.ts` → `jobs/bullQueues.ts`: compunha filas a partir de `../jobs`,
+  ou seja, infraestrutura dependendo de aplicação. Nunca foi infraestrutura.
+- `helpers/SendMessage.ts` → `services/MessageServices/`, e
+  `helpers/UpdateDeletedUserOpenTicketsStatus.ts` → `services/TicketServices/`:
+  eram serviços na pasta errada.
+
+### Aresta falsa
+
+O grafo ainda reporta `libs/socket.ts -> app.ts`, que **não existe**: vem de
+`ALLOWED_ORIGINS` sendo casado com `allowedOrigins` de `app.ts` por normalização
+de nome. Com ela o núcleo aparenta 134; sem ela, 26. É a regra do OS na prática —
+uma aresta é hipótese até ser confirmada.
+
+### Verificado
+
+Gate 62/237, `tsc` limpo, deploy 1.39, `/health/ready` 200 e **sessão WhatsApp
+reconectada após restart**, sem nenhum `session_hook_not_registered` no log.
+
+**Não exercitado:** reconexão por queda real de conexão — forçar isso em produção
+com tráfego não é aceitável. O caminho de boot foi provado e usa o mesmo registro.
+
 ## [1.38] — 2026-08-08 — dois serviços deixaram de depender de um controller
 
 Primeira ação sobre o núcleo emaranhado medido pelo grafo (HEALTH-003).

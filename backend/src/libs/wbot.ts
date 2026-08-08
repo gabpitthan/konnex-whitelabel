@@ -20,11 +20,13 @@ import { useMultiFileAuthState } from "../helpers/useMultiFileAuthState";
 import { Boom } from "@hapi/boom";
 import AppError from "../errors/AppError";
 import { getIO } from "./socket";
-import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
-import ImportWhatsAppMessageService from "../services/WhatsappService/ImportWhatsAppMessageService";
+import {
+  iniciarSessaoWhatsapp,
+  importarMensagensWhatsapp
+} from "./sessionHooks";
 import { add } from "date-fns";
 import moment from "moment";
-import { getTypeMessage, isValidMsg } from "../services/WbotServices/wbotMessageListener";
+import { getTypeMessage, isValidMsg } from "../helpers/WhatsappMessageType";
 import { addLogs } from "../helpers/addLogs";
 import NodeCache from 'node-cache';
 import { Store } from "./store";
@@ -468,7 +470,7 @@ export const initWASocket = async (
 
                     if (dataLimite < new Date().getTime()) {
                       //console.log("Pronto para come?ar")
-                      ImportWhatsAppMessageService(wpp.id)
+                      importarMensagensWhatsapp(wpp.id)
                       wpp.update({
                         statusImportMessages: "Running"
                       })
@@ -582,7 +584,7 @@ export const initWASocket = async (
                   where: { id, companyId, channel: "whatsapp" }
                 });
                 if (current && current.status !== "DISCONNECTED") {
-                  StartWhatsAppSession(current, current.companyId);
+                  iniciarSessaoWhatsapp(current, current.companyId);
                 }
               }, reconnectDelay);
               reconnectTimersMap.set(id, timer);

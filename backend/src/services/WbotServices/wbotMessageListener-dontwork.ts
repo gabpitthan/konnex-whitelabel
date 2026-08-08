@@ -78,7 +78,7 @@ import typebotListener from "../TypebotServices/typebotListener";
 import Tag from "../../models/Tag";
 import TicketTag from "../../models/TicketTag";
 import pino from "pino";
-import BullQueues from "../../libs/queue";
+import BullQueues from "../../jobs/bullQueues";
 import { Transform } from "stream";
 import { msgDB } from "../../libs/wbot";
 import { title } from "process";

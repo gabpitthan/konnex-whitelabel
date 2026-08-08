@@ -4,7 +4,7 @@ jest.mock("../../jobs", () => ({
   sample: { key: "sample", handle: jest.fn() }
 }));
 
-import BullQueues from "../queue";
+import BullQueues from "../../jobs/bullQueues";
 
 describe("optional ACK queues", () => {
   it("does not create Redis clients when REDIS_URI_ACK is disabled", () => {

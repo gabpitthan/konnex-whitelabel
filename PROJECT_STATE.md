@@ -1,7 +1,7 @@
 # Estado persistente — Whitelabel Whaticket
 
 Última atualização: 2026-08-07
-Versão ativa: `1.38`, implantada e verificada em produção.
+Versão ativa: `1.39`, implantada e verificada em produção.
 
 Este arquivo é o índice canônico. O estado curto de retomada está em `docs/project/CURRENT.md`; o histórico está no `CHANGELOG.md` e nos READMEs de versão.
 

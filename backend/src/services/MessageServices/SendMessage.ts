@@ -1,9 +1,9 @@
-import Whatsapp from "../models/Whatsapp";
-import GetWhatsappWbot from "./GetWhatsappWbot";
+import Whatsapp from "../../models/Whatsapp";
+import GetWhatsappWbot from "../../helpers/GetWhatsappWbot";
 import fs from "fs";
-import formatBody from "./Mustache";
+import formatBody from "../../helpers/Mustache";
 
-import { getMessageOptions } from "../services/WbotServices/SendWhatsAppMedia";
+import { getMessageOptions } from "../WbotServices/SendWhatsAppMedia";
 
 export type MessageData = {
   number: number | string;

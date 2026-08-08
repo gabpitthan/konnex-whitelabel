@@ -1,9 +1,19 @@
+/**
+ * Composicao das filas Bull a partir das definicoes de job.
+ *
+ * Morava em `libs/queue.ts`, onde importava `../jobs` — infraestrutura
+ * dependendo da camada de aplicacao. Era a ultima das nove arestas que
+ * fechavam o ciclo de 133 arquivos (HEALTH-003).
+ *
+ * O modulo nunca foi infraestrutura: ele so existe para casar handlers de job
+ * com filas, e e consumido por servicos. Pertence a `jobs/`.
+ */
 import 'dotenv/config';
 import BullQueue from 'bull';
 import { REDIS_URI_MSG_CONN } from "../config/redis";
 import configLoader from '../services/ConfigLoaderService/configLoaderService';
-import * as jobs from '../jobs';
-import { closeBullQueues, QUEUE_RETENTION, registerQueueTelemetry } from './queueReliability';
+import * as jobs from './index';
+import { closeBullQueues, QUEUE_RETENTION, registerQueueTelemetry } from '../libs/queueReliability';
 
 const config = configLoader(); // Carregue as configurações
 
