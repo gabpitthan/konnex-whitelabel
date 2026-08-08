@@ -95,7 +95,41 @@ fi
 
 # -------------------------------------------------------- 4. DEPENDENCY GRAPH
 titulo "4. DEPENDENCY — ciclos, acoplamento e violação de camada"
-if tem madge; then
+GRAFO="graphify-out/graph.json"
+if [ -f "$GRAFO" ] && command -v python3 >/dev/null 2>&1; then
+  PY_G=$(cat graphify-out/.graphify_python 2>/dev/null || echo python3)
+  "$PY_G" - "$GRAFO" <<'PYEOF'
+import json, sys
+try:
+    import networkx as nx
+except ImportError:
+    print("  -- networkx indisponivel; medicao pelo grafo pulada"); raise SystemExit(0)
+g = json.loads(open(sys.argv[1], encoding="utf-8").read())
+mapa = {n["id"]: n.get("source_file", "") for n in g["nodes"]}
+D = nx.DiGraph()
+for e in g["links"]:
+    a, b = mapa.get(e.get("source")), mapa.get(e.get("target"))
+    if a and b and a != b:
+        D.add_edge(a, b)
+sccs = sorted(nx.strongly_connected_components(D), key=len, reverse=True)
+total = D.number_of_nodes()
+maior = len(sccs[0]) if sccs else 0
+pct = (100 * maior / total) if total else 0
+print(f"  arquivos analisados: {total}")
+if maior > 1:
+    print(f"  \033[31mNUCLEO EMARANHADO\033[0m {maior} arquivos ({pct:.0f}%) num unico ciclo mutuo:")
+    print("        cada um alcanca todos os outros e volta; nenhum pode ser")
+    print("        entendido, testado ou substituido sozinho.")
+    for f in sorted(sccs[0])[:5]:
+        print(f"          {f}")
+else:
+    print("  \033[32mOK\033[0m sem ciclo de dependencia entre arquivos")
+graus = sorted(((D.in_degree(n), n) for n in D), reverse=True)[:3]
+print("  maior fan-in (mudar quebra muita coisa):")
+for v, n in graus:
+    print(f"          {v:>4}  {n}")
+PYEOF
+elif tem madge; then
   ciclos=$(cd "$BACK" && ./node_modules/.bin/madge --circular --extensions ts src 2>/dev/null | grep -c "^[0-9]" || echo 0)
   [ "${ciclos:-0}" -eq 0 ] && ok "nenhuma dependência circular" || falha "$ciclos ciclo(s) — nenhum lado pode ser entendido, testado ou substituído sozinho"
 else
