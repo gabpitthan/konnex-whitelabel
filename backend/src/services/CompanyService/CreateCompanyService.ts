@@ -2,6 +2,7 @@ import * as Yup from "yup";
 import AppError from "../../errors/AppError";
 import Company from "../../models/Company";
 import User from "../../models/User";
+import Queue from "../../models/Queue";
 import sequelize from "../../database";
 import CompaniesSettings from "../../models/CompaniesSettings";
 
@@ -74,6 +75,34 @@ const CreateCompanyService = async (
     },
       { transaction: t }
     );
+
+    /**
+     * Setor padrão.
+     *
+     * Sem nenhum setor cadastrado, a mensagem que chega cria um ticket sem
+     * setor: a lista "Aguardando" fica vazia e o aceite abre um seletor sem
+     * opção. Foi o que travou o primeiro uso real em 2026-08-08, e é o que
+     * travaria todo comprador nos dez primeiros minutos.
+     *
+     * O nome é genérico de propósito — quem instala renomeia em Filas.
+     */
+    const setorPadrao = await Queue.create({
+      name: "Atendimento",
+      color: "#1573E1",
+      greetingMessage: "",
+      orderQueue: 1,
+      // NOT NULL sem default no modelo: omitir derruba a criação da empresa
+      // inteira com notNull Violation. Descoberto criando uma empresa de teste.
+      tempoRoteador: 0,
+      ativarRoteador: false,
+      closeTicket: false,
+      companyId: company.id
+    },
+      { transaction: t }
+    );
+
+    // O admin precisa pertencer ao setor para receber a distribuição.
+    await user.$add("queues", setorPadrao, { transaction: t });
 
     const settings = await CompaniesSettings.create({
           companyId: company.id,

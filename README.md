@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="./CHANGELOG.md"><img alt="Versão 1.39" src="https://img.shields.io/badge/vers%C3%A3o-1.39-123d37"></a>
+  <a href="./CHANGELOG.md"><img alt="Versão 1.40" src="https://img.shields.io/badge/vers%C3%A3o-1.40-123d37"></a>
   <a href="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml"><img alt="Quality Gate" src="https://github.com/gabpitthan/konnex-whitelabel/actions/workflows/quality.yml/badge.svg"></a>
   <a href="./backend/Dockerfile"><img alt="Node.js 20" src="https://img.shields.io/badge/Node.js-20-337a5b?logo=node.js&amp;logoColor=white"></a>
   <a href="./compose.yaml"><img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169e1?logo=postgresql&amp;logoColor=white"></a>

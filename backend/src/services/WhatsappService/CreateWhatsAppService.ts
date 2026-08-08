@@ -2,6 +2,7 @@ import * as Yup from "yup";
 
 import AppError from "../../errors/AppError";
 import Whatsapp from "../../models/Whatsapp";
+import Queue from "../../models/Queue";
 import Company from "../../models/Company";
 import Plan from "../../models/Plan";
 import AssociateWhatsappQueue from "./AssociateWhatsappQueue";
@@ -235,7 +236,30 @@ const CreateWhatsAppService = async ({
         })
       : await Whatsapp.create(whatsappData, { include: ["queues"] });
 
-  await AssociateWhatsappQueue(whatsapp, queueIds);
+  /**
+   * Conexão sem setor escolhido cai no setor padrão da empresa.
+   *
+   * Associar zero setores fazia toda mensagem recebida criar ticket órfão: a
+   * lista "Aguardando" não mostrava, e aceitar abria um seletor de setor. Quem
+   * instala não tem como saber que precisa ligar conexão a setor — e nada na
+   * tela diz isso.
+   *
+   * Só vale quando o usuário não escolheu nenhum: escolha explícita é respeitada,
+   * inclusive a de deixar sem setor ao editar depois.
+   */
+  let setoresParaAssociar = queueIds;
+
+  if (setoresParaAssociar.length === 0) {
+    const setoresDaEmpresa = await Queue.findAll({
+      where: { companyId },
+      attributes: ["id"],
+      order: [["orderQueue", "ASC"], ["id", "ASC"]],
+      limit: 1
+    });
+    setoresParaAssociar = setoresDaEmpresa.map(q => q.id);
+  }
+
+  await AssociateWhatsappQueue(whatsapp, setoresParaAssociar);
 
   return { whatsapp, oldDefaultWhatsapp, apiToken };
 };

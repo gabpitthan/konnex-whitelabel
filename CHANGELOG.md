@@ -2,6 +2,36 @@
 
 Todas as alterações relevantes deste projeto são documentadas aqui.
 
+## [1.40] — 2026-08-08 — a instalação nova já nasce atendendo
+
+A 1.37 corrigiu os sintomas dos três tropeços do primeiro uso real; esta corrige
+a causa. A instalação nascia sem setor, sem vínculo da conexão e sem vínculo do
+usuário — todo comprador repetiria os mesmos três tropeços.
+
+### Mudado
+
+- Seed novo cria o setor "Atendimento" na primeira empresa e vincula o admin.
+- `CreateCompanyService` faz o mesmo para toda empresa criada depois.
+- `CreateWhatsAppService`: conexão sem setor escolhido cai no primeiro setor da
+  empresa, em vez de ficar órfã. Escolha explícita continua respeitada.
+
+### Dois defeitos que só o teste encontrou
+
+- `Queue.ativarRoteador` e `tempoRoteador` são NOT NULL sem default no modelo:
+  omiti-los **derrubava a criação de empresa inteira**. A correção teria impedido
+  qualquer empresa nova de existir.
+- No seed, o `rawSelect` do setor recém-inserido não recebia a transação, então
+  não via a linha não commitada: o id voltava vazio e o vínculo do admin era
+  pulado **em silêncio**. Setor aparecia, vínculo não, sem erro nenhum.
+
+### Verificado
+
+Instalação do zero em cópia isolada: login funciona, setor `Atendimento` com
+`Admin` vinculado. Empresa criada pela API: setor e vínculo presentes.
+
+**Não coberto:** conexão que já existe sem setor continua como está, e não há
+teste automatizado de seed — a verificação foi por instalação real.
+
 ## [1.39] — 2026-08-08 — o núcleo emaranhado aberto: 133 → 26 arquivos
 
 | | antes | depois |
